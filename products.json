@@ -1,0 +1,274 @@
+[
+  {
+    "cat": "Burgers",
+    "name": "Simple Smash",
+    "desc": "steak, fromage, salade, tomates, sauce secrète",
+    "price": 5.9,
+    "menu": 8.4,
+    "img": "product_01.jpeg"
+  },
+  {
+    "cat": "Burgers",
+    "name": "Smash Original",
+    "desc": "2 steaks, salade, tomate, 2 fromages, sauce secrète",
+    "price": 7.9,
+    "menu": 10.4,
+    "img": "product_01.jpeg"
+  },
+  {
+    "cat": "Burgers",
+    "name": "Big Burger",
+    "desc": "steak, raclette, oignons caramélisés, bacon, sauce Smoke",
+    "price": 6.9,
+    "menu": 9.4,
+    "img": "product_07.jpeg"
+  },
+  {
+    "cat": "Burgers",
+    "name": "Big Philly Cheese",
+    "desc": "steak, oignon cuit, fromage, mayonnaise",
+    "price": 6.9,
+    "menu": 9.4,
+    "img": "product_08.jpeg"
+  },
+  {
+    "cat": "Burgers",
+    "name": "Big Hermanos",
+    "desc": "steak, 2 fromages, jalapeño, oignons caramélisés, sauce secrète",
+    "price": 7.5,
+    "menu": 10.0,
+    "img": "product_08.jpeg"
+  },
+  {
+    "cat": "Burgers",
+    "name": "Big Pollo",
+    "desc": "poulet pané, fromage, bacon, salade, sauce secrète",
+    "price": 6.5,
+    "menu": 9.0,
+    "img": "product_09.jpeg"
+  },
+  {
+    "cat": "Burgers",
+    "name": "Burger Royal",
+    "desc": "steak, raclette, œuf, oignons caramélisés, bacon, sauce barbecue",
+    "price": 7.9,
+    "menu": 10.4,
+    "img": "product_07.jpeg"
+  },
+  {
+    "cat": "Burgers",
+    "name": "Burger Chef",
+    "desc": "steak, poulet pané, fromage, oignons caramélisés, bacon, sauce secrète",
+    "price": 8.5,
+    "menu": 11.0,
+    "img": "product_02.jpeg"
+  },
+  {
+    "cat": "Sandwichs",
+    "name": "Sandwich Kebab",
+    "desc": "",
+    "price": 5.9,
+    "menu": 8.4,
+    "img": "product_03.jpeg"
+  },
+  {
+    "cat": "Sandwichs",
+    "name": "Sandwich Poulet Mariné",
+    "desc": "",
+    "price": 5.9,
+    "menu": 8.4,
+    "img": "product_10.jpeg"
+  },
+  {
+    "cat": "Sandwichs",
+    "name": "Sandwich Escalope",
+    "desc": "",
+    "price": 5.9,
+    "menu": 8.4,
+    "img": "product_10.jpeg"
+  },
+  {
+    "cat": "Sandwichs",
+    "name": "Sandwich Steak Cheddar",
+    "desc": "",
+    "price": 5.9,
+    "menu": 8.4,
+    "img": "product_10.jpeg"
+  },
+  {
+    "cat": "Sandwichs",
+    "name": "Sandwich Spécial",
+    "desc": "steak, frites, œuf, bacon, raclette",
+    "price": 6.9,
+    "menu": 9.4,
+    "img": "product_10.jpeg"
+  },
+  {
+    "cat": "Sandwichs",
+    "name": "Sandwich Chef",
+    "desc": "2 steaks, raclette, cheddar, bacon, œuf",
+    "price": 8.5,
+    "menu": 11.0,
+    "img": "product_10.jpeg"
+  },
+  {
+    "cat": "Tacos",
+    "name": "Tacos M",
+    "desc": "",
+    "price": 6.0,
+    "menu": 8.5,
+    "img": "product_09.jpeg"
+  },
+  {
+    "cat": "Tacos",
+    "name": "Tacos L",
+    "desc": "",
+    "price": 7.0,
+    "menu": 9.5,
+    "img": "product_09.jpeg"
+  },
+  {
+    "cat": "Tacos",
+    "name": "Tacos XL",
+    "desc": "",
+    "price": 8.0,
+    "menu": 10.5,
+    "img": "product_09.jpeg"
+  },
+  {
+    "cat": "Tacos",
+    "name": "Tacos Double M",
+    "desc": "",
+    "price": 9.0,
+    "menu": 11.5,
+    "img": "product_09.jpeg"
+  },
+  {
+    "cat": "Tacos",
+    "name": "Tacos Double L",
+    "desc": "",
+    "price": 10.0,
+    "menu": 12.5,
+    "img": "product_09.jpeg"
+  },
+  {
+    "cat": "Poutines",
+    "name": "Poutine Campagna",
+    "desc": "poulet, champignons, cheddar, frites, oignons crispés, sauce magique",
+    "price": 6.9,
+    "menu": 9.4,
+    "img": "product_05.jpeg"
+  },
+  {
+    "cat": "Poutines",
+    "name": "Poutine Pollo",
+    "desc": "tenders, bacon, frites, cheddar, oignons crispés, sauce magique",
+    "price": 7.5,
+    "menu": 10.0,
+    "img": "product_05.jpeg"
+  },
+  {
+    "cat": "Poutines",
+    "name": "Poutine Hermanos",
+    "desc": "bœuf, frites, cheddar, olives, poivrons, oignons, sauce magique",
+    "price": 6.9,
+    "menu": 9.4,
+    "img": "product_05.jpeg"
+  },
+  {
+    "cat": "Poutines",
+    "name": "Poutine Classique",
+    "desc": "cordons-bleus, frites, cheddar, bacon, oignons crispés, sauce magique",
+    "price": 7.5,
+    "menu": 10.0,
+    "img": "product_05.jpeg"
+  },
+  {
+    "cat": "Pâtes",
+    "name": "Pâtes à la crème",
+    "desc": "",
+    "price": 5.9,
+    "menu": null,
+    "img": "product_06.jpeg"
+  },
+  {
+    "cat": "Pâtes",
+    "name": "Pâtes à la crème - Champignons",
+    "desc": "",
+    "price": 6.9,
+    "menu": null,
+    "img": "product_06.jpeg"
+  },
+  {
+    "cat": "Pâtes",
+    "name": "Pâtes à la crème - Viande hachée",
+    "desc": "oignons, poivrons",
+    "price": 7.9,
+    "menu": null,
+    "img": "product_06.jpeg"
+  },
+  {
+    "cat": "Pâtes",
+    "name": "Pâtes à la crème - Poulet",
+    "desc": "",
+    "price": 7.9,
+    "menu": null,
+    "img": "product_06.jpeg"
+  },
+  {
+    "cat": "Frites",
+    "name": "Frites Cheesy",
+    "desc": "",
+    "price": 3.0,
+    "menu": null,
+    "img": "product_05.jpeg"
+  },
+  {
+    "cat": "Frites",
+    "name": "Cheesy Nuggets Brésil",
+    "desc": "",
+    "price": 6.5,
+    "menu": null,
+    "img": "product_05.jpeg"
+  },
+  {
+    "cat": "Frites",
+    "name": "Cheesy Cordon BBQ",
+    "desc": "",
+    "price": 6.5,
+    "menu": null,
+    "img": "product_05.jpeg"
+  },
+  {
+    "cat": "Salades",
+    "name": "Salade Poulet",
+    "desc": "",
+    "price": 6.9,
+    "menu": null,
+    "img": "product_05.jpeg"
+  },
+  {
+    "cat": "Salades",
+    "name": "Salade Thon",
+    "desc": "",
+    "price": 7.9,
+    "menu": null,
+    "img": "product_05.jpeg"
+  },
+  {
+    "cat": "Salades",
+    "name": "Salade Classique",
+    "desc": "",
+    "price": 6.9,
+    "menu": null,
+    "img": "product_05.jpeg"
+  },
+  {
+    "cat": "Dessert",
+    "name": "Tiramisu Maison",
+    "desc": "",
+    "price": 3.0,
+    "menu": null,
+    "img": "product_05.jpeg"
+  }
+]
