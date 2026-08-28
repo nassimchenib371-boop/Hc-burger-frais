@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HC Burger Frais</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <h1>🍔 HC Burger Frais</h1>
+
+    <h2>Nos produits</h2>
+
+    <div class="products">
+        {% for product in products %}
+        <div class="product-card">
+            <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.name }}">
+
+            <h3>{{ product.name }}</h3>
+
+            <p>{{ product.description }}</p>
+
+            <strong>{{ product.price }} €</strong>
+        </div>
+        {% endfor %}
+    </div>
+
+</body>
+</html>
