@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commander - HC Burger Frais</title>
+</head>
+<body>
+
+    <h1>🍔 Passer votre commande</h1>
+
+    <h2>{{ product.name }}</h2>
+    <p>{{ product.description }}</p>
+    <strong>{{ product.price }} €</strong>
+
+    <form method="POST">
+        <p>
+            <label>Nom :</label><br>
+            <input type="text" name="name" required>
+        </p>
+
+        <p>
+            <label>Téléphone :</label><br>
+            <input type="tel" name="phone" required>
+        </p>
+
+        <p>
+            <label>Quantité :</label><br>
+            <input type="number" name="quantity" value="1" min="1" required>
+        </p>
+
+        <button type="submit">Confirmer la commande</button>
+    </form>
+
+    <p><a href="/">← Retour aux produits</a></p>
+
+</body>
+</html>
