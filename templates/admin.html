@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - HC Burger Frais</title>
+</head>
+<body>
+
+<h1>🍔 Administration HC Burger Frais</h1>
+
+<h2>Commandes</h2>
+
+<div id="orders">
+    Chargement des commandes...
+</div>
+
+<script>
+async function loadOrders() {
+    try {
+        const response = await fetch('/api/admin/orders');
+        const orders = await response.json();
+
+        const container = document.getElementById('orders');
+
+        if (orders.length === 0) {
+            container.innerHTML = "<p>Aucune commande pour le moment.</p>";
+            return;
+        }
+
+        container.innerHTML = orders.map(order => `
+            <div>
+                <hr>
+                <h3>Commande #${order.id}</h3>
+                <p><strong>Nom :</strong> ${order.name || ''}</p>
+                <p><strong>Téléphone :</strong> ${order.phone || ''}</p>
+                <p><strong>Quantité :</strong> ${order.quantity || ''}</p>
+            </div>
+        `).join('');
+
+    } catch (error) {
+        document.getElementById('orders').innerHTML =
+            "<p>Erreur lors du chargement des commandes.</p>";
+    }
+}
+
+loadOrders();
+</script>
+
+</body>
+</html>
