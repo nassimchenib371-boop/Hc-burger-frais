@@ -5,7 +5,7 @@
     "desc": "steak, fromage, salade, tomates, sauce secrète",
     "price": 5.9,
     "menu": 8.4,
-    "img": "product_01.jpeg"
+    "img": "F82246A2-76CF-4148-8860-F3A48D7F5651.png"
   },
   {
     "cat": "Burgers",
@@ -21,7 +21,7 @@
     "desc": "steak, raclette, oignons caramélisés, bacon, sauce Smoke",
     "price": 6.9,
     "menu": 9.4,
-    "img": "product_07.jpeg"
+    "img": "3110EEDD-5790-436E-AC58-9A770AF3A7BB.jpeg"
   },
   {
     "cat": "Burgers",
@@ -245,7 +245,7 @@
     "desc": "",
     "price": 6.9,
     "menu": null,
-    "img": "product_05.jpeg"
+  "img": "30AFBF77-1E66-4E19-8564-08E1D709FFF5.png"
   },
   {
     "cat": "Salades",
@@ -253,7 +253,7 @@
     "desc": "",
     "price": 7.9,
     "menu": null,
-    "img": "product_05.jpeg"
+    "img": "15544701-8E31-49C4-8918-AD4DCE9296C4.png"
   },
   {
     "cat": "Salades",
@@ -261,7 +261,7 @@
     "desc": "",
     "price": 6.9,
     "menu": null,
-    "img": "product_05.jpeg"
+    "img": "60968B69-04C7-49E6-A095-2A3BCAD9762B.png"
   },
   {
     "cat": "Dessert",
@@ -269,6 +269,6 @@
     "desc": "",
     "price": 3.0,
     "menu": null,
-    "img": "product_05.jpeg"
+    "img": "124A30D6-DABF-4A55-8746-2BD8809601DC.png"
   }
 ]
