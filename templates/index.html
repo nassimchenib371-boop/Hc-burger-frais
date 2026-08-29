@@ -23,8 +23,9 @@
             <p>{{ product.description }}</p>
 
             <strong>{{ product.price }} €</strong>
-        </div>
-        {% endfor %}
+      <a href="/order?product={{ product.name }}" class="order-btn">Commander</a>
+       </div> 
+       {% endfor %}
     </div>
 
 </body>
