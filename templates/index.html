@@ -23,9 +23,9 @@
             <p>{{ product.description }}</p>
 
             <strong>{{ product.price }} €</strong>
-      <a href="/order?product={{ product.name }}" class="order-btn">Commander</a>
+     <a href="{{ url_for('order', pid=product.id) }}" class="order-btn">Commander</a> 
        </div> 
-       {% endfor %}
+       {% ndfor %}
     </div>
 
 </body>
