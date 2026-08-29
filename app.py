@@ -314,6 +314,19 @@ def ticket(oid):
     con=db(); o=con.execute("SELECT * FROM orders WHERE id=?",(oid,)).fetchone(); con.close()
     if not o: return "Introuvable",404
     return render_template("ticket.html",o=o,items=json.loads(o["items_json"]))
+@app.route("/order/<int:pid>", methods=["GET", "POST"])
+def order(pid):
+    con = db()
+    product = con.execute(
+        "SELECT * FROM products WHERE id=?",
+        (pid,)
+    ).fetchone()
+    con.close()
+
+    if not product:
+        return "Produit introuvable", 404
+
+    return render_template("order.html", product=product)
 init_db()
 if __name__=="__main__":
     
