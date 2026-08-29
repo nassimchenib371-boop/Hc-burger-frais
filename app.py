@@ -322,11 +322,49 @@ def order(pid):
         "SELECT * FROM products WHERE id=?",
         (pid,)
     ).fetchone()
-    con.close()
 
     if not product:
+        con.close()
         return "Produit introuvable", 404
 
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        phone = request.form.get("phone", "").strip()
+        quantity = int(request.form.get("quantity", 1))
+
+        total = float(product["price"]) * quantity
+
+        items = [{
+            "product_id": pid,
+            "name": product["name"],
+            "quantity": quantity,
+            "price": float(product["price"])
+        }]
+
+        con.execute(
+            """INSERT INTO orders
+            (created_at, status, customer_name, phone, order_type,
+             address, payment, payment_status, note, total, items_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                datetime.now().isoformat(),
+                "pending",
+                name,
+                phone,
+                "takeaway",
+                "",
+                "cash",
+                "unpaid",
+                "",
+                total,
+                json.dumps(items)
+            )
+        )
+        con.commit()
+        con.close()
+        return redirect(url_for("home"))
+
+    con.close()
     return render_template("order.html", product=product)
 init_db()
 if __name__=="__main__":
