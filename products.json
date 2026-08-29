@@ -232,12 +232,13 @@
     "img": "product_05.jpeg"
   },
   {
-    "cat": "Frites",
-  "name": "Cheese Cordons BBQ"
-    "desc": "",
-    "price": 6.5,
-    "menu": null,
-    "img": "EDBF5A19-E422-4B81-ADEB-A4C51185AAC6.jpeg"
+  "cat": "Frites",
+  "name": "Cheese Cordons BBQ",
+  "desc": "",
+  "price": 6.5,
+  "menu": null,
+  "img": "EDBF5A19-E422-4B81-ADEB-A4C51185AAC6.j
+
   },
   {
     "cat": "Salades",
