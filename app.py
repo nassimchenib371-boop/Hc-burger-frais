@@ -249,7 +249,7 @@ def admin_orders():
     for r in rows:
         d=dict(r); d["items"]=json.loads(d.pop("items_json"))
         out.append(d)
-return jsonify(out)
+    return jsonify(out)
 @app.post("/api/admin/orders/<int:oid>/status")
 @admin_required
 def admin_status(oid):
