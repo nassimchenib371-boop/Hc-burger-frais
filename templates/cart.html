@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panier - HC Burger Frais</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <h1>🛒 Mon panier</h1>
+
+    {% if items %}
+        {% for item in items %}
+            <div class="product-card">
+                <h3>{{ item.name }}</h3>
+                <p>Quantité : {{ item.quantity }}</p>
+                <p>Prix : {{ item.price }} €</p>
+                <strong>
+                    Sous-total : {{ item.price * item.quantity }} €
+                </strong>
+            </div>
+        {% endfor %}
+
+        <h2>Total : {{ total }} €</h2>
+
+    {% else %}
+        <p>Votre panier est vide.</p>
+    {% endif %}
+
+    <p>
+        <a href="/">← Retour aux produits</a>
+    </p>
+
+</body>
+</html>
