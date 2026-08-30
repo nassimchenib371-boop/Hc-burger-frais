@@ -35,6 +35,7 @@ async function loadOrders() {
                 <p><strong>Nom :</strong> ${order.customer_name}</p>
                 <p><strong>Téléphone :</strong> ${order.phone || ''}</p>
                 <p><strong>Quantité :</strong> ${order.items[0].quantity}</p>
+                <button onclick="changeStatus(${order.id}, 'accepted')">✅ Accepter</button> <button onclick="changeStatus(${order.id}, 'rejected')">❌ Refuser</button> <button onclick="changeStatus(${order.id}, 'done')">✅ Terminé</button> <button onclick="printOrder(${order.id})">🖨️ Imprimer</button>
             </div>
         `).join('');
 
@@ -43,7 +44,22 @@ async function loadOrders() {
             "<p>Erreur lors du chargement des commandes.</p>";
     }
 }
+async function changeStatus(id, status) {
+  await fetch(`/api/admin/orders/${id}/status`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({status: status})
+  });
+  loadOrders();
+}
 
+async function printOrder(id) {
+  const response = await fetch(`/api/admin/orders/${id}/print`, {
+    method: "POST"
+  });
+  const result = await response.json();
+  alert(result.message || "Impression envoyée");
+}
 loadOrders();
 </script>
 
