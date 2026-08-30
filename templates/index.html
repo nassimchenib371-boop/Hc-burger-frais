@@ -23,7 +23,7 @@
             <p>{{ product.description }}</p>
 
             <strong>{{ product.price }} €</strong>
-     <a href="{{ url_for('order', pid=product.id) }}" class="order-btn">Commander</a> 
+     <a href="{{ url_for('add_to_cart', pid=product.id) }}" class="order-btn">Ajouter au panier 🛒</a>
        </div> 
        {% endfor %}
     </div>
