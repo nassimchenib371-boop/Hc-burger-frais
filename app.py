@@ -247,10 +247,9 @@ def admin_orders():
     con=db(); rows=con.execute("SELECT * FROM orders ORDER BY id DESC LIMIT 100").fetchall(); con.close()
     out=[]
     for r in rows:
-        d=dict(r); d["items"]=json.loads(d.pop("items_json")); out.append(d)
-        out.append(d)  
-    return jsonify(out)
-
+    d=dict(r); d["items"]=json.loads(d.pop("items_json"))
+    out.append(d)
+return jsonify(out)
 @app.post("/api/admin/orders/<int:oid>/status")
 @admin_required
 def admin_status(oid):
