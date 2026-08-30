@@ -316,7 +316,30 @@ def ticket(oid):
     return render_template("ticket.html",o=o,items=json.loads(o["items_json"]))
 @app.get("/cart")
 def cart():
-    return "Panier OK"
+    cart_data = session.get("cart", {})
+    items = []
+
+    con = db()
+
+    for pid, quantity in cart_data.items():
+        product = con.execute(
+            "SELECT * FROM products WHERE id = ?",
+            (int(pid),)
+        ).fetchone()
+
+        if product:
+            items.append({
+                "id": product["id"],
+                "name": product["name"],
+                "price": float(product["price"]),
+                "quantity": quantity
+            })
+
+    con.close()
+
+    total = sum(item["price"] * item["quantity"] for item in items)
+
+    return render_template("cart.html", items=items, total=total)
 @app.get("/cart/add/<int:pid>")
 def add_to_cart(pid):
     cart = session.get("cart", {})
