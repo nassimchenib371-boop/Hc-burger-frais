@@ -317,7 +317,13 @@ def ticket(oid):
 @app.get("/cart")
 def cart():
     return "Panier OK"
-
+@app.get("/cart/add/<int:pid>")
+def add_to_cart(pid):
+    cart = session.get("cart", {})
+    key = str(pid)
+    cart[key] = cart.get(key, 0) + 1
+    session["cart"] = cart
+    return redirect(url_for("home"))
 @app.route("/order/<int:pid>", methods=["GET", "POST"])
 def order(pid):
     con = db()
