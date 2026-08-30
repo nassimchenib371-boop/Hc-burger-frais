@@ -35,6 +35,7 @@ async function loadOrders() {
                 <p><strong>Nom :</strong> ${order.customer_name}</p>
                 <p><strong>Téléphone :</strong> ${order.phone || ''}</p>
                 <p><strong>Quantité :</strong> ${order.items[0].quantity}</p>
+                <p><strong>Statut :</strong> ${order.status}</p>
                 <button onclick="changeStatus(${order.id}, 'accepted')">✅ Accepter</button> <button onclick="changeStatus(${order.id}, 'rejected')">❌ Refuser</button> <button onclick="changeStatus(${order.id}, 'done')">✅ Terminé</button> <button onclick="printOrder(${order.id})">🖨️ Imprimer</button>
             </div>
         `).join('');
