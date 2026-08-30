@@ -18,12 +18,12 @@
                 <p>Quantité : {{ item.quantity }}</p>
                 <p>Prix : {{ item.price }} €</p>
                 <strong>
-                    Sous-total : {{ item.price * item.quantity }} €
+                   Sous-total : {{ "%.2f"|format(item.price * item.quantity) }} € 
                 </strong>
             </div>
         {% endfor %}
 
-        <h2>Total : {{ total }} €</h2>
+        <h2>Total : {{ "%.2f"|format(total) }} €</h2>
 
     {% else %}
         <p>Votre panier est vide.</p>
