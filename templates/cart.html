@@ -15,7 +15,12 @@
         {% for item in items %}
             <div class="product-card">
                 <h3>{{ item.name }}</h3>
-                <p>Quantité : {{ item.quantity }}</p>
+                <p>
+    Quantité :
+    <a href="{{ url_for('remove_from_cart', pid=item.id) }}">➖</a>
+    {{ item.quantity }}
+    <a href="{{ url_for('add_to_cart', pid=item.id) }}">➕</a>
+</p>
                 <p>Prix : {{ item.price }} €</p>
                 <strong>
                    Sous-total : {{ "%.2f"|format(item.price * item.quantity) }} € 

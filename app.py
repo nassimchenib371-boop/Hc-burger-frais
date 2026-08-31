@@ -346,7 +346,11 @@ def remove_from_cart(pid):
     key = str(pid)
 
     if key in cart:
-        del cart[key]
+        if cart[key] > 1:
+            cart[key] -= 1
+        else:
+            del cart[key]
+
         session["cart"] = cart
 
     return redirect(url_for("cart"))
