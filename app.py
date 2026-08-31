@@ -414,7 +414,6 @@ con.execute(
                 total,
                 json.dumps(items)
             )
-        )
 con.commit()
 con.close()
 return redirect(url_for("home"))
