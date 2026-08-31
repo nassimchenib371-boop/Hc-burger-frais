@@ -381,22 +381,22 @@ def order(pid):
         formula = request.form.get("formula", "seul")
         drink = request.form.get("drink", "")
 
-unit_price = float(product["price"])
-item_name = product["name"]
+        unit_price = float(product["price"])
+        item_name = product["name"]
 
-if formula == "menu":
+    if formula == "menu":
     unit_price += 2.50
     item_name = f'{product["name"]} - Menu ({drink})'
 
-total = unit_price * quantity
+        total = unit_price * quantity
 
-items = [{
+        items = [{
     "product_id": pid,
     "name": item_name,
     "quantity": quantity,
     "price": unit_price
-}]
-con.execute(
+        }]
+        con.execute(
             """INSERT INTO orders
             (created_at, status, customer_name, phone, order_type,
              address, payment, payment_status, note, total, items_json)
@@ -414,10 +414,10 @@ con.execute(
                 total,
                 json.dumps(items)
             )
-)
-con.commit()
-con.close()
-return redirect(url_for("home"))
+        )
+        con.commit()
+        con.close()
+        return redirect(url_for("home"))
 init_db()
 if __name__=="__main__":
     
