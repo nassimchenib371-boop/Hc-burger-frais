@@ -396,7 +396,7 @@ def order(pid):
         "quantity": quantity,
         "price": unit_price
             }]
-            con.execute(
+        con.execute(
                 """INSERT INTO orders
                 (created_at, status, customer_name, phone, order_type,
                  address, payment, payment_status, note, total, items_json)
@@ -418,8 +418,7 @@ def order(pid):
            con.commit()
            con.close()
            return redirect(url_for("home"))
-           con.close()
-           return render_template("order.html", product=product) 
+           
 init_db()
 if __name__=="__main__":
     
