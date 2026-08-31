@@ -26,7 +26,7 @@
                    Sous-total : {{ "%.2f"|format(item.price * item.quantity) }} € 
                 </strong>
             <a href="{{ url_for('remove_from_cart', pid=item.id) }}">🗑️ Supprimer</a>
-            </div>
+           <a href="{{ url_for('order', pid=item.id) }}">🍔 Commander / choisir menu</a> </div>
         {% endfor %}
 
         <h2>Total : {{ "%.2f"|format(total) }} €</h2>
