@@ -415,9 +415,9 @@ def order(pid):
                     json.dumps(items)
                 )
             )
-           con.commit()
-           con.close()
-           return redirect(url_for("home"))
+        con.commit()
+        con.close()
+        return redirect(url_for("home"))
            
 init_db()
 if __name__=="__main__":
