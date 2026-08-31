@@ -36,9 +36,9 @@ container.innerHTML = orders.map(order => `
 <p><strong>Téléphone :</strong> ${order.phone}</p>
 <p><strong>Quantité :</strong> ${order.items?.[0]?.quantity ?? ""}</p>
 
-        <p><strong>Commande :</strong> ${
-            order.items ? JSON.stringify(order.items) : "Non disponible"
-        }</p>
+<p><strong>Commande :</strong> ${
+    order.items?.map(item => item.name + " × " + item.quantity + " — " + Number(item.price).toFixed(2) + " €").join("<br>") || "Non disponible"
+}</p>
 
         <p><strong>Total :</strong> ${order.total ?? 0} €</p>
         <p><strong>Statut :</strong> ${order.status}</p>
