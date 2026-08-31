@@ -374,7 +374,7 @@ def order(pid):
         return "Produit introuvable", 404
 
     if request.method == "POST":
-       name = request.form.get("name", "").strip()
+        name = request.form.get("name", "").strip()
         phone = request.form.get("phone", "").strip()
         quantity = int(request.form.get("quantity", 1))
 
