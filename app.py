@@ -390,7 +390,7 @@ def order(pid):
 
        total = unit_price * quantity
 
-        items = [{
+       items = [{
     "product_id": pid,
     "name": item_name,
     "quantity": quantity,
