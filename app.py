@@ -384,40 +384,42 @@ def order(pid):
         unit_price = float(product["price"])
         item_name = product["name"]
 
-    if formula == "menu":
-       unit_price += 2.50
-       item_name = f'{product["name"]} - Menu ({drink})'
+        if formula == "menu":
+            unit_price += 2.50
+            item_name = f'{product["name"]} - Menu ({drink})'
 
-       total = unit_price * quantity
+           total = unit_price * quantity
 
-       items = [{
-    "product_id": pid,
-    "name": item_name,
-    "quantity": quantity,
-    "price": unit_price
-        }]
-       con.execute(
-            """INSERT INTO orders
-            (created_at, status, customer_name, phone, order_type,
-             address, payment, payment_status, note, total, items_json)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (
-                datetime.now().isoformat(),
-                "pending",
-                name,
-                phone,
-                "takeaway",
-                "",
-                "cash",
-                "unpaid",
-                "",
-                total,
-                json.dumps(items)
+           items = [{
+        "product_id": pid,
+        "name": item_name,
+        "quantity": quantity,
+        "price": unit_price
+            }]
+            con.execute(
+                """INSERT INTO orders
+                (created_at, status, customer_name, phone, order_type,
+                 address, payment, payment_status, note, total, items_json)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    datetime.now().isoformat(),
+                    "pending",
+                    name,
+                    phone,
+                    "takeaway",
+                    "",
+                    "cash",
+                    "unpaid",
+                    "",
+                    total,
+                    json.dumps(items)
+                )
             )
-        )
-       con.commit()
-       con.close()
-       return redirect(url_for("home"))
+           con.commit()
+           con.close()
+           return redirect(url_for("home"))
+           con.close()
+           return render_template("order.html", product=product) 
 init_db()
 if __name__=="__main__":
     
