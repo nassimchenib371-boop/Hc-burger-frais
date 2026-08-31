@@ -378,14 +378,24 @@ def order(pid):
         phone = request.form.get("phone", "").strip()
         quantity = int(request.form.get("quantity", 1))
 
-        total = float(product["price"]) * quantity
+        formula = request.form.get("formula", "seul")
+        drink = request.form.get("drink", "")
 
-        items = [{
-            "product_id": pid,
-            "name": product["name"],
-            "quantity": quantity,
-            "price": float(product["price"])
-        }]
+unit_price = float(product["price"])
+item_name = product["name"]
+
+if formula == "menu":
+    unit_price += 2.50
+    item_name = f'{product["name"]} - Menu ({drink})'
+
+total = unit_price * quantity
+
+items = [{
+    "product_id": pid,
+    "name": item_name,
+    "quantity": quantity,
+    "price": unit_price
+}]
 
         con.execute(
             """INSERT INTO orders

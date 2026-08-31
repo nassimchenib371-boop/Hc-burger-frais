@@ -28,7 +28,29 @@
             <label>Quantité :</label><br>
             <input type="number" name="quantity" value="1" min="1" required>
         </p>
+<p>
+    <label>Formule :</label><br>
 
+    <label>
+        <input type="radio" name="formula" value="seul" checked>
+        Burger seul
+    </label><br>
+
+    <label>
+        <input type="radio" name="formula" value="menu">
+        🍟🥤 Menu +2.50 €
+    </label>
+</p>
+
+<p>
+    <label>Boisson du menu :</label><br>
+    <select name="drink">
+        <option value="Coca-Cola">Coca-Cola 33cl</option>
+        <option value="Fanta">Fanta 33cl</option>
+        <option value="Oasis">Oasis 33cl</option>
+        <option value="Eau">Eau</option>
+    </select>
+</p>
         <button type="submit">Confirmer la commande</button>
     </form>
 
