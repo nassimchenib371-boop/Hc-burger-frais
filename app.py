@@ -418,9 +418,8 @@ con.execute(
     con.commit()
     con.close()
     return redirect(url_for("home"))
-
-    con.close()
-    return render_template("order.html", product=product)
+con.close()
+return render_template("order.html", product=product)
 init_db()
 if __name__=="__main__":
     
