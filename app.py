@@ -385,8 +385,8 @@ def order(pid):
         item_name = product["name"]
 
     if formula == "menu":
-    unit_price += 2.50
-    item_name = f'{product["name"]} - Menu ({drink})'
+       unit_price += 2.50
+       item_name = f'{product["name"]} - Menu ({drink})'
 
         total = unit_price * quantity
 
