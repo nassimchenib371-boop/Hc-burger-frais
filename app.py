@@ -396,7 +396,7 @@ def order(pid):
     "quantity": quantity,
     "price": unit_price
         }]
-        con.execute(
+      con.execute(
             """INSERT INTO orders
             (created_at, status, customer_name, phone, order_type,
              address, payment, payment_status, note, total, items_json)
