@@ -28,17 +28,28 @@ async function loadOrders() {
             return;
         }
 
-        container.innerHTML = orders.map(order => `
-            <div>
-                <hr>
-                <h3>Commande #${order.id}</h3>
-                <p><strong>Nom :</strong> ${order.customer_name}</p>
-                <p><strong>Téléphone :</strong> ${order.phone || ''}</p>
-                <p><strong>Quantité :</strong> ${order.items[0].quantity}</p>
-                <p><strong>Statut :</strong> ${order.status}</p>
-                <button onclick="changeStatus(${order.id}, 'accepted')">✅ Accepter</button> <button onclick="changeStatus(${order.id}, 'rejected')">❌ Refuser</button> <button onclick="changeStatus(${order.id}, 'done')">✅ Terminé</button> <button onclick="printOrder(${order.id})">🖨️ Imprimer</button>
-            </div>
-        `).join('');
+container.innerHTML = orders.map(order => `
+    <div>
+        <hr>
+        <h3>Commande #${order.id}</h3>
+
+        <p><strong>Nom :</strong> ${order.name}</p>
+        <p><strong>Téléphone :</strong> ${order.phone}</p>
+        <p><strong>Quantité :</strong> ${order.quantity}</p>
+
+        <p><strong>Commande :</strong> ${
+            order.items ? JSON.stringify(order.items) : "Non disponible"
+        }</p>
+
+        <p><strong>Total :</strong> ${order.total ?? 0} €</p>
+        <p><strong>Statut :</strong> ${order.status}</p>
+
+        <button onclick="changeStatus(${order.id}, 'accepted')">✅ Accepter</button>
+        <button onclick="changeStatus(${order.id}, 'refused')">❌ Refuser</button>
+        <button onclick="changeStatus(${order.id}, 'completed')">✅ Terminé</button>
+        <button onclick="printOrder(${order.id})">🖨️ Imprimer</button>
+    </div>
+`).join('');
 
     } catch (error) {
         document.getElementById('orders').innerHTML =
