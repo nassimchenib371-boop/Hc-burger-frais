@@ -396,7 +396,6 @@ items = [{
     "quantity": quantity,
     "price": unit_price
 }]
-
         con.execute(
             """INSERT INTO orders
             (created_at, status, customer_name, phone, order_type,
