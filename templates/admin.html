@@ -32,10 +32,9 @@ container.innerHTML = orders.map(order => `
     <div>
         <hr>
         <h3>Commande #${order.id}</h3>
-
-        <p><strong>Nom :</strong> ${order.name}</p>
-        <p><strong>Téléphone :</strong> ${order.phone}</p>
-        <p><strong>Quantité :</strong> ${order.quantity}</p>
+<p><strong>Nom :</strong> ${order.customer_name}</p>
+<p><strong>Téléphone :</strong> ${order.phone}</p>
+<p><strong>Quantité :</strong> ${order.items?.[0]?.quantity ?? ""}</p>
 
         <p><strong>Commande :</strong> ${
             order.items ? JSON.stringify(order.items) : "Non disponible"
