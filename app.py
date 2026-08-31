@@ -388,9 +388,9 @@ def order(pid):
             unit_price += 2.50
             item_name = f'{product["name"]} - Menu ({drink})'
 
-           total = unit_price * quantity
+        total = unit_price * quantity
 
-           items = [{
+        items = [{
         "product_id": pid,
         "name": item_name,
         "quantity": quantity,
