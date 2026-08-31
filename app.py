@@ -360,7 +360,7 @@ def add_to_cart(pid):
     key = str(pid)
     cart[key] = cart.get(key, 0) + 1
     session["cart"] = cart
-    return redirect(url_for("home"))
+    return redirect(url_for("cart"))
 @app.route("/order/<int:pid>", methods=["GET", "POST"])
 def order(pid):
     con = db()
