@@ -16,10 +16,11 @@
             <div class="product-card">
                 <h3>{{ item.name }}</h3>
                 <p>
+    <p>
     Quantité :
-    <a href="{{ url_for('remove_from_cart', pid=item.id) }}">➖</a>
-    {{ item.quantity }}
-    <a href="{{ url_for('add_to_cart', pid=item.id) }}">➕</a>
+    <a href="{{ url_for('remove_from_cart', pid=item.id) }}" onclick="updateCart(event, this)">➖</a>
+    <span>{{ item.quantity }}</span>
+    <a href="{{ url_for('add_to_cart', pid=item.id) }}" onclick="updateCart(event, this)">➕</a>
 </p>
                 <p>Prix : {{ item.price }} €</p>
                 <strong>
@@ -39,5 +40,26 @@
         <a href="/">← Retour aux produits</a>
     </p>
 
+   <script>
+async function updateCart(event, link) {
+    event.preventDefault();
+
+    const scrollPosition = window.scrollY;
+
+    await fetch(link.href);
+
+    sessionStorage.setItem("cartScroll", scrollPosition);
+    location.reload();
+}
+
+window.addEventListener("load", function () {
+    const scrollPosition = sessionStorage.getItem("cartScroll");
+
+    if (scrollPosition !== null) {
+        window.scrollTo(0, parseInt(scrollPosition));
+        sessionStorage.removeItem("cartScroll");
+    }
+});
+</script> 
 </body>
 </html>
