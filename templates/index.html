@@ -23,10 +23,25 @@
             <p>{{ product.description }}</p>
 
             <strong>{{ product.price }} €</strong>
-     <a href="{{ url_for('add_to_cart', pid=product.id) }}" class="order-btn">Ajouter au panier 🛒</a>
+     <a href="{{ url_for('add_to_cart', pid=product.id) }}"
+   onclick="addToCart(event, this)">Ajouter au panier 🛒</a>
        </div> 
        {% endfor %}
-    </div>
+       </div>
+    <script>
+async function addToCart(event, link) {
+    event.preventDefault();
+
+    await fetch(link.href);
+
+    const oldText = link.innerHTML;
+    link.innerHTML = "✅ Ajouté au panier";
+
+    setTimeout(() => {
+        link.innerHTML = oldText;
+    }, 1200);
+}
+</script>   
 
 </body>
 </html>
