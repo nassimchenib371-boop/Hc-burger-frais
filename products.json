@@ -270,5 +270,109 @@
     "price": 3.0,
     "menu": null,
     "img": "124A30D6-DABF-4A55-8746-2BD8809601DC.png"
-  }
+  },
+  {
+  "cat": "Boissons",
+  "name": "Lipton Ice Tea",
+  "desc": "",
+  "price": 1.5,
+  "menu": null,
+  "img": ""
+},
+{
+  "cat": "Boissons",
+  "name": "Coca-Cola Zero",
+  "desc": "",
+  "price": 1.5,
+  "menu": null,
+  "img": ""
+},
+{
+  "cat": "Boissons",
+  "name": "Schweppes Agrumes",
+  "desc": "",
+  "price": 1.5,
+  "menu": null,
+  "img": ""
+},
+{
+  "cat": "Boissons",
+  "name": "Cristalline Citron",
+  "desc": "",
+  "price": 1.5,
+  "menu": null,
+  "img": ""
+},
+{
+  "cat": "Boissons",
+  "name": "Cristalline Pêche",
+  "desc": "",
+  "price": 1.5,
+  "menu": null,
+  "img": ""
+},
+{
+  "cat": "Boissons",
+  "name": "Cristalline Pommes Cassis",
+  "desc": "",
+  "price": 1.5,
+  "menu": null,
+  "img": ""
+},
+{
+  "cat": "Boissons",
+  "name": "Oasis Tropical",
+  "desc": "",
+  "price": 1.5,
+  "menu": null,
+  "img": ""
+},
+{
+  "cat": "Boissons",
+  "name": "Orangina",
+  "desc": "",
+  "price": 1.5,
+  "menu": null,
+  "img": ""
+},
+{
+  "cat": "Boissons",
+  "name": "Cola",
+  "desc": "",
+  "price": 1.5,
+  "menu": null,
+  "img": ""
+},
+{
+  "cat": "Boissons",
+  "name": "Coca-Chérie",
+  "desc": "",
+  "price": 1.5,
+  "menu": null,
+  "img": ""
+},
+{
+  "cat": "Boissons",
+  "name": "Coca-Cola 1L",
+  "desc": "",
+  "price": 3.0,
+  "menu": null,
+  "img": ""
+},
+{
+  "cat": "Boissons",
+  "name": "Eau petite",
+  "desc": "",
+  "price": 1.0,
+  "menu": null,
+  "img": ""
+},
+{
+  "cat": "Boissons",
+  "name": "Eau grande",
+  "desc": "",
+  "price": 1.5,
+  "menu": null,
+  "img": ""
+}
 ]
