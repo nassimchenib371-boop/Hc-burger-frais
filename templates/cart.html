@@ -12,25 +12,81 @@
     <h1>🛒 Mon panier</h1>
 
     {% if items %}
-        {% for item in items %}
-            <div class="product-card">
-                <h3>{{ item.name }}</h3>
-                <p>
-    <p>
-    Quantité :
-    <a href="{{ url_for('remove_from_cart', pid=item.id) }}" onclick="updateCart(event, this)">➖</a>
-    <span>{{ item.quantity }}</span>
-    <a href="{{ url_for('add_to_cart', pid=item.id) }}" onclick="updateCart(event, this)">➕</a>
-</p>
-                <p>Prix : {{ item.price }} €</p>
-                <strong>
-                   Sous-total : {{ "%.2f"|format(item.price * item.quantity) }} € 
-                </strong>
-            <a href="{{ url_for('remove_from_cart', pid=item.id) }}">🗑️ Supprimer</a>
-           <a href="{{ url_for('order', pid=item.id) }}">🍔 Commander / choisir menu</a> </div>
-        {% endfor %}
+<form method="POST" action="{{ url_for('cart_checkout') }}">
 
-        <h2>Total : {{ "%.2f"|format(total) }} €</h2>
+    <p>
+        <label>Nom :</label><br>
+        <input type="text" name="name" required>
+    </p>
+
+    <p>
+        <label>Téléphone :</label><br>
+        <input type="tel" name="phone" required>
+    </p>
+
+    {% for item in items %}
+    <div class="product-card">
+        <h3>{{ item.name }}</h3>
+
+        <p>
+            Quantité :
+            <a href="{{ url_for('remove_from_cart', pid=item.id) }}"
+               onclick="updateCart(event, this)">➖</a>
+
+            <span>{{ item.quantity }}</span>
+
+            <a href="{{ url_for('add_to_cart', pid=item.id) }}"
+               onclick="updateCart(event, this)">➕</a>
+        </p>
+
+        <p>Prix : {{ item.price }} €</p>
+
+        <p>
+            <strong>
+                Sous-total :
+                {{ "%.2f"|format(item.price * item.quantity) }} €
+            </strong>
+        </p>
+
+        <p>
+            <strong>Formule :</strong><br>
+
+            <label>
+                <input type="radio"
+                       name="formula_{{ item.id }}"
+                       value="seul"
+                       checked>
+                Burger seul
+            </label><br>
+
+            <label>
+                <input type="radio"
+                       name="formula_{{ item.id }}"
+                       value="menu">
+                🍟🥤 Menu +2.50 €
+            </label>
+        </p>
+
+        <p>
+            <label>Boisson du menu :</label><br>
+            <select name="drink_{{ item.id }}">
+                <option value="Coca-Cola">Coca-Cola 33cl</option>
+                <option value="Fanta">Fanta 33cl</option>
+                <option value="Oasis">Oasis 33cl</option>
+                <option value="Eau">Eau</option>
+            </select>
+        </p>
+
+        <a href="{{ url_for('remove_from_cart', pid=item.id) }}">🗑️ Supprimer</a>
+    </div>
+    <hr>
+    {% endfor %}
+
+    <h2>Total actuel : {{ "%.2f"|format(total) }} €</h2>
+    <p>Le supplément Menu (+2.50 €) sera ajouté à la confirmation.</p>
+
+    <button type="submit">✅ Confirmer toute la commande</button>
+</form>
 
     {% else %}
         <p>Votre panier est vide.</p>

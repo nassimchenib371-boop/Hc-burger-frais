@@ -419,7 +419,79 @@ def order(pid):
         con.close()
         return redirect(url_for("home"))
     con.close()
-    return render_template("order.html", product=product)         
+    return render_template("order.html", product=product)  
+@app.post("/cart/checkout")
+def cart_checkout():
+    cart_data = session.get("cart", {})
+
+    if not cart_data:
+        return redirect(url_for("cart"))
+
+    name = request.form.get("name", "").strip()
+    phone = request.form.get("phone", "").strip()
+
+    if not name or not phone:
+        return "Nom et téléphone obligatoires", 400
+
+    con = db()
+    items = []
+    total = 0
+
+    for pid, quantity in cart_data.items():
+        product = con.execute(
+            "SELECT * FROM products WHERE id = ?",
+            (int(pid),)
+        ).fetchone()
+
+        if not product:
+            continue
+
+        quantity = int(quantity)
+        formula = request.form.get(f"formula_{pid}", "seul")
+        drink = request.form.get(f"drink_{pid}", "Coca-Cola")
+
+        unit_price = float(product["price"])
+        item_name = product["name"]
+
+        if formula == "menu":
+            unit_price += 2.50
+            item_name = f"{product['name']} - Menu ({drink})"
+
+        items.append({
+            "product_id": int(pid),
+            "name": item_name,
+            "quantity": quantity,
+            "price": unit_price
+        })
+
+        total += unit_price * quantity
+
+    con.execute(
+        """INSERT INTO orders
+        (created_at, status, customer_name, phone, order_type,
+         address, payment, payment_status, note, total, items_json)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (
+            datetime.now().isoformat(),
+            "pending",
+            name,
+            phone,
+            "takeaway",
+            "",
+            "cash",
+            "unpaid",
+            "",
+            total,
+            json.dumps(items)
+        )
+    )
+
+    con.commit()
+    con.close()
+
+    session["cart"] = {}
+
+    return redirect(url_for("home"))       
 init_db()
 if __name__=="__main__":
     
