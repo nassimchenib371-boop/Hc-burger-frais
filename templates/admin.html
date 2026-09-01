@@ -73,6 +73,8 @@ async function printOrder(id) {
 }
 loadOrders();
 setInterval(loadOrders, 2000);
+document.addEventListener("visibilitychange", loadOrders);
+window.addEventListener("focus", loadOrders);
 </script>
 
 </body>
