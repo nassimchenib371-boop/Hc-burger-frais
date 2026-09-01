@@ -45,10 +45,10 @@ container.innerHTML = orders.map(order => `
 
         <button onclick="changeStatus(${order.id}, 'accepted')">✅ Accepter</button>
         <button onclick="changeStatus(${order.id}, 'refused')">❌ Refuser</button>
-        <button onclick="changeStatus(${order.id}, 'completed')">✅ Terminé</button>
+        <button onclick="changeStatus(${order.id}, 'done')">✅ Terminé</button>
         <button onclick="printOrder(${order.id})">🖨️ Imprimer</button>
     </div>
-`).join('');
+`).join('')
 
     } catch (error) {
         document.getElementById('orders').innerHTML =
