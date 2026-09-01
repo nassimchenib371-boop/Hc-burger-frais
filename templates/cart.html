@@ -48,6 +48,8 @@
             </strong>
         </p>
 
+      {% set n = item.name|lower %}
+{% if 'burger' in n or 'tacos' in n or 'sandwich' in n or 'poutine' in n %} 
         <p>
             <strong>Formule :</strong><br>
 
@@ -76,7 +78,7 @@
                 <option value="Eau">Eau</option>
             </select>
         </p>
-
+        {% endif %}
         <a href="{{ url_for('remove_from_cart', pid=item.id) }}">🗑️ Supprimer</a>
     </div>
     <hr>
