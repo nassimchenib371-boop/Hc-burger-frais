@@ -85,8 +85,16 @@
     {% endfor %}
 
     <h2>Total actuel : {{ "%.2f"|format(total) }} €</h2>
+    {% set ns = namespace(has_menu=false) %}
+{% for item in items %}
+    {% set n = item.name|lower %}
+    {% if 'burger' in n or 'tacos' in n or 'sandwich' in n or 'poutine' in n %}
+        {% set ns.has_menu = true %}
+    {% endif %}
+{% endfor %}
+{% if ns.has_menu %}
     <p>Le supplément Menu (+2.50 €) sera ajouté à la confirmation.</p>
-
+{% endif %}
     <button type="submit">✅ Confirmer toute la commande</button>
 </form>
 
