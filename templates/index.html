@@ -15,18 +15,28 @@
 
     <div class="products">
         {% for product in products %}
-        <div class="product-card">
-            <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.name }}">
+<div class="product-card">
 
-            <h3>{{ product.name }}</h3>
+    {% if product.image %}
+    <img src="{{ url_for('static', filename=product.image) }}"
+         alt="{{ product.name }}">
+    {% endif %}
 
-            <p>{{ product.description }}</p>
+    <h3>{{ product.name }}</h3>
 
-            <strong>{{ product.price }} €</strong>
-     <a href="{{ url_for('add_to_cart', pid=product.id) }}"
-   onclick="addToCart(event, this)">Ajouter au panier 🛒</a>
-       </div> 
-       {% endfor %}
+    {% if product.description %}
+    <p>{{ product.description }}</p>
+    {% endif %}
+
+    <strong>{{ product.price }} €</strong>
+
+    <a href="{{ url_for('add_to_cart', product_id=product.id) }}"
+       onclick="addToCart(event, this)">
+        Ajouter au panier 🛒
+    </a>
+
+</div>
+{% endfor %}
        </div>
     <script>
 async function addToCart(event, link) {
