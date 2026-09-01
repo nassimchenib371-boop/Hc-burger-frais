@@ -20,15 +20,15 @@ async function loadOrders() {
     try {
         const response = await fetch('/api/admin/orders');
         const orders = await response.json();
-
+        const activeOrders = orders.filter(order => order.status !== "done");
         const container = document.getElementById('orders');
 
-        if (orders.length === 0) {
+        if (activeOrders.length === 0) {
             container.innerHTML = "<p>Aucune commande pour le moment.</p>";
             return;
         }
 
-container.innerHTML = orders.map(order => `
+container.innerHTML = activeOrders.map(order => `
     <div>
         <hr>
         <h3>Commande #${order.id}</h3>
