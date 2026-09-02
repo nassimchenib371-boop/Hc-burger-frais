@@ -460,7 +460,7 @@ def cart_checkout():
 
         if formula == "menu":
             unit_price += 2.50
-            item_name = f"{product['name']} - Menu ({drink})"
+        
 
         items.append({
             "product_id": int(pid),
