@@ -35,15 +35,15 @@ container.innerHTML = activeOrders.map(order => `
 <p><strong>Nom :</strong> ${order.customer_name}</p>
 <p><strong>Téléphone :</strong> ${order.phone}</p>
 <p><strong>Quantité :</strong> ${order.items?.[0]?.quantity ?? ""}</p>
-<p><strong>Commande :</strong> ${
-    order.items?.map(item =>
-        item.name + " × " + item.quantity +
-        " — " + Number(item.price).toFixed(2) + " €" +
-        (item.formula === "menu"
-            ? " — 🍟🥤 Menu (" + (item.drink || "Boisson non choisie") + ")"
-            : " — 🍔 Seul")
-    ).join("<br>") || "Non disponible"
-}</p>
+<p><strong>Commande :</strong><br>
+${order.items?.map(item => {
+    const formule = item.formula === "menu"
+        ? `🍟🥤 Menu${item.drink ? " (" + item.drink + ")" : ""}`
+        : "🍔 Seul";
+
+    return `${item.name} × ${item.quantity} — ${Number(item.price).toFixed(2)} € — ${formule}`;
+}).join("<br>") || "Non disponible"}
+</p>
 
         <p><strong>Total :</strong> ${order.total ?? 0} €</p>
         <p><strong>Statut :</strong> ${order.status}</p>
