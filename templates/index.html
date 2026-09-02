@@ -30,7 +30,7 @@
 
     <strong>{{ product.price }} €</strong>
 
-    <a href="{{ url_for('add_to_cart', product_id=product.id) }}"
+    <a href="{{ url_for('add_to_cart', pid=product.id) }}"
        onclick="addToCart(event, this)">
         Ajouter au panier 🛒
     </a>
