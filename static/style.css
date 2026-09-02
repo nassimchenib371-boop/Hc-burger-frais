@@ -161,3 +161,23 @@ button[type="submit"] {
 .product-card select {
     margin-top: 5px;
 }
+/* أزرار الكمية + و - */
+.product-card a[href*="remove_from_cart"],
+.product-card a[href*="add_to_cart"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    margin: 0 8px;
+
+    background: #111;
+    color: white;
+    text-decoration: none;
+
+    border-radius: 50%;
+    font-size: 22px;
+    font-weight: bold;
+}
