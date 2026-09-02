@@ -122,6 +122,37 @@ window.addEventListener("load", function () {
         sessionStorage.removeItem("cartScroll");
     }
 });
+document.querySelectorAll('input[type="radio"][name^="formula_"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        const card = this.closest('.product-card');
+
+        const quantitySpan = card.querySelector('p span');
+        const quantity = parseInt(quantitySpan.textContent) || 1;
+
+        const priceLine = Array.from(card.querySelectorAll('p')).find(function(p) {
+            return p.textContent.includes('Prix');
+        });
+
+        const priceMatch = priceLine.textContent.match(/[\d.]+/);
+        const basePrice = parseFloat(priceMatch[0]);
+
+        let unitPrice = basePrice;
+
+        if (this.value === 'menu') {
+            unitPrice += 2.50;
+        }
+
+        const subtotal = unitPrice * quantity;
+
+        const subtotalElement = Array.from(card.querySelectorAll('strong')).find(function(el) {
+            return el.textContent.includes('Sous-total');
+        });
+
+        if (subtotalElement) {
+            subtotalElement.textContent = 'Sous-total : ' + subtotal.toFixed(2) + ' €';
+        }
+    });
+});
 </script> 
 </body>
 </html>
