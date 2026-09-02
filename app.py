@@ -314,6 +314,16 @@ def ticket(oid):
     con=db(); o=con.execute("SELECT * FROM orders WHERE id=?",(oid,)).fetchone(); con.close()
     if not o: return "Introuvable",404
     return render_template("ticket.html",o=o,items=json.loads(o["items_json"]))
+    @app.context_processor
+def inject_cart_count():
+    cart_data = session.get("cart", {})
+    cart_count = sum(int(q) for q in cart_data.values())
+    return {"cart_count": cart_count}
+    @app.context_processor
+def inject_cart_count():
+    cart_data = session.get("cart", {})
+    cart_count = sum(int(q) for q in cart_data.values())
+    return {"cart_count": cart_count}
 @app.get("/cart")
 def cart():
     cart_data = session.get("cart", {})
