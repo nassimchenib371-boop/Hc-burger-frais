@@ -30,12 +30,12 @@
 
         <p>
             Quantité :
-            <a href="{{ url_for('remove_from_cart', pid=item.id) }}"
+            <a class="qty-btn" href="{{ url_for('remove_from_cart', pid=item.id) }}" onclick="updateCart(event, this)">−</a> class="qty-btn"
                onclick="updateCart(event, this)">➖</a>
 
             <span>{{ item.quantity }}</span>
 
-            <a href="{{ url_for('add_to_cart', pid=item.id) }}"
+            <a class="qty-btn" href="{{ url_for('add_to_cart', pid=item.id) }}"
                onclick="updateCart(event, this)">➕</a>
         </p>
 

@@ -162,8 +162,7 @@ button[type="submit"] {
     margin-top: 5px;
 }
 /* أزرار الكمية + و - */
-.product-card a[href*="remove_from_cart"],
-.product-card a[href*="add_to_cart"] {
+.qty-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
