@@ -45,20 +45,23 @@
     <p>Choisissez votre boisson</p>
 
     <select id="drink-select">
-        {% for product in products %}
-            {% if product.category == 'Boissons' %}
-            <option value="{{ product.id }}">
-                {{ product.name }} — {{ product.price }} €
-            </option>
-            {% endif %}
-        {% endfor %}
-    </select>
+    {% for product in products %}
+        {% if product.category == 'Boissons' %}
+        <option value="{{ url_for('add_to_cart', pid=product.id) }}">
+            {{ product.name }} — {{ product.price }} €
+        </option>
+        {% endif %}
+    {% endfor %}
+</select>
 
-    <a href="#"
-       onclick="
-       event.preventDefault();
-       const pid = document.getElementById('drink-select').value;
-       window.location.href='/add_to_cart/' + pid;
+<a href="#"
+   onclick="
+   event.preventDefault();
+   const url = document.getElementById('drink-select').value;
+   window.location.href = url;
+   ">
+    Ajouter au panier 🛒
+</a>
        ">
         Ajouter au panier 🛒
     </a>
