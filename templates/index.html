@@ -57,14 +57,12 @@
 <a href="#"
    onclick="
    event.preventDefault();
-   const url = document.getElementById('drink-select').value;
-   window.location.href = url;
+   const select = document.getElementById('drink-select');
+   const url = select.value;
+   addToCart(event, { href: url });
    ">
     Ajouter au panier 🛒
 </a>
-       ">
-        Ajouter au panier 🛒
-    </a>
 </div>
        </div>
     <script>
