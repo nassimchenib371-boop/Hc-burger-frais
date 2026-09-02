@@ -244,3 +244,66 @@ body > h2 {
         margin: 6px 0;
     }
 }
+/* ===== تحسين صفحة الإدارة ===== */
+
+body {
+    background: #f5f5f5;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+body > h1 {
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+body > h2 {
+    text-align: center;
+    font-size: 22px;
+    margin-bottom: 25px;
+    color: #555;
+}
+
+#orders {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+#orders > div {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+#orders button {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 15px;
+    margin: 6px 4px 0 0;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 12px;
+    }
+
+    body > h1 {
+        font-size: 27px;
+    }
+
+    #orders > div {
+        padding: 15px;
+    }
+
+    #orders button {
+        width: 100%;
+        margin: 6px 0;
+    }
+}
