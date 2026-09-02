@@ -67,7 +67,7 @@ ${order.items?.map(item => {
 </p>
 
         <p><strong>Total :</strong> ${order.total ?? 0} €</p>
-        <p><strong>Statut :</strong> ${order.status}</p>
+        <p><strong>Statut :</strong> ${order.status === "pending" ? "🟠 En attente" : order.status === "accepted" ? "🟢 Acceptée" : order.status}</p>
 ${actionButtons(order)}
     
     </div>
