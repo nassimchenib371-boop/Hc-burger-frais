@@ -466,7 +466,9 @@ def cart_checkout():
             "product_id": int(pid),
             "name": item_name,
             "quantity": quantity,
-            "price": unit_price
+            "price": unit_price,
+            "formula": formula,
+            "drink": drink if formula == "menu" else ""
         })
 
         total += unit_price * quantity
