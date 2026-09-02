@@ -10,7 +10,7 @@
 <body>
 
     <h1>🍔 HC Burger Frais</h1>
-<a href="{{ url_for('cart') }}" class="cart-btn">🛒 Mon panier</a>
+<a href="{{ url_for('cart') }}" class="cart-btn">🛒</a>
     <h2>Nos produits</h2>
 
     <div class="products">
@@ -79,6 +79,51 @@ async function addToCart(event, link) {
     }, 1200);
 }
 </script>   
+<script>
+const cartBtn = document.querySelector('.cart-btn');
 
+if (cartBtn) {
+    let dragging = false;
+    let moved = false;
+
+    cartBtn.addEventListener('pointerdown', function(e) {
+        dragging = true;
+        moved = false;
+        cartBtn.setPointerCapture(e.pointerId);
+    });
+
+    cartBtn.addEventListener('pointermove', function(e) {
+        if (!dragging) return;
+
+        moved = true;
+
+        const x = Math.max(
+            10,
+            Math.min(window.innerWidth - cartBtn.offsetWidth - 10, e.clientX - cartBtn.offsetWidth / 2)
+        );
+
+        const y = Math.max(
+            10,
+            Math.min(window.innerHeight - cartBtn.offsetHeight - 10, e.clientY - cartBtn.offsetHeight / 2)
+        );
+
+        cartBtn.style.left = x + 'px';
+        cartBtn.style.top = y + 'px';
+        cartBtn.style.right = 'auto';
+        cartBtn.style.transform = 'none';
+    });
+
+    cartBtn.addEventListener('pointerup', function() {
+        dragging = false;
+    });
+
+    cartBtn.addEventListener('click', function(e) {
+        if (moved) {
+            e.preventDefault();
+            moved = false;
+        }
+    });
+}
+</script>
 </body>
 </html>
