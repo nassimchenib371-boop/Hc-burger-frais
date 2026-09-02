@@ -115,3 +115,49 @@ button[type="submit"] {
     font-weight: bold;
     cursor: pointer;
 }
+/* ===== تحسين أزرار السلة ===== */
+
+.product-card p {
+    margin: 14px 0;
+}
+
+/* أزرار + و - */
+.product-card a[href*="increase"],
+.product-card a[href*="decrease"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    margin: 0 8px;
+    background: #111;
+    color: white;
+    text-decoration: none;
+    border-radius: 50%;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* زر الحذف */
+.product-card a[href*="remove"] {
+    background: #e53935;
+    color: white;
+    text-decoration: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+/* تصغير الفراغات داخل المنتج */
+.product-card {
+    padding: 18px;
+}
+
+.product-card h3 {
+    margin: 0 0 15px 0;
+}
+
+.product-card select {
+    margin-top: 5px;
+}
