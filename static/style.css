@@ -180,3 +180,67 @@ button[type="submit"] {
     font-size: 22px;
     font-weight: bold;
 }
+/* ===== ADMIN PAGE ===== */
+
+#orders {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+#orders > div {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+}
+
+body > h1 {
+    font-size: 32px;
+    margin: 20px 16px 10px;
+}
+
+body > h2 {
+    font-size: 24px;
+    margin: 10px 16px 20px;
+}
+
+#orders {
+    margin: 0 16px 30px;
+}
+
+#orders h3 {
+    margin-top: 0;
+    font-size: 22px;
+}
+
+#orders p {
+    margin: 10px 0;
+    line-height: 1.45;
+}
+
+#orders button {
+    border: 0;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin: 5px 4px 0 0;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    body > h1 {
+        font-size: 28px;
+    }
+
+    #orders > div {
+        padding: 16px;
+    }
+
+    #orders button {
+        width: 100%;
+        margin: 6px 0;
+    }
+}
