@@ -55,3 +55,63 @@
     line-height: 20px;
     text-align: center;
 }
+/* ===== Panier ===== */
+
+body {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 18px;
+    box-sizing: border-box;
+}
+
+h1 {
+    font-size: 38px;
+    margin-bottom: 28px;
+}
+
+form > p {
+    margin-bottom: 18px;
+}
+
+input[type="text"],
+input[type="tel"],
+select {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 16px;
+}
+
+.product-card {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 16px;
+    padding: 18px;
+    margin: 18px 0;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+
+.product-card h3 {
+    margin-top: 0;
+    font-size: 24px;
+}
+
+.product-card a {
+    display: inline-block;
+    margin: 4px;
+    padding: 7px 11px;
+    border-radius: 9px;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    border: 0;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
