@@ -10,7 +10,10 @@
 <body>
 
     <h1>🍔 HC Burger Frais</h1>
-<a href="{{ url_for('cart') }}" class="cart-btn">🛒</a>
+<a href="{{ url_for('cart') }}" class="cart-btn">
+    🛒
+    <span class="cart-count">0</span>
+</a>
     <h2>Nos produits</h2>
 
     <div class="products">
@@ -70,7 +73,9 @@ async function addToCart(event, link) {
     event.preventDefault();
 
     await fetch(link.href);
-
+const cartCount = document.querySelector('.cart-count');
+let count = parseInt(cartCount.textContent || '0');
+cartCount.textContent = count + 1;
     const oldText = link.innerHTML;
     link.innerHTML = "✅ Ajouté au panier";
 
