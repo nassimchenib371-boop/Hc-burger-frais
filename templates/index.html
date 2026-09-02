@@ -15,28 +15,54 @@
 
     <div class="products">
         {% for product in products %}
-<div class="product-card">
+    {% if product.category != 'Boissons' %}
+    <div class="product-card">
 
-    {% if product.image %}
-    <img src="{{ url_for('static', filename=product.image) }}"
-         alt="{{ product.name }}">
+        {% if product.image %}
+        <img src="{{ url_for('static', filename=product.image) }}"
+             alt="{{ product.name }}">
+        {% endif %}
+
+        <h3>{{ product.name }}</h3>
+
+        {% if product.description %}
+        <p>{{ product.description }}</p>
+        {% endif %}
+
+        <strong>{{ product.price }} €</strong>
+
+        <a href="{{ url_for('add_to_cart', pid=product.id) }}"
+           onclick="addToCart(event, this)">
+            Ajouter au panier 🛒
+        </a>
+
+    </div>
     {% endif %}
+{% endfor %}
 
-    <h3>{{ product.name }}</h3>
+<div class="product-card drinks-card">
+    <h3>🥤 Boissons</h3>
+    <p>Choisissez votre boisson</p>
 
-    {% if product.description %}
-    <p>{{ product.description }}</p>
-    {% endif %}
+    <select id="drink-select">
+        {% for product in products %}
+            {% if product.category == 'Boissons' %}
+            <option value="{{ product.id }}">
+                {{ product.name }} — {{ product.price }} €
+            </option>
+            {% endif %}
+        {% endfor %}
+    </select>
 
-    <strong>{{ product.price }} €</strong>
-
-    <a href="{{ url_for('add_to_cart', pid=product.id) }}"
-       onclick="addToCart(event, this)">
+    <a href="#"
+       onclick="
+       event.preventDefault();
+       const pid = document.getElementById('drink-select').value;
+       window.location.href='/add_to_cart/' + pid;
+       ">
         Ajouter au panier 🛒
     </a>
-
 </div>
-{% endfor %}
        </div>
     <script>
 async function addToCart(event, link) {
