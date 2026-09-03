@@ -17,8 +17,16 @@
     <h2>Nos produits</h2>
 
     <div class="products">
-        {% for product in products %}
-    {% if product.category != 'Boissons' %}
+
+    {% set ns = namespace(last_category='') %}
+
+    {% for product in products %}
+        {% if product.category != 'Boissons' %}
+
+            {% if product.category != ns.last_category %}
+                <h2 class="category-title">{{ product.category }}</h2>
+                {% set ns.last_category = product.category %}
+            {% endif %}
     <div class="product-card">
 
         {% if product.image %}
