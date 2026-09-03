@@ -307,12 +307,32 @@ body > h2 {
         margin: 6px 0;
     }
 }
+/* تحسين كروت المنتجات */
+.product-card {
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.product-card img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+    border-radius: 16px;
+}
+
+/* السعر */
+.product-card strong {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+/* زر Ajouter au panier */
 .product-card a {
     display: inline-block;
     background: #ffcc00;
     color: #000;
     text-decoration: none;
-    font-weight: bold;
-    padding: 10px 16px;
-    border-radius: 10px;
+    font-weight: 800;
+    padding: 12px 18px;
+    border-radius: 12px;
 }
