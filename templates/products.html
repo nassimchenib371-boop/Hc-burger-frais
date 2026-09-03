@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gestion des produits - HC Burger Frais</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<h1>🍔 Gestion des produits</h1>
+
+<h2>Ajouter un produit</h2>
+
+<form method="POST" action="{{ url_for('admin_products') }}">
+
+    <p>
+        <label>Catégorie :</label><br>
+        <input type="text" name="category" required>
+    </p>
+
+    <p>
+        <label>Nom :</label><br>
+        <input type="text" name="name" required>
+    </p>
+
+    <p>
+        <label>Description :</label><br>
+        <input type="text" name="description">
+    </p>
+
+    <p>
+        <label>Prix :</label><br>
+        <input type="number" step="0.01" name="price" required>
+    </p>
+
+    <p>
+        <label>Prix Menu :</label><br>
+        <input type="number" step="0.01" name="menu_price">
+    </p>
+
+    <p>
+        <label>Image :</label><br>
+        <input type="text" name="image">
+    </p>
+
+    <button type="submit">➕ Ajouter</button>
+</form>
+
+<hr>
+
+<h2>Produits actuels</h2>
+
+{% for p in products %}
+
+<div style="margin-bottom:25px; padding:15px; border:1px solid #ccc; border-radius:12px;">
+
+    <form method="POST" action="{{ url_for('admin_products') }}">
+
+        <input type="hidden" name="id" value="{{ p.id }}">
+
+        <p>
+            <strong>Catégorie :</strong><br>
+            <input type="text" name="category" value="{{ p.category }}" required>
+        </p>
+
+        <p>
+            <strong>Nom :</strong><br>
+            <input type="text" name="name" value="{{ p.name }}" required>
+        </p>
+
+        <p>
+            <strong>Description :</strong><br>
+            <input type="text" name="description" value="{{ p.description or '' }}">
+        </p>
+
+        <p>
+            <strong>Prix :</strong><br>
+            <input type="number" step="0.01" name="price" value="{{ p.price }}" required>
+        </p>
+
+        <p>
+            <strong>Prix Menu :</strong><br>
+            <input type="number" step="0.01" name="menu_price" value="{{ p.menu_price or '' }}">
+        </p>
+
+        <p>
+            <strong>Image :</strong><br>
+            <input type="text" name="image" value="{{ p.image or '' }}">
+        </p>
+
+        <button type="submit">💾 Modifier</button>
+
+    </form>
+
+    <form method="POST"
+          action="{{ url_for('delete_product', pid=p.id) }}"
+          onsubmit="return confirm('Supprimer ce produit ?');">
+
+        <button type="submit">🗑️ Supprimer</button>
+
+    </form>
+
+</div>
+
+{% else %}
+
+<p>Aucun produit.</p>
+
+{% endfor %}
+
+</body>
+</html>
