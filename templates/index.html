@@ -18,7 +18,20 @@
     <h2>Choisissez une catégorie</h2>
 
     <div class="category-grid">
-        {% for category, items in products|groupby('category') %}
+      {% set category_order = [
+    'Burgers',
+    'Tacos',
+    'Sandwichs',
+    'Poutines',
+    'Pâtes',
+    'Frites',
+    'Dessert',
+    'Boissons'
+] %}
+
+{% for wanted_category in category_order %}
+    {% for category, items in products|groupby('category') %}
+        {% if category == wanted_category %}
             {% set cover = items[0] %}
 
             <button type="button"
@@ -26,15 +39,16 @@
                     data-category="{{ category }}">
 
                 {% if cover.image %}
-                <img src="{{ url_for('static', filename=cover.image) }}"
-                     alt="{{ category }}">
+                    <img src="{{ url_for('static', filename=cover.image) }}"
+                         alt="{{ category }}">
                 {% endif %}
 
                 <h3>{{ category }}</h3>
                 <span>Voir les produits →</span>
             </button>
-
-        {% endfor %}
+        {% endif %}
+    {% endfor %}
+{% endfor %}  
     </div>
 </div>
 
