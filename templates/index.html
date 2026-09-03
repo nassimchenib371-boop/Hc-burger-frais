@@ -103,31 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
-<div class="product-card drinks-card">
-    <h3>🥤 Boissons</h3>
-    <p>Choisissez votre boisson</p>
-
-    <select id="drink-select">
-    {% for product in products %}
-        {% if product.category == 'Boissons' %}
-        <option value="{{ url_for('add_to_cart', pid=product.id) }}">
-            {{ product.name }} — {{ product.price }} €
-        </option>
-        {% endif %}
-    {% endfor %}
-</select>
-
-<a href="#"
-   onclick="
-   event.preventDefault();
-   const select = document.getElementById('drink-select');
-   const url = select.value;
-   addToCart(event, { href: url });
-   ">
-    Ajouter au panier 🛒
-</a>
-</div>
-       </div> 
+ 
     <script>
 async function addToCart(event, link) {
     event.preventDefault();
