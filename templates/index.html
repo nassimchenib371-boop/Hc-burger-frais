@@ -102,45 +102,7 @@
     Ajouter au panier 🛒
 </a>
 </div>
-       </div>
-     <script>
-document.addEventListener("DOMContentLoaded", () => {
-    const home = document.getElementById("category-home");
-    const cards = document.querySelectorAll(".category-card");
-    const products = document.querySelectorAll(".menu-product");
-    const backBtn = document.getElementById("back-category");
-
-    cards.forEach(card => {
-        card.addEventListener("click", () => {
-            const category = card.dataset.category;
-
-            home.style.display = "none";
-            backBtn.style.display = "block";
-
-            products.forEach(product => {
-                if (product.dataset.category === category) {
-                    product.hidden = false;
-                } else {
-                    product.hidden = true;
-                }
-            });
-
-            window.scrollTo({ top: 0, behavior: "smooth" });
-        });
-    });
-
-    backBtn.addEventListener("click", () => {
-        products.forEach(product => {
-            product.hidden = true;
-        });
-
-        backBtn.style.display = "none";
-        home.style.display = "block";
-
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-});
-</script>  
+       </div> 
     <script>
 async function addToCart(event, link) {
     event.preventDefault();
