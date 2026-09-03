@@ -276,7 +276,7 @@ def admin_products():
             con.execute("""UPDATE products SET category=?,name=?,description=?,price=?,menu_price=?,image=?,active=? WHERE id=?""",
                         (f["category"],f["name"],f.get("description",""),float(f["price"]),
                          float(f["menu_price"]) if f.get("menu_price") else None,
-                         1, int(f["id"])))
+                         f.get("image", ""), 1, int(f["id"])))
         else:
             con.execute("""INSERT INTO products(category,name,description,price,menu_price,image,active)
                            VALUES(?,?,?,?,?,?,?)""",
