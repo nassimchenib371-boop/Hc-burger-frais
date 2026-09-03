@@ -307,3 +307,12 @@ body > h2 {
         margin: 6px 0;
     }
 }
+.product-card a {
+    display: inline-block;
+    background: #ffcc00;
+    color: #000;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 10px 16px;
+    border-radius: 10px;
+}
