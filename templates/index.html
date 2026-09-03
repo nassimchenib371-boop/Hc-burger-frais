@@ -39,10 +39,13 @@
                     class="category-card"
                     data-category="{{ category }}">
 
-                {% if cover.image %}
-                    <img src="{{ url_for('static', filename=cover.image) }}"
-                         alt="{{ category }}">
-                {% endif %}
+                {% if category == 'Boissons' %}
+    <img src="{{ url_for('static', filename='46C72C9A-A8C8-400F-B956-568A946AF345.jpeg') }}"
+         alt="Boissons">
+{% elif cover.image %}
+    <img src="{{ url_for('static', filename=cover.image) }}"
+         alt="{{ category }}">
+{% endif %}
 
                 <h3>{{ category }}</h3>
                 <span>Voir les produits →</span>
