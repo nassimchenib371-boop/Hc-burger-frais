@@ -355,3 +355,60 @@ body > h2 {
     padding-bottom: 8px;
     border-bottom: 3px solid #ffcc00;
 }
+/* ===== MENU CATEGORIES ===== */
+
+#category-home {
+    padding: 20px;
+}
+
+#category-home h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.category-card {
+    background: white;
+    border: none;
+    border-radius: 18px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+    cursor: pointer;
+    text-align: center;
+}
+
+.category-card img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    display: block;
+}
+
+.category-card h3 {
+    font-size: 21px;
+    margin: 12px 5px 5px;
+}
+
+.category-card span {
+    display: block;
+    color: #666;
+    padding-bottom: 14px;
+    font-size: 14px;
+}
+
+#back-category {
+    display: none;
+    margin: 15px 20px;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 12px;
+    background: #ffcc00;
+    font-weight: bold;
+    font-size: 16px;
+}
