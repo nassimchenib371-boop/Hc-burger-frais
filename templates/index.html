@@ -44,15 +44,7 @@
 
     <div class="products">
 
-    {% set ns = namespace(last_category='') %}
-
     {% for product in products %}
-        
-
-            {% if product.category != ns.last_category %}
-                <h2 class="category-title">{{ product.category }}</h2>
-                {% set ns.last_category = product.category %}
-            {% endif %}
     <div class="product-card menu-product"
      data-category="{{ product.category }}"
      hidden>
@@ -77,7 +69,40 @@
 
     </div>
 {% endfor %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const home = document.getElementById("category-home");
+    const cards = document.querySelectorAll(".category-card");
+    const products = document.querySelectorAll(".menu-product");
+    const backBtn = document.getElementById("back-categories");
 
+    cards.forEach(function (card) {
+        card.addEventListener("click", function () {
+            const category = card.dataset.category;
+
+            home.hidden = true;
+            backBtn.hidden = false;
+
+            products.forEach(function (product) {
+                product.hidden = product.dataset.category !== category;
+            });
+
+            window.scrollTo(0, 0);
+        });
+    });
+
+    backBtn.addEventListener("click", function () {
+        products.forEach(function (product) {
+            product.hidden = true;
+        });
+
+        backBtn.hidden = true;
+        home.hidden = false;
+
+        window.scrollTo(0, 0);
+    });
+});
+</script>
 <div class="product-card drinks-card">
     <h3>🥤 Boissons</h3>
     <p>Choisissez votre boisson</p>
