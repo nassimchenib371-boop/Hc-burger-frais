@@ -130,9 +130,57 @@ document.addEventListener("DOMContentLoaded", function () {
     const category = card.dataset.category;
 
     if (category === "Tacos") {
-        alert("Tacos OK");
-        return;
-    }
+    const viande = prompt(
+        "Choisis ta viande :\n" +
+        "1 - Kebab\n" +
+        "2 - Viande hachée\n" +
+        "3 - Poulet mariné\n" +
+        "4 - Escalope\n" +
+        "5 - Tenders\n" +
+        "6 - Cordon bleu\n" +
+        "7 - Nuggets"
+    );
+
+    if (!viande) return;
+
+    const sauce = prompt(
+        "Choisis ta sauce :\n" +
+        "1 - Algérienne\n" +
+        "2 - Harissa\n" +
+        "3 - Mayonnaise\n" +
+        "4 - Biggy\n" +
+        "5 - Barbecue\n" +
+        "6 - Andalouse\n" +
+        "7 - Samouraï\n" +
+        "8 - Brésil\n" +
+        "9 - Ketchup"
+    );
+
+    if (!sauce) return;
+
+    const supplements = prompt(
+        "Suppléments +1€ chacun\n" +
+        "Écris les numéros séparés par virgule.\n" +
+        "Exemple : 1,3\n\n" +
+        "1 - Œuf\n" +
+        "2 - Emmental\n" +
+        "3 - Cheddar\n" +
+        "4 - Chèvre\n" +
+        "5 - Raclette\n" +
+        "6 - Vache Kiri\n" +
+        "7 - Bacon\n\n" +
+        "Laisse vide si aucun supplément."
+    ) || "";
+
+    const url = new URL(link.href, window.location.origin);
+    url.searchParams.set("viande", viande);
+    url.searchParams.set("sauce", sauce);
+    url.searchParams.set("supplements", supplements);
+
+    link.href = url.toString();
+    addToCart(event, link);
+    return;
+}
 
     addToCart(event, link);
 }

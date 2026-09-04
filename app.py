@@ -322,6 +322,7 @@ def inject_cart_count():
 @app.get("/cart")
 def cart():
     cart_data = session.get("cart", {})
+    customizations = session.get("cart_customizations", {})
     items = []
 
     con = db()
@@ -333,11 +334,19 @@ def cart():
         ).fetchone()
 
         if product:
+            choices = customizations.get(str(pid), [])
+choice = choices[0] if choices else {}
+
+supplements = choice.get("supplements", [])
+extra_price = len(supplements) * 1.0
             items.append({
                 "id": product["id"],
                 "name": product["name"],
-                "price": float(product["price"]),
+                "price": float(product["price"]) + extra_price,
                 "quantity": quantity
+                "viande": choice.get("viande", ""),
+"sauce": choice.get("sauce", ""),
+"supplements": supplements,
             })
 
     con.close()
@@ -363,8 +372,67 @@ def remove_from_cart(pid):
 def add_to_cart(pid):
     cart = session.get("cart", {})
     key = str(pid)
+
     cart[key] = cart.get(key, 0) + 1
     session["cart"] = cart
+
+    viande_map = {
+        "1": "Kebab",
+        "2": "Viande hachée",
+        "3": "Poulet mariné",
+        "4": "Escalope",
+        "5": "Tenders",
+        "6": "Cordon bleu",
+        "7": "Nuggets"
+    }
+
+    sauce_map = {
+        "1": "Algérienne",
+        "2": "Harissa",
+        "3": "Mayonnaise",
+        "4": "Biggy",
+        "5": "Barbecue",
+        "6": "Andalouse",
+        "7": "Samouraï",
+        "8": "Brésil",
+        "9": "Ketchup"
+    }
+
+    supplement_map = {
+        "1": "Œuf",
+        "2": "Emmental",
+        "3": "Cheddar",
+        "4": "Chèvre",
+        "5": "Raclette",
+        "6": "Vache Kiri",
+        "7": "Bacon"
+    }
+
+    viande_code = request.args.get("viande", "").strip()
+    sauce_code = request.args.get("sauce", "").strip()
+    supp_codes = request.args.get("supplements", "").split(",")
+
+    viande = viande_map.get(viande_code, "")
+    sauce = sauce_map.get(sauce_code, "")
+    supplements = [
+        supplement_map[c.strip()]
+        for c in supp_codes
+        if c.strip() in supplement_map
+    ]
+
+    if viande or sauce or supplements:
+        customizations = session.get("cart_customizations", {})
+        choices = customizations.get(key, [])
+
+        choices.append({
+            "viande": viande,
+            "sauce": sauce,
+            "supplements": supplements
+        })
+
+        customizations[key] = choices
+        session["cart_customizations"] = customizations
+
     return redirect(url_for("home"))
 @app.route("/order/<int:pid>", methods=["GET", "POST"])
 def order(pid):

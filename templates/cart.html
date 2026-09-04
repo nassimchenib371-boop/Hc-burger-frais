@@ -27,7 +27,16 @@
     {% for item in items %}
     <div class="product-card">
         <h3>{{ item.name }}</h3>
+{% if item.viande %}
+<p>🥩 Viande : {{ item.viande }}</p>
+{% endif %}
+{% if item.sauce %}
+<p>🥫 Sauce : {{ item.sauce }}</p>
+{% endif %}
 
+{% if item.supplements %}
+<p>➕ Suppléments : {{ item.supplements | join(', ') }}</p>
+{% endif %}
         <p>
     Quantité :
     <a class="qty-btn" href="{{ url_for('remove_from_cart', pid=item.id) }}" onclick="updateCart(event, this)">−</a>
