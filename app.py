@@ -532,7 +532,7 @@ choice = choices[0] if choices else {}
 viande = choice.get("viande", "")
 sauce = choice.get("sauce", "")
 supplements = choice.get("supplements", [])
-        if formula == "menu":
+if formula == "menu":
             unit_price += 2.50
         
 
