@@ -334,19 +334,20 @@ def cart():
         ).fetchone()
 
         if product:
-            choices = customizations.get(str(pid), [])
-choice = choices[0] if choices else {}
+                    choices = customizations.get(str(pid), [])
+            choice = choices[0] if choices else {}
 
-supplements = choice.get("supplements", [])
-extra_price = len(supplements) * 1.0
+            supplements = choice.get("supplements", [])
+            extra_price = len(supplements) * 1.0
+
             items.append({
                 "id": product["id"],
                 "name": product["name"],
                 "price": float(product["price"]) + extra_price,
-                "quantity": quantity
+                "quantity": quantity,
                 "viande": choice.get("viande", ""),
-"sauce": choice.get("sauce", ""),
-"supplements": supplements,
+                "sauce": choice.get("sauce", ""),
+                "supplements": supplements,
             })
 
     con.close()
