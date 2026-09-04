@@ -334,7 +334,7 @@ def cart():
         ).fetchone()
 
         if product:
-                    choices = customizations.get(str(pid), [])
+            choices = customizations.get(str(pid), [])
             choice = choices[0] if choices else {}
 
             supplements = choice.get("supplements", [])
