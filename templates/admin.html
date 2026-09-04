@@ -62,10 +62,10 @@ ${order.items?.map(item => {
         ? `🍟🥤 Menu${item.drink ? " (" + item.drink + ")" : ""}`
         : "🍔 Seul";
 
-    return `${item.name} × ${item.quantity} — ${Number(item.price).toFixed(2)} € — ${formule}`;
-    ${item.viande ? `<br>🥩 Viande : ${item.viande}` : ""}
-${item.sauce ? `<br>🥫 Sauce : ${item.sauce}` : ""}
-${item.supplements ? `<br>➕ Suppléments : ${item.supplements}` : ""}
+    return `${item.name} × ${item.quantity} — ${formule}
+        ${item.viande ? `<br>🥩 Viande : ${item.viande}` : ""}
+        ${item.sauce ? `<br>🥫 Sauce : ${item.sauce}` : ""}
+        ${item.supplements ? `<br>➕ Suppléments : ${item.supplements}` : ""}`;
 }).join("<br>") || "Non disponible"}
 </p>
 
