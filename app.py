@@ -542,7 +542,7 @@ items.append({
             "quantity": quantity,
             "price": unit_price,
             "formula": formula,
-            "drink": drink if formula == "menu" else ""
+            "drink": drink if formula == "menu" else "",
             "viande": viande,
             "sauce": sauce,
             "supplements": supplements,
