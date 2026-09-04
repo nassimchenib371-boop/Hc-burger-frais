@@ -355,6 +355,7 @@ def cart():
     total = sum(item["price"] * item["quantity"] for item in items)
 
     return render_template("cart.html", items=items, total=total)
+ @app.get("/cart/remove/<int:pid>")   
 def remove_from_cart(pid):
     cart = session.get("cart", {})
     key = str(pid)
