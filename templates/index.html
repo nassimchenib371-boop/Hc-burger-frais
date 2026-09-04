@@ -81,7 +81,7 @@
         <strong>{{ product.price }} €</strong>
 
         <a href="{{ url_for('add_to_cart', pid=product.id) }}"
-           onclick="addToCart(event, this)">
+           onclick="customizeOrAdd(event, this)">
             Ajouter au panier 🛒
         </a>
 
@@ -123,6 +123,19 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
  
     <script>
+        function customizeOrAdd(event, link) {
+    event.preventDefault();
+
+    const card = link.closest(".menu-product");
+    const category = card.dataset.category;
+
+    if (category === "Tacos") {
+        alert("Tacos OK");
+        return;
+    }
+
+    addToCart(event, link);
+}
 async function addToCart(event, link) {
     event.preventDefault();
 
