@@ -523,10 +523,15 @@ def cart_checkout():
         quantity = int(quantity)
         formula = request.form.get(f"formula_{pid}", "seul")
         drink = request.form.get(f"drink_{pid}", "Coca-Cola")
-
+        
         unit_price = float(product["price"])
         item_name = product["name"]
+        choices = session.get("cart_customizations", {}).get(str(pid), [])
+choice = choices[0] if choices else {}
 
+viande = choice.get("viande", "")
+sauce = choice.get("sauce", "")
+supplements = choice.get("supplements", [])
         if formula == "menu":
             unit_price += 2.50
         
@@ -538,6 +543,9 @@ def cart_checkout():
             "price": unit_price,
             "formula": formula,
             "drink": drink if formula == "menu" else ""
+            "viande": viande,
+            "sauce": sauce,
+            "supplements": supplements,
         })
 
         total += unit_price * quantity
