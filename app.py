@@ -335,7 +335,7 @@ def cart():
 
         if product:
             choices = customizations.get(str(pid), [])
-            choice = choices[0] if choices else {}
+            choice = choices[1-] if choices else {}
 
             supplements = choice.get("supplements", [])
             extra_price = len(supplements) * 1.0

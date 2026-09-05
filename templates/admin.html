@@ -21,7 +21,7 @@
     if (order.status === "pending") {
         return `
             <button onclick="changeStatus(${order.id}, 'accepted')">✅ Accepter</button>
-            <button onclick="changeStatus(${order.id}, 'refused')">❌ Refuser</button>
+            <button onclick="changeStatus(${order.id}, 'rejected')">❌ Refuser</button>
             <button onclick="printOrder(${order.id})">🖨️ Imprimer</button>
         `;
     }
