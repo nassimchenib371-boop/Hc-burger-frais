@@ -414,14 +414,14 @@ garniture_map = {
     "2": "Tomate",
     "3": "Oignon"
 }
-    viande_code = request.args.get("viande", "").strip()
-    sauce_code = request.args.get("sauce", "").strip()
-    supp_codes = request.args.get("supplements", "").split(",")
-    garniture_codes = request.args.get("garnitures", "")
-    garnitures = [garniture_map[g.strip()] for g in garniture_codes.split(",") if g.strip() in garniture_map]
-    viande = ", ".join(viande_map[c.strip()] for c in viande_code.split(",") if c.strip() in viande_map)
-    sauce = sauce_map.get(sauce_code, "")
-    supplements = [
+viande_code = request.args.get("viande", "").strip()
+sauce_code = request.args.get("sauce", "").strip()
+supp_codes = request.args.get("supplements", "").split(",")
+garniture_codes = request.args.get("garnitures", "")
+garnitures = [garniture_map[g.strip()] for g in garniture_codes.split(",") if g.strip() in garniture_map]
+viande = ", ".join(viande_map[c.strip()] for c in viande_code.split(",") if c.strip() in viande_map)
+sauce = sauce_map.get(sauce_code, "")
+supplements = [
         supplement_map[c.strip()]
         for c in supp_codes
         if c.strip() in supplement_map
