@@ -564,8 +564,8 @@ items.append({
             "garnitures": garnitures
         })
 
-    total += unit_price * quantity
-    con.execute(
+total += unit_price * quantity
+con.execute(
             """INSERT INTO orders
             (created_at, status, customer_name, phone, order_type,
             address, payment, payment_status, note, total, items_json)
