@@ -427,7 +427,7 @@ supplements = [
         if c.strip() in supplement_map
     ]
 
-    if viande or sauce or supplements or garnitures:
+if viande or sauce or supplements or garnitures:
         customizations = session.get("cart_customizations", {})
         choices = customizations.get(key, [])
 
