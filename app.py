@@ -590,7 +590,7 @@ con.close()
 
 session["cart"] = {}
 
-        return redirect(url_for("home"))       
+return redirect(url_for("home"))       
 init_db()
 if __name__=="__main__":
     
