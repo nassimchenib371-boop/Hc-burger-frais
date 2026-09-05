@@ -585,8 +585,8 @@ con.execute(
         )
     )
 
-        con.commit()
-        con.close()
+con.commit()
+con.close()
 
         session["cart"] = {}
 
