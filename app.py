@@ -557,11 +557,11 @@ def cart_checkout():
         })
 
         total += unit_price * quantity
-con.execute(
-        """INSERT INTO orders
-        (created_at, status, customer_name, phone, order_type,
-         address, payment, payment_status, note, total, items_json)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        con.execute(
+            """INSERT INTO orders
+            (created_at, status, customer_name, phone, order_type,
+            address, payment, payment_status, note, total, items_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             datetime.now().isoformat(),
             "pending",
@@ -577,12 +577,12 @@ con.execute(
         )
     )
 
-con.commit()
-con.close()
+        con.commit()
+        con.close()
 
-session["cart"] = {}
+        session["cart"] = {}
 
-return redirect(url_for("home"))       
+        return redirect(url_for("home"))       
 init_db()
 if __name__=="__main__":
     
