@@ -548,7 +548,7 @@ def cart_checkout():
         sauce = choice.get("sauce", "")
         supplements = choice.get("supplements", [])
 garnitures = choice.get("garnitures", [])
-        if formula == "menu":
+if formula == "menu":
             unit_price += 2.50
 
         items.append({
