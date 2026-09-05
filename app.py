@@ -534,7 +534,8 @@ def cart_checkout():
         unit_price = float(product["price"])
         item_name = product["name"]
 
-        choices = session.get("cart_customizations", {}).get(str(pid), [])
+        customizations = session.get("cart_customizations", {})
+        choices = customizations.get(str(pid), [])
         choice = choices[0] if choices else {}
 
         viande = choice.get("viande", "")
