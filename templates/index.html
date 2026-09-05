@@ -123,64 +123,175 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
  
     <script>
-        function customizeOrAdd(event, link) {
+        function chooseOne(title, options) {
+    return new Promise((resolve) => {
+        const overlay = document.createElement("div");
+        overlay.style.cssText = `
+            position:fixed; inset:0; background:rgba(0,0,0,.55);
+            display:flex; align-items:center; justify-content:center;
+            z-index:99999; padding:20px;
+        `;
+
+        const box = document.createElement("div");
+        box.style.cssText = `
+            background:white; width:100%; max-width:400px;
+            border-radius:20px; padding:20px;
+            max-height:85vh; overflow:auto;
+        `;
+
+        const h2 = document.createElement("h2");
+        h2.textContent = title;
+        h2.style.textAlign = "center";
+        box.appendChild(h2);
+
+        options.forEach(([code, name]) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.textContent = name;
+            btn.style.cssText = `
+                display:block; width:100%; padding:15px;
+                margin:8px 0; border:0; border-radius:12px;
+                font-size:18px; font-weight:bold; cursor:pointer;
+            `;
+
+            btn.onclick = () => {
+                overlay.remove();
+                resolve(code);
+            };
+
+            box.appendChild(btn);
+        });
+
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+    });
+}
+
+
+function chooseSupplements(options) {
+    return new Promise((resolve) => {
+        const overlay = document.createElement("div");
+        overlay.style.cssText = `
+            position:fixed; inset:0; background:rgba(0,0,0,.55);
+            display:flex; align-items:center; justify-content:center;
+            z-index:99999; padding:20px;
+        `;
+
+        const box = document.createElement("div");
+        box.style.cssText = `
+            background:white; width:100%; max-width:400px;
+            border-radius:20px; padding:20px;
+            max-height:85vh; overflow:auto;
+        `;
+
+        box.innerHTML = `
+            <h2 style="text-align:center;">Choisis tes suppléments</h2>
+            <p style="text-align:center;">Plusieurs choix possibles (+1€ chacun)</p>
+        `;
+
+        const selected = [];
+
+        options.forEach(([code, name]) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.textContent = name;
+            btn.style.cssText = `
+                display:block; width:100%; padding:15px;
+                margin:8px 0; border:2px solid #ddd;
+                border-radius:12px; font-size:18px;
+                font-weight:bold; cursor:pointer;
+            `;
+
+            btn.onclick = () => {
+                const index = selected.indexOf(code);
+
+                if (index === -1) {
+                    selected.push(code);
+                    btn.textContent = "✅ " + name;
+                    btn.style.borderColor = "green";
+                } else {
+                    selected.splice(index, 1);
+                    btn.textContent = name;
+                    btn.style.borderColor = "#ddd";
+                }
+            };
+
+            box.appendChild(btn);
+        });
+
+        const validate = document.createElement("button");
+        validate.type = "button";
+        validate.textContent = "Valider";
+        validate.style.cssText = `
+            width:100%; padding:16px; margin-top:15px;
+            border:0; border-radius:12px;
+            font-size:19px; font-weight:bold;
+            background:#28a745; color:white;
+        `;
+
+        validate.onclick = () => {
+            overlay.remove();
+            resolve(selected.join(","));
+        };
+
+        box.appendChild(validate);
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+    });
+}
+
+
+async function customizeOrAdd(event, link) {
     event.preventDefault();
 
-    const card = link.closest(".menu-product");
+    const card = link.closest(".product-card");
     const category = card.dataset.category;
 
     if (category === "Tacos") {
-    const viande = prompt(
-        "Choisis ta viande :\n" +
-        "1 - Kebab\n" +
-        "2 - Viande hachée\n" +
-        "3 - Poulet mariné\n" +
-        "4 - Escalope\n" +
-        "5 - Tenders\n" +
-        "6 - Cordon bleu\n" +
-        "7 - Nuggets"
-    );
 
-    if (!viande) return;
+        const viande = await chooseOne("Choisis ta viande", [
+            ["1", "Kebab"],
+            ["2", "Viande hachée"],
+            ["3", "Poulet mariné"],
+            ["4", "Escalope"],
+            ["5", "Tenders"],
+            ["6", "Cordon bleu"],
+            ["7", "Nuggets"]
+        ]);
 
-    const sauce = prompt(
-        "Choisis ta sauce :\n" +
-        "1 - Algérienne\n" +
-        "2 - Harissa\n" +
-        "3 - Mayonnaise\n" +
-        "4 - Biggy\n" +
-        "5 - Barbecue\n" +
-        "6 - Andalouse\n" +
-        "7 - Samouraï\n" +
-        "8 - Brésil\n" +
-        "9 - Ketchup"
-    );
+        const sauce = await chooseOne("Choisis ta sauce", [
+            ["1", "Algérienne"],
+            ["2", "Harissa"],
+            ["3", "Mayonnaise"],
+            ["4", "Biggy"],
+            ["5", "Barbecue"],
+            ["6", "Andalouse"],
+            ["7", "Samouraï"],
+            ["8", "Brésil"],
+            ["9", "Ketchup"]
+        ]);
 
-    if (!sauce) return;
+        const supplements = await chooseSupplements([
+            ["1", "Œuf"],
+            ["2", "Emmental"],
+            ["3", "Cheddar"],
+            ["4", "Chèvre"],
+            ["5", "Raclette"],
+            ["6", "Vache Kiri"],
+            ["7", "Bacon"]
+        ]);
 
-    const supplements = prompt(
-        "Suppléments +1€ chacun\n" +
-        "Écris les numéros séparés par virgule.\n" +
-        "Exemple : 1,3\n\n" +
-        "1 - Œuf\n" +
-        "2 - Emmental\n" +
-        "3 - Cheddar\n" +
-        "4 - Chèvre\n" +
-        "5 - Raclette\n" +
-        "6 - Vache Kiri\n" +
-        "7 - Bacon\n\n" +
-        "Laisse vide si aucun supplément."
-    ) || "";
+        const url = new URL(link.href, window.location.origin);
 
-    const url = new URL(link.href, window.location.origin);
-    url.searchParams.set("viande", viande);
-    url.searchParams.set("sauce", sauce);
-    url.searchParams.set("supplements", supplements);
+        url.searchParams.set("viande", viande);
+        url.searchParams.set("sauce", sauce);
+        url.searchParams.set("supplements", supplements);
 
-    link.href = url.toString();
-    addToCart(event, link);
-    return;
-}
+        link.href = url.toString();
+
+        addToCart(event, link);
+        return;
+    }
 
     addToCart(event, link);
 }
