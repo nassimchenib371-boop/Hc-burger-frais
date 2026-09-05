@@ -520,23 +520,24 @@ def cart_checkout():
         if not product:
             continue
 
-quantity = int(quantity)
-formula = request.form.get(f"formula_{pid}", "seul")
-drink = request.form.get(f"drink_{pid}", "Coca-Cola")
-        
-unit_price = float(product["price"])
-item_name = product["name"]
-choices = session.get("cart_customizations", {}).get(str(pid), [])
-choice = choices[0] if choices else {}
+        quantity = int(quantity)
+        formula = request.form.get(f"formula_{pid}", "")
+        drink = request.form.get(f"drink_{pid}", "")
 
-viande = choice.get("viande", "")
-sauce = choice.get("sauce", "")
-supplements = choice.get("supplements", [])
-if formula == "menu":
+        unit_price = float(product["price"])
+        item_name = product["name"]
+
+        choices = session.get("cart_customizations", {}).get(str(pid), [])
+        choice = choices[0] if choices else {}
+
+        viande = choice.get("viande", "")
+        sauce = choice.get("sauce", "")
+        supplements = choice.get("supplements", [])
+
+        if formula == "menu":
             unit_price += 2.50
-        
 
-items.append({
+        items.append({
             "product_id": int(pid),
             "name": item_name,
             "quantity": quantity,
@@ -548,8 +549,7 @@ items.append({
             "supplements": supplements,
         })
 
-    total += unit_price * quantity
-
+        total += unit_price * quantity
 con.execute(
         """INSERT INTO orders
         (created_at, status, customer_name, phone, order_type,
