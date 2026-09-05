@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 
 
-function chooseSupplements(options) {
+function chooseSupplements(options, title = "Choisis tes suppléments", maxChoices = null) {
     return new Promise((resolve) => {
         const overlay = document.createElement("div");
         overlay.style.cssText = `
@@ -206,7 +206,11 @@ function chooseSupplements(options) {
                 const index = selected.indexOf(code);
 
                 if (index === -1) {
-                    selected.push(code);
+    if (maxChoices !== null && selected.length >= maxChoices) {
+        alert(`Tu peux choisir maximum ${maxChoices} viande(s).`);
+        return;
+    }
+    selected.push(code);
                     btn.textContent = "✅ " + name;
                     btn.style.borderColor = "green";
                 } else {
@@ -245,19 +249,32 @@ async function customizeOrAdd(event, link) {
     event.preventDefault();
 
     const card = link.closest(".product-card");
+    const productName = card.querySelector("h3").textContent.trim().toLowerCase();
+
+let maxViandes = 1;
+
+if (productName.includes("double l")) {
+    maxViandes = 4;
+} else if (productName.includes("double m")) {
+    maxViandes = 2;
+} else if (productName.includes("xl")) {
+    maxViandes = 3;
+} else if (productName.includes("tacos l")) {
+    maxViandes = 2;
+}
     const category = card.dataset.category;
 
     if (category === "Tacos") {
 
-        const viande = await chooseOne("Choisis ta viande", [
-            ["1", "Kebab"],
-            ["2", "Viande hachée"],
-            ["3", "Poulet mariné"],
-            ["4", "Escalope"],
-            ["5", "Tenders"],
-            ["6", "Cordon bleu"],
-            ["7", "Nuggets"]
-        ]);
+        const viande = await chooseSupplements([
+    ["1", "Kebab"],
+    ["2", "Viande hachée"],
+    ["3", "Poulet mariné"],
+    ["4", "Escalope"],
+    ["5", "Tenders"],
+    ["6", "Cordon bleu"],
+    ["7", "Nuggets"]
+], "Choisis tes viandes", maxViandes);
 
         const sauce = await chooseOne("Choisis ta sauce", [
             ["1", "Algérienne"],
