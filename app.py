@@ -440,7 +440,7 @@ if viande or sauce or supplements or garnitures:
 
         customizations[key] = choices
         session["cart_customizations"] = customizations
-    return redirect(url_for("home"))
+return redirect(url_for("home"))
 @app.route("/order/<int:pid>", methods=["GET", "POST"])
 def order(pid):
     con = db()
