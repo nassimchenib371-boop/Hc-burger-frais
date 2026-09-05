@@ -463,13 +463,20 @@ def order(pid):
             item_name = f'{product["name"]} - Menu ({drink})'
 
         total = unit_price * quantity
-
+        customizations = session.get("cart_customizations", {})
+        choices = customizations.get(str(pid), [])
+        choice = choices[-1] if choices else {}
         items = [{
-        "product_id": pid,
-        "name": item_name,
-        "quantity": quantity,
-        "price": unit_price
-            }]
+            "product_id": pid,
+            "name": item_name,
+            "quantity": quantity,
+            "price": unit_price,
+            "viande": choice.get("viande"),
+            "sauce": choice.get("sauce"),
+            "supplements": choice.get("supplements", []),
+            "formula": formula,
+            "drink": drink
+        }]
         con.execute(
                 """INSERT INTO orders
                 (created_at, status, customer_name, phone, order_type,
