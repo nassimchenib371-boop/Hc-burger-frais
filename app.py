@@ -433,7 +433,7 @@ def add_to_cart(pid):
 
         customizations[key] = choices
         session["cart_customizations"] = customizations
-
+        print("DEBUG CUSTOMIZATIONS:", session.get("cart_customizations"))
     return redirect(url_for("home"))
 @app.route("/order/<int:pid>", methods=["GET", "POST"])
 def order(pid):
