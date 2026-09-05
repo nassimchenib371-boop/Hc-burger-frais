@@ -65,7 +65,9 @@ ${order.items?.map(item => {
     return `${item.name} × ${item.quantity} — ${formule}
         ${item.viande ? `<br>🥩 Viande : ${item.viande}` : ""}
         ${item.sauce ? `<br>🥫 Sauce : ${item.sauce}` : ""}
-        ${item.supplements && item.supplements.trim() ? `<br>➕ Suppléments : ${item.supplements}` : ""}
+        ${Array.isArray(item.supplements) && item.supplements.length > 0
+    ? `<br>➕ Suppléments : ${item.supplements.join(", ")}`
+    : ""}
 }).join("<br>") || "Non disponible"}
 </p>
 
