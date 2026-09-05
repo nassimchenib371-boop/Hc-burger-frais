@@ -89,7 +89,7 @@
     <hr>
     {% endfor %}
 
-    <h2>Total actuel : {{ "%.2f"|format(total) }} €</h2>
+    <h2 id="total-actuel">Total actuel : {{ "%.2f"|format(total) }} €</h2>
     {% set ns = namespace(has_menu=false) %}
 {% for item in items %}
     {% set n = item.name|lower %}
@@ -160,6 +160,25 @@ document.querySelectorAll('input[type="radio"][name^="formula_"]').forEach(funct
         if (subtotalElement) {
             subtotalElement.textContent = 'Sous-total : ' + subtotal.toFixed(2) + ' €';
         }
+        const totalElement = document.getElementById("total-actuel");
+
+let totalGeneral = 0;
+
+document.querySelectorAll(".product-card").forEach(card => {
+    const subtotalLine = Array.from(card.querySelectorAll("p"))
+        .find(p => p.textContent.includes("Sous-total"));
+
+    if (subtotalLine) {
+        const match = subtotalLine.textContent.match(/[\d.]+/);
+        if (match) {
+            totalGeneral += parseFloat(match[0]);
+        }
+    }
+});
+
+if (totalElement) {
+    totalElement.textContent = `Total actuel : ${totalGeneral.toFixed(2)} €`;
+}
     });
 });
 </script> 
