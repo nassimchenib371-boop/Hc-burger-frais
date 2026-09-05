@@ -348,6 +348,7 @@ def cart():
                 "viande": choice.get("viande", ""),
                 "sauce": choice.get("sauce", ""),
                 "supplements": supplements,
+                "garnitures": choice.get("garnitures", [])
             })
 
     con.close()
@@ -408,11 +409,16 @@ def add_to_cart(pid):
         "6": "Vache Kiri",
         "7": "Bacon"
     }
-
+garniture_map = {
+    "1": "Salade",
+    "2": "Tomate",
+    "3": "Oignon"
+}
     viande_code = request.args.get("viande", "").strip()
     sauce_code = request.args.get("sauce", "").strip()
     supp_codes = request.args.get("supplements", "").split(",")
-
+garniture_codes = request.args.get("garnitures", "")
+garnitures = [garniture_map[g.strip()] for g in garniture_codes.split(",") if g.strip() in garniture_map]
     viande = ", ".join(viande_map[c.strip()] for c in viande_code.split(",") if c.strip() in viande_map)
     sauce = sauce_map.get(sauce_code, "")
     supplements = [
@@ -421,14 +427,15 @@ def add_to_cart(pid):
         if c.strip() in supplement_map
     ]
 
-    if viande or sauce or supplements:
+    if viande or sauce or supplements or garnitures:
         customizations = session.get("cart_customizations", {})
         choices = customizations.get(key, [])
 
         choices.append({
             "viande": viande,
             "sauce": sauce,
-            "supplements": supplements
+            "supplements": supplements,
+            "garnitures": garnitures
         })
 
         customizations[key] = choices
@@ -540,7 +547,7 @@ def cart_checkout():
         viande = choice.get("viande", "")
         sauce = choice.get("sauce", "")
         supplements = choice.get("supplements", [])
-
+garnitures = choice.get("garnitures", [])
         if formula == "menu":
             unit_price += 2.50
 
@@ -554,6 +561,7 @@ def cart_checkout():
             "viande": viande,
             "sauce": sauce,
             "supplements": supplements,
+            "garnitures": garnitures
         })
 
         total += unit_price * quantity

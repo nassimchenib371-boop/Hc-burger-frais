@@ -263,7 +263,33 @@ if (productName.includes("double l")) {
     maxViandes = 2;
 }
     const category = card.dataset.category;
+if (category.toLowerCase().includes("sandwich")) {
+    const sauce = await chooseOne("Choisis ta sauce", [
+        ["1", "Algérienne"],
+        ["2", "Harissa"],
+        ["3", "Mayonnaise"],
+        ["4", "Biggy"],
+        ["5", "Barbecue"],
+        ["6", "Andalouse"],
+        ["7", "Samouraï"],
+        ["8", "Brésil"],
+        ["9", "Ketchup"]
+    ]);
 
+    const garnitures = await chooseSupplements([
+        ["1", "Salade"],
+        ["2", "Tomate"],
+        ["3", "Oignon"]
+    ], "Choisis tes garnitures");
+
+    const url = new URL(link.href, window.location.origin);
+    url.searchParams.set("sauce", sauce);
+    url.searchParams.set("garnitures", garnitures);
+
+    link.href = url.toString();
+    addToCart(event, link);
+    return;
+}
     if (category === "Tacos") {
 
         const viande = await chooseSupplements([
