@@ -551,7 +551,7 @@ garnitures = choice.get("garnitures", [])
 if formula == "menu":
             unit_price += 2.50
 
-        items.append({
+items.append({
             "product_id": int(pid),
             "name": item_name,
             "quantity": quantity,
