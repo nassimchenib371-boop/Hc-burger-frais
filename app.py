@@ -577,12 +577,12 @@ con.execute(
         )
     )
 
-    con.commit()
-    con.close()
+con.commit()
+con.close()
 
-    session["cart"] = {}
+session["cart"] = {}
 
-    return redirect(url_for("home"))       
+return redirect(url_for("home"))       
 init_db()
 if __name__=="__main__":
     
