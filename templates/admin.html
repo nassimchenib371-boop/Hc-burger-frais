@@ -63,11 +63,11 @@ ${order.items?.map(item => {
         : "🍔 Seul";
 
     return `${item.name} × ${item.quantity} — ${formule}
-        ${item.viande ? `<br>🥩 Viande : ${item.viande}` : ""}
-        ${item.sauce ? `<br>🥫 Sauce : ${item.sauce}` : ""}
-        ${Array.isArray(item.supplements) && item.supplements.length > 0
-    ? `<br>➕ Suppléments : ${item.supplements.join(", ")}`
-    : ""}
+    ${item.viande ? `<br>🥩 Viande : ${item.viande}` : ""}
+    ${item.sauce ? `<br>🥫 Sauce : ${item.sauce}` : ""}
+    ${Array.isArray(item.supplements) && item.supplements.length > 0
+        ? `<br>➕ Suppléments : ${item.supplements.join(", ")}`
+        : ""}`;
 }).join("<br>") || "Non disponible"}
 </p>
 
