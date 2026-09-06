@@ -68,7 +68,7 @@ ${order.items?.map(item => {
     ${Array.isArray(item.supplements) && item.supplements.length > 0
         ? `<br>➕ Suppléments : ${item.supplements.join(", ")}`
             : ""}`;
-        
+    ${Array.isArray(item.garnitures) && item.garnitures.length > 0 ? `<br>🥗 Garnitures : ${item.garnitures.join(", ")}` : ""}
 }).join("<br>") || "Non disponible"}
 </p>
 
