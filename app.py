@@ -563,13 +563,13 @@ items.append({
             "supplements": supplements,
             "garnitures": garnitures
         })
+        total += unit_price * quantity
 
-total += unit_price * quantity
-con.execute(
-            """INSERT INTO orders
-            (created_at, status, customer_name, phone, order_type,
-            address, payment, payment_status, note, total, items_json)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+    con.execute(
+        """INSERT INTO orders
+        (created_at, status, name, phone, order_type,
+         address, payment, payment_status, notes, total, items)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             datetime.now().isoformat(),
             "pending",
