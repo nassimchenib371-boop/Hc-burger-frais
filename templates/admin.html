@@ -95,9 +95,14 @@ async function changeStatus(id, status) {
   });
   loadOrders();
 }
-async function changeStatusAndPrint(id) {
-    await changeStatus(id, "accepted");
-    await printOrder(id);
+function changeStatusAndPrint(id) {
+    fetch(`/api/admin/orders/${id}/status`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({status: "accepted"})
+    });
+
+    printOrder(id);
 }
 function printOrder(id) {
     const text = `HC BURGER FRAIS\nCommande #${id}\n\n`;
