@@ -563,7 +563,7 @@ items.append({
             "supplements": supplements,
             "garnitures": garnitures
         })
-        total += unit_price * quantity
+total += unit_price * quantity
 
     con.execute(
         """INSERT INTO orders
