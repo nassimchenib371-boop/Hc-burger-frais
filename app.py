@@ -570,9 +570,9 @@ def cart_checkout():
         total += unit_price * quantity
 
     con.execute(
-        """INSERT INTO orders
-        address, payment, payment_status, note, total, items_json)
-         address, payment, payment_status, notes, total, items)
+                """INSERT INTO orders
+        (created_at, status, customer_name, phone, order_type,
+         address, payment, payment_status, note, total, items_json)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             datetime.now().isoformat(),
@@ -587,7 +587,6 @@ def cart_checkout():
             total,
             json.dumps(items)
         )
-    )
 
     con.commit()
     con.close()
