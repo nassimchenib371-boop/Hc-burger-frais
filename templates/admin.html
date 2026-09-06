@@ -20,7 +20,7 @@
     function actionButtons(order) {
     if (order.status === "pending") {
         return `
-            <button onclick="changeStatusAndPrint(${order.id}, 'accepted')">✅ Accepter</button>
+            <button onclick="changeStatus(${order.id}, 'accepted')">✅ Accepter</button>
             <button onclick="changeStatus(${order.id}, 'rejected')">❌ Refuser</button>
             <button onclick="printOrder(${order.id})">🖨️ Imprimer</button>
         `;
