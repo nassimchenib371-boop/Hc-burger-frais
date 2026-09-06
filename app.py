@@ -571,7 +571,7 @@ def cart_checkout():
 
     con.execute(
         """INSERT INTO orders
-        (created_at, status, name, phone, order_type,
+        (created_at, status, customer_name, phone, order_type,
          address, payment, payment_status, notes, total, items)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
