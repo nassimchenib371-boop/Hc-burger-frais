@@ -41,6 +41,7 @@ async function loadOrders() {
     try {
         const response = await fetch('/api/admin/orders');
         const orders = await response.json();
+        window.currentOrders = orders;
         const activeOrders = orders.filter(order => order.status !== "done");
         const container = document.getElementById('orders');
 
@@ -105,7 +106,42 @@ function changeStatusAndPrint(id) {
     printOrder(id);
 }
 function printOrder(id) {
-    const text = `HC BURGER FRAIS\nCommande #${id}\n\n`;
+    const order = window.currentOrders.find(o => o.id === id);
+    if (!order) return;
+
+    let text = "HC BURGER FRAIS\n";
+    text += "------------------------------\n";
+    text += `Commande #${order.id}\n`;
+    text += `Nom: ${order.customer_name || ""}\n`;
+    text += `Telephone: ${order.phone || ""}\n`;
+    text += "------------------------------\n";
+
+    (order.items || []).forEach(item => {
+        text += `${item.name} x ${item.quantity}\n`;
+
+        if (item.formula === "menu") {
+            text += `Menu${item.drink ? " - " + item.drink : ""}\n`;
+        } else {
+            text += "Seul\n";
+        }
+
+        if (item.viande) text += `Viande: ${item.viande}\n`;
+        if (item.sauce) text += `Sauce: ${item.sauce}\n`;
+
+        if (item.supplements && item.supplements.length) {
+            text += `Supplements: ${item.supplements.join(", ")}\n`;
+        }
+
+        if (item.garnitures && item.garnitures.length) {
+            text += `Garnitures: ${item.garnitures.join(", ")}\n`;
+        }
+
+        text += "------------------------------\n";
+    });
+
+    text += `TOTAL: ${order.total || 0} EUR\n`;
+    text += "\n\n\n";
+
     const base64 = btoa(unescape(encodeURIComponent(text)));
     window.location.href = "rawbt:base64," + base64;
 }
