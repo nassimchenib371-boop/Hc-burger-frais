@@ -20,7 +20,7 @@
     function actionButtons(order) {
     if (order.status === "pending") {
         return `
-            <button onclick="changeStatus(${order.id}, 'accepted')">✅ Accepter</button>
+            <button onclick="changeStatusAndPrint(${order.id})">✅ Accepter</button>
             <button onclick="changeStatus(${order.id}, 'rejected')">❌ Refuser</button>
             <button onclick="printOrder(${order.id})">🖨️ Imprimer</button>
         `;
@@ -95,7 +95,10 @@ async function changeStatus(id, status) {
   });
   loadOrders();
 }
-
+async function changeStatusAndPrint(id) {
+    await changeStatus(id, "accepted");
+    await printOrder(id);
+}
 async function printOrder(id) {
   const response = await fetch(`/api/admin/orders/${id}/print`, {
     method: "POST"
