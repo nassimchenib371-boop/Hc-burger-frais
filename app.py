@@ -587,7 +587,7 @@ def cart_checkout():
             total,
             json.dumps(items)
         )
-
+    )
     con.commit()
     con.close()
 
