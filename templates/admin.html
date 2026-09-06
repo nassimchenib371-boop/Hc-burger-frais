@@ -99,12 +99,10 @@ async function changeStatusAndPrint(id) {
     await changeStatus(id, "accepted");
     await printOrder(id);
 }
-async function printOrder(id) {
-  const response = await fetch(`/api/admin/orders/${id}/print`, {
-    method: "POST"
-  });
-  const result = await response.json();
-  alert(result.message || "Impression envoyée");
+function printOrder(id) {
+    const text = `HC BURGER FRAIS\nCommande #${id}\n\n`;
+    const base64 = btoa(unescape(encodeURIComponent(text)));
+    window.location.href = "rawbt:base64," + base64;
 }
 loadOrders();
 setInterval(loadOrders, 2000);
