@@ -518,7 +518,7 @@ def cart_checkout():
     phone = request.form.get("phone", "").strip()
 
     if not name or not phone:
-        return "Nom et téléphone obligatoires", 400
+        return "Nom et téléphone requis", 400
 
     con = db()
     items = []
@@ -534,7 +534,7 @@ def cart_checkout():
             continue
 
         quantity = int(quantity)
-        formula = request.form.get(f"formula_{pid}", "")
+        formula = request.form.get(f"formula_{pid}", "seul")
         drink = request.form.get(f"drink_{pid}", "")
 
         unit_price = float(product["price"])
@@ -547,11 +547,14 @@ def cart_checkout():
         viande = choice.get("viande", "")
         sauce = choice.get("sauce", "")
         supplements = choice.get("supplements", [])
-garnitures = choice.get("garnitures", [])
-if formula == "menu":
+        garnitures = choice.get("garnitures", [])
+
+        unit_price += len(supplements) * 1.0
+
+        if formula == "menu":
             unit_price += 2.50
 
-items.append({
+        items.append({
             "product_id": int(pid),
             "name": item_name,
             "quantity": quantity,
@@ -563,7 +566,8 @@ items.append({
             "supplements": supplements,
             "garnitures": garnitures
         })
-total += unit_price * quantity
+
+        total += unit_price * quantity
 
     con.execute(
         """INSERT INTO orders
