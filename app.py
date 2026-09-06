@@ -585,13 +585,14 @@ con.execute(
         )
     )
 
-con.commit()
-con.close()
+    con.commit()
+    con.close()
 
-session["cart"] = {}
+    session["cart"] = {}
 
-return redirect(url_for("home"))       
+    return redirect(url_for("home"))
+
 init_db()
-if __name__=="__main__":
-    
-    app.run(host="0.0.0.0",port=int(os.getenv("PORT","8000")),debug=False)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8000")), debug=False)
