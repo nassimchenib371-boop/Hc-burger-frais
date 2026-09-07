@@ -109,11 +109,11 @@ function printOrder(id) {
     const order = window.currentOrders.find(o => o.id === id);
     if (!order) return;
 const clean = s => String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    let text = "HC BURGER FRAIS\n";
+    let text = "\x1D\x21\x11HC BURGER FRAIS\x1D\x21\x00\n";
     text += "------------------------------\n";
     text += `Commande #${order.id}\n`;
-    text += `Nom: ${order.customer_name || ""}\n`;
-    text += `Telephone: ${order.phone || ""}\n`;
+    text += `\x1D\x21\x11Commande #${order.id}\x1D\x21\x00\n`;
+    text += `Nom: ${order.customer_name}\n`;
     text += "------------------------------\n";
 
     (order.items || []).forEach(item => {
@@ -139,7 +139,7 @@ const clean = s => String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, 
         text += "------------------------------\n";
     });
 
-    text += `TOTAL: ${Number(order.total).toFixed(2)} EUR\n`;
+    text += `\x1D\x21\x11TOTAL: ${Number(order.total).toFixed(2)} EUR\x1D\x21\x00\n`;
     text += "\n\n\n\n\n\n\n\n\n\n\n\n";
     const base64 = btoa(unescape(encodeURIComponent(text)));
     window.location.href = "rawbt:base64," + base64;
