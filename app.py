@@ -368,7 +368,15 @@ def remove_from_cart(pid):
             del cart[key]
 
         session["cart"] = cart
-
+        customizations = session.get("cart_customizations", {})
+        choices = customizations.get(key, [])
+    if choices:
+        choices.pop()
+    if choices:
+        customizations[key] = choices
+    else:
+        customizations.pop(key, None)
+    session["cart_customizations"] = customizations
     return redirect(url_for("cart"))
 @app.get("/cart/add/<int:pid>")
 def add_to_cart(pid):
