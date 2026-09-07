@@ -112,7 +112,7 @@ const clean = s => String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, 
     let text = "\x1D\x21\x11HC BURGER FRAIS\x1D\x21\x00\n";
     text += "------------------------------\n";
     text += `\x1D\x21\x11Commande #${order.id}\n`;
-    text += `Nom: ${clean(order.customer_name)}\n`;
+    text += `\x1D\x21\x00Nom: ${clean(order.customer_name)}\n`;
     text += `Telephone: ${clean(order.phone)}\n`;
 
     (order.items || []).forEach(item => {
