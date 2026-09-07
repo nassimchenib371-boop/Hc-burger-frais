@@ -76,7 +76,7 @@ ${Array.isArray(item.garnitures) && item.garnitures.length > 0
 }).join("<br>") || "Non disponible"}
 </p>
 
-        <p><strong>Total :</strong> ${order.total ?? 0} €</p>
+        <p><strong>Total :</strong> ${Number(order.total ?? 0).toFixed(2)} €</p>
         <p><strong>Statut :</strong> ${order.status === "pending" ? "🟠 En attente" : order.status === "accepted" ? "🟢 Acceptée" : order.status}</p>
 ${actionButtons(order)}
     
