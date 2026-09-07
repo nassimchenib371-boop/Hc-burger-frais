@@ -542,7 +542,7 @@ def cart_checkout():
 
         customizations = session.get("cart_customizations", {})
         choices = customizations.get(str(pid), [])
-        for i in range(quantity):
+    for i in range(quantity):
     choice = choices[i] if i < len(choices) else {}
 
     viande = choice.get("viande", "")
