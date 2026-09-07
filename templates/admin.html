@@ -139,7 +139,7 @@ function printOrder(id) {
         text += "------------------------------\n";
     });
 
-    text += `TOTAL: ${order.total || 0} EUR\n`;
+    text += `TOTAL: ${Number(order.total).toFixed(2)} EUR\n`;
     text += "\n\n\n\n\n\n\n\n\n\n\n\n";
     const base64 = btoa(unescape(encodeURIComponent(text)));
     window.location.href = "rawbt:base64," + base64;
