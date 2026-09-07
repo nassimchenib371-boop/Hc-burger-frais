@@ -140,7 +140,7 @@ function printOrder(id) {
     });
 
     text += `TOTAL: ${order.total || 0} EUR\n`;
-    text += "\n\n\n\n\n";
+    text += "\n\n\n\n\n\n\n\n\n\n";
 
     const base64 = btoa(unescape(encodeURIComponent(text)));
     window.location.href = "rawbt:base64," + base64;
