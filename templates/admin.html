@@ -111,21 +111,21 @@ function printOrder(id) {
 const clean = s => String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     let text = "\x1D\x21\x11HC BURGER FRAIS\x1D\x21\x00\n";
     text += "------------------------------\n";
-    text += `\x1D\x21\x11Commande #${order.id}\x1D\x21\x00\n`;
-    text += `Nom: ${order.customer_name}\n`;
-    text += "------------------------------\n";
+    text += `\x1D\x21\x11Commande #${order.id}\n`;
+    text += `Nom: ${clean(order.customer_name)}\n`;
+    text += `Telephone: ${clean(order.phone)}\n`;
 
     (order.items || []).forEach(item => {
         text += `${clean(item.name)} x ${item.quantity}\n`;
 
         if (item.formula === "menu") {
-            text += `Menu${item.drink ? " - " + item.drink : ""}\n`;
+            text += `Menu - ${clean(item.drink || "")}\n`;
         } else {
             text += "Seul\n";
         }
 
-        if (item.viande) text += `Viande: ${item.viande}\n`;
-        if (item.sauce) text += `Sauce: ${item.sauce}\n`;
+        if (item.viande) text += `Viande: ${clean(item.viande)}\n`;
+        if (item.sauce) text += `Sauce: ${clean(item.sauce)}\n`;
 
         if (item.supplements && item.supplements.length) {
             text += `Supplements: ${item.supplements.map(clean).join(", ")}\n`;
