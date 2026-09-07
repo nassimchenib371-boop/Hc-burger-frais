@@ -542,32 +542,33 @@ def cart_checkout():
 
         customizations = session.get("cart_customizations", {})
         choices = customizations.get(str(pid), [])
-        choice = choices[-1] if choices else {}
+        for i in range(quantity):
+    choice = choices[i] if i < len(choices) else {}
 
-        viande = choice.get("viande", "")
-        sauce = choice.get("sauce", "")
-        supplements = choice.get("supplements", [])
-        garnitures = choice.get("garnitures", [])
+    viande = choice.get("viande", "")
+    sauce = choice.get("sauce", "")
+    supplements = choice.get("supplements", [])
+    garnitures = choice.get("garnitures", [])
 
-        unit_price += len(supplements) * 1.0
+    item_unit_price = unit_price + len(supplements) * 1.0
 
-        if formula == "menu":
-            unit_price += 2.50
+    if formula == "menu":
+        item_unit_price += 2.50
 
-        items.append({
-            "product_id": int(pid),
-            "name": item_name,
-            "quantity": quantity,
-            "price": unit_price,
-            "formula": formula,
-            "drink": drink if formula == "menu" else "",
-            "viande": viande,
-            "sauce": sauce,
-            "supplements": supplements,
-            "garnitures": garnitures
-        })
+    items.append({
+        "product_id": int(pid),
+        "name": item_name,
+        "quantity": 1,
+        "price": item_unit_price,
+        "formula": formula,
+        "drink": drink if formula == "menu" else "",
+        "viande": viande,
+        "sauce": sauce,
+        "supplements": supplements,
+        "garnitures": garnitures
+    })
 
-        total += unit_price * quantity
+    total += item_unit_price
 
     con.execute(
                 """INSERT INTO orders
