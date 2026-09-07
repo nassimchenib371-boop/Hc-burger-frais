@@ -563,20 +563,20 @@ def cart_checkout():
         if formula == "menu":
             item_unit_price += 2.50
 
-            items.append({
-                "product_id": int(pid),
-                "name": item_name,
-                "quantity": 1,
-                "price": item_unit_price,
-                "formula": formula,
-                "drink": drink if formula == "menu" else "",
-                "viande": viande,
-                "sauce": sauce,
-                "supplements": supplements,
-                "garnitures": garnitures
-            })
+        items.append({
+            "product_id": int(pid),
+            "name": item_name,
+            "quantity": 1,
+            "price": item_unit_price,
+            "formula": formula,
+            "drink": drink if formula == "menu" else "",
+            "viande": viande,
+            "sauce": sauce,
+            "supplements": supplements,
+            "garnitures": garnitures
+        })
 
-        total += item_unit_price
+    total += item_unit_price
 
     con.execute(
                 """INSERT INTO orders
