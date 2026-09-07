@@ -141,9 +141,8 @@ function printOrder(id) {
 
     text += `TOTAL: ${order.total || 0} EUR\n`;
     text += "\n\n\n\n\n\n\n\n\n\n\n\n";
-    const file = new Blob([text], { type: "text/plain" });
-    const url = URL.createObjectURL(file);
-    window.location.href = url;
+    const base64 = btoa(unescape(encodeURIComponent(text)));
+    window.location.href = "rawbt:base64," + base64;
 }
 loadOrders();
 setInterval(loadOrders, 2000);
