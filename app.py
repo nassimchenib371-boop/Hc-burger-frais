@@ -552,7 +552,7 @@ def cart_checkout():
 
         item_unit_price = unit_price + len(supplements) * 1.0
 
-        if formula == "menu":
+    if formula == "menu":
         item_unit_price += 2.50
 
         items.append({
