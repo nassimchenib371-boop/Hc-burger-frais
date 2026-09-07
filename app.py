@@ -601,7 +601,7 @@ def cart_checkout():
     con.close()
 
     session["cart"] = {}
-
+    session["cart_customizations"] = {}
     return redirect(url_for("home"))
 
 init_db()
