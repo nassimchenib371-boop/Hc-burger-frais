@@ -147,7 +147,7 @@ loadOrders();
 setInterval(loadOrders, 2000);
 document.addEventListener("visibilitychange", loadOrders);
 window.addEventListener("focus", loadOrders);
-navigator.wakeLock?.request("screen").catch(() => {});
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") navigator.wakeLock?.request("screen").catch(() => {}); });
 </script>
 
 </body>
