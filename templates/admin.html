@@ -108,7 +108,7 @@ function changeStatusAndPrint(id) {
 function printOrder(id) {
     const order = window.currentOrders.find(o => o.id === id);
     if (!order) return;
-
+const clean = s => String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     let text = "HC BURGER FRAIS\n";
     text += "------------------------------\n";
     text += `Commande #${order.id}\n`;
@@ -117,7 +117,7 @@ function printOrder(id) {
     text += "------------------------------\n";
 
     (order.items || []).forEach(item => {
-        text += `${item.name} x ${item.quantity}\n`;
+        text += `${clean(item.name)} x ${item.quantity}\n`;
 
         if (item.formula === "menu") {
             text += `Menu${item.drink ? " - " + item.drink : ""}\n`;
@@ -129,11 +129,11 @@ function printOrder(id) {
         if (item.sauce) text += `Sauce: ${item.sauce}\n`;
 
         if (item.supplements && item.supplements.length) {
-            text += `Supplements: ${item.supplements.join(", ")}\n`;
+            text += `Supplements: ${item.supplements.map(clean).join(", ")}\n`;
         }
 
         if (item.garnitures && item.garnitures.length) {
-            text += `Garnitures: ${item.garnitures.join(", ")}\n`;
+            text += `Garnitures: ${item.garnitures.map(clean).join(", ")}\n`;
         }
 
         text += "------------------------------\n";
