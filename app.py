@@ -576,7 +576,7 @@ def cart_checkout():
             "garnitures": garnitures
         })
 
-    total += item_unit_price
+        total += item_unit_price
 
     con.execute(
                 """INSERT INTO orders
