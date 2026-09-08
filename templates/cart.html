@@ -109,6 +109,15 @@
 {% endfor %}
 {% if ns.has_menu %}
 {% endif %}
+<label>Type de commande :</label>
+<select name="order_type" id="order_type" required></select>
+<option value="emporter">🛍️ Emporter</option>
+<option value="sur_place">🍽️ Sur place</option>
+<option value="livraison">🛵 Livraison</option>
+</select>
+<input type="text" name="address" id="address" placeholder="Adresse de livraison">
+<input type="text" name="postal_code" id="postal_code" placeholder="Code postal" maxlength="5">
+<p id="delivery-info"></p>
     <button type="submit">✅ Confirmer toute la commande</button>
 </form>
 
@@ -121,7 +130,24 @@
     </p>
 
    <script>
-async function updateCart(event, link) {
+    const orderType = document.getElementById("order_type");
+    const addressInput = document.querySelector('input[name="address"]');
+    const postalInput = document.querySelector('input[name="postal_code"]');
+    const deliveryInfo = document.getElementById("delivery-info");
+    orderType.addEventListener("change", () => {
+      if (orderType.value === "livraison") { 
+    addressInput.style.display = "block";
+    postalInput.style.display = "block";
+    deliveryInfo.textContent = "Livraison disponible à Marseille.";
+    } else {
+    addressInput.style.display = "none";  
+    postalInput.style.display = "none";
+    deliveryInfo.textContent = "";
+    }
+});
+    addressInput.style.display = "none";
+    postalInput.style.display = "none";
+    async function updateCart(event, link) {    
     event.preventDefault();
 
     const scrollPosition = window.scrollY;
