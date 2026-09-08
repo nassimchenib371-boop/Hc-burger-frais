@@ -151,6 +151,7 @@
     const code = postalInput.value.trim(); 
     const marseille = /^130(0[1-9]|1[0-6])$/.test(code);
     deliveryInfo.textContent = code.length === 5 && !marseille ? "❌ Livraison uniquement à Marseille." : "Livraison disponible à Marseille.";
+    document.querySelector('button[type="submit"]').disabled = code.length === 5 && !marseille;
 });
     async function updateCart(event, link) {    
     event.preventDefault();
