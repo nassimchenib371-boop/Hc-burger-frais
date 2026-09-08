@@ -57,6 +57,8 @@ container.innerHTML = activeOrders.map(order => `
 <p><strong>Nom :</strong> ${order.customer_name}</p>
 <p><strong>Téléphone :</strong> ${order.phone}</p>
 <p><strong>Quantité :</strong> ${order.items?.[0]?.quantity ?? ""}</p>
+<p><strong>Adresse :</strong> ${order.address || "—"}</p>
+<p><strong>Type :</strong> ${order.order_type || "—"}</p>
 <p><strong>Commande :</strong><br>
 ${order.items?.map(item => {
     const formule = item.formula === "menu"
