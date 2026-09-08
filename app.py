@@ -1,6 +1,7 @@
 
 import os, json, sqlite3, socket
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from functools import wraps
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 
@@ -15,7 +16,16 @@ PRINTER_IP = os.getenv("PRINTER_IP","")
 PRINTER_PORT = int(os.getenv("PRINTER_PORT","9100"))
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY","")
 PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL","http://localhost:8000")
-
+PARIS_TZ = ZoneInfo("Europe/Paris")
+def restaurant_is_open():
+    now = datetime.now(PARIS_TZ)
+    day = now.weekday()
+    hour = now.hour
+    if day == 6:
+         return False
+    if day == 4:
+         return 14 <= hour < 23
+         return 11 <= hour < 23
 def db():
     conn = sqlite3.connect(DB)
     conn.row_factory = sqlite3.Row
@@ -517,6 +527,8 @@ def order(pid):
     return render_template("order.html", product=product)  
 @app.post("/cart/checkout")
 def cart_checkout():
+    if not restaurant_is_open():
+    return "🔴 Restaurant fermé — commandes indisponibles actuellement.", 403  
     cart_data = session.get("cart", {})
 
     if not cart_data:
@@ -532,7 +544,7 @@ def cart_checkout():
         if not postal.startswith("130") or postal not in [f"130{i:02d}" for i in range(1, 17)]:
             return "Livraison uniquement à Marseille", 400
     if not name or not phone:
-        return "Nom et téléphone requis", 400
+            return "Nom et téléphone requis", 400
 
     con = db()
     items = []
