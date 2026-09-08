@@ -25,7 +25,7 @@ def restaurant_is_open():
          return False
     if day == 4:
          return 14 <= hour < 23
-         return 11 <= hour < 23
+    return 11 <= hour < 23
 def db():
     conn = sqlite3.connect(DB)
     conn.row_factory = sqlite3.Row
