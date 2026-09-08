@@ -147,6 +147,11 @@
 });
     addressInput.style.display = "none";
     postalInput.style.display = "none";
+    postalInput.addEventListener("input", function () {
+    const code = postalInput.value.trim(); 
+    const marseille = /^130(0[1-9]|1[0-6])$/.test(code);
+    deliveryInfo.textContent = code.length === 5 && !marseille ? "❌ Livraison uniquement à Marseille." : "Livraison disponible à Marseille.";
+});
     async function updateCart(event, link) {    
     event.preventDefault();
 
