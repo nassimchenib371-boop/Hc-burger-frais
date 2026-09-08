@@ -524,7 +524,13 @@ def cart_checkout():
 
     name = request.form.get("name", "").strip()
     phone = request.form.get("phone", "").strip()
-
+    order_type = request.form.get("order_type", "emporter")
+    address = request.form.get("address", "").strip()
+    postal = request.form.get("postal_code", "").strip()
+    if order_type == "livraison":
+    address = f"{address}, {postal}"  
+    if not postal.startswith("130") or postal not in [f"130{i:02d}" for i in range(1, 17)]:
+        return "Livraison uniquement à Marseille", 400
     if not name or not phone:
         return "Nom et téléphone requis", 400
 

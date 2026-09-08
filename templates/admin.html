@@ -42,7 +42,7 @@ async function loadOrders() {
         const response = await fetch('/api/admin/orders');
         const orders = await response.json();
         window.currentOrders = orders;
-        const activeOrders = orders.filter(order => order.status !== "done");
+        const activeOrders = orders.filter(order => order.status !== "done" && order.status !== "rejected");
         const container = document.getElementById('orders');
 
         if (activeOrders.length === 0) {
