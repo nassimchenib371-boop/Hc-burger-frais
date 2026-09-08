@@ -528,7 +528,7 @@ def order(pid):
 @app.post("/cart/checkout")
 def cart_checkout():
     if not restaurant_is_open():
-    return "🔴 Restaurant fermé — commandes indisponibles actuellement.", 403  
+        return "🔴 Restaurant fermé — commandes indisponibles actuellement.", 403  
     cart_data = session.get("cart", {})
 
     if not cart_data:
