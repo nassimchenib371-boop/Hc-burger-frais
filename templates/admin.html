@@ -17,6 +17,7 @@
 </div>
 
 <script>
+    let lastOrderIds = [];
     function actionButtons(order) {
     if (order.status === "pending") {
         return `
@@ -42,6 +43,13 @@ async function loadOrders() {
         const response = await fetch('/api/admin/orders');
         const orders = await response.json();
         window.currentOrders = orders;
+        const newOrders = orders.filter(o => !lastOrderIds.includes(o.id));
+
+if (lastOrderIds.length > 0 && newOrders.length > 0) {
+    new Audio("/static/notification.mp3").play().catch(() => {});
+}
+
+lastOrderIds = orders.map(o => o.id);
         const activeOrders = orders.filter(order => order.status !== "done" && order.status !== "rejected");
         const container = document.getElementById('orders');
 
@@ -151,6 +159,9 @@ setInterval(loadOrders, 2000);
 document.addEventListener("visibilitychange", loadOrders);
 window.addEventListener("focus", loadOrders);
 navigator.wakeLock?.request("screen").catch(() => {});
+let voice = new SpeechSynthesisUtterance("HC Burgueur, vous avez une nouvelle commande");
+voice.lang = "fr-FR";
+speechSynthesis.speak(voice);
 </script>
 
 </body>
