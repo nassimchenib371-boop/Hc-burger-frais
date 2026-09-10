@@ -48,11 +48,6 @@ async function loadOrders() {
 if (lastOrderIds.length > 0 && newOrders.length > 0) {
     const voice = new SpeechSynthesisUtterance("Nouvelle commande");
     voice.lang = "fr-FR";
-    voice.volume = 1;
-    voice.rate = 1;
-    voice.pitch = 1;
-
-    speechSynthesis.cancel();
     speechSynthesis.speak(voice);
 }
 lastOrderIds = orders.map(o => o.id);
