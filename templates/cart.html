@@ -100,6 +100,18 @@
     {% endfor %}
 
     <h2 id="total-actuel">Total actuel : {{ "%.2f"|format(total) }} €</h2>
+
+    <div id="promo-gift-box" class="product-card" style="display:none; border:2px solid #f4c400;">
+        <h3>🎁 Votre produit offert</h3>
+        <p>Vous avez au moins 2 menus : choisissez 1 produit offert.</p>
+        <select name="promo_gift" id="promo_gift">
+            <option value="">— Choisir mon cadeau —</option>
+            {% for gift in promo_gifts %}
+            <option value="{{ gift }}">{{ gift }}</option>
+            {% endfor %}
+        </select>
+        <p><strong>Prix : 0,00 €</strong></p>
+    </div>
     {% set ns = namespace(has_menu=false) %}
 {% for item in items %}
     {% set n = item.name|lower %}
@@ -172,6 +184,26 @@ window.addEventListener("load", function () {
         sessionStorage.removeItem("cartScroll");
     }
 });
+function updatePromoGift() {
+    let menuCount = 0;
+    document.querySelectorAll('.product-card').forEach(function(card) {
+        const selected = card.querySelector('input[type="radio"][name^="formula_"]:checked');
+        if (selected && selected.value === 'menu') {
+            const quantitySpan = card.querySelector('p span');
+            menuCount += parseInt(quantitySpan?.textContent || '1', 10);
+        }
+    });
+
+    const box = document.getElementById('promo-gift-box');
+    const select = document.getElementById('promo_gift');
+    if (!box || !select) return;
+
+    const eligible = menuCount >= 2;
+    box.style.display = eligible ? 'block' : 'none';
+    select.required = eligible;
+    if (!eligible) select.value = '';
+}
+
 document.querySelectorAll('input[type="radio"][name^="formula_"]').forEach(function(radio) {
     radio.addEventListener('change', function() {
         const card = this.closest('.product-card');
@@ -220,8 +252,11 @@ document.querySelectorAll(".product-card").forEach(card => {
 if (totalElement) {
     totalElement.textContent = `Total actuel : ${totalGeneral.toFixed(2)} €`;
 }
+        updatePromoGift();
     });
 });
+
+updatePromoGift();
 </script> 
 </body>
 </html>
