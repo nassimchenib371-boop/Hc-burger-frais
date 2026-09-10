@@ -48,8 +48,7 @@ async function loadOrders() {
 if (lastOrderIds.length > 0 && newOrders.length > 0) {
     const voice = new SpeechSynthesisUtterance("HC Burgueur, vous avez une nouvelle commande");
 voice.lang = "fr-FR";
-setTimeout(() => alert(speechSynthesis.getVoices().filter(v => v.lang.startsWith("fr")).map(v => `${v.name} (${v.lang})`).join("\n") || "Aucune voix française"), 1000);
-voice.voice = speechSynthesis.getVoices().find(v => v.name.includes("Voix 2"));
+voice.voice = speechSynthesis.getVoices().find(v => v.lang === "fr-FR");
 speechSynthesis.speak(voice);
 }
 
