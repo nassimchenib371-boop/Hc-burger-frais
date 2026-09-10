@@ -17,6 +17,9 @@ PRINTER_PORT = int(os.getenv("PRINTER_PORT","9100"))
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY","")
 PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL","http://localhost:8000")
 PARIS_TZ = ZoneInfo("Europe/Paris")
+
+# Offre découverte : dès 2 menus dans le panier, 1 produit offert au choix.
+PROMO_GIFTS = ["Tacos M", "Simple Smash", "Sandwich Kebab", "Pâtes à la crème"]
 def restaurant_is_open():
     now = datetime.now(PARIS_TZ)
     day = now.weekday()
@@ -365,7 +368,7 @@ def cart():
 
     total = sum(item["price"] * item["quantity"] for item in items)
 
-    return render_template("cart.html", items=items, total=total)
+    return render_template("cart.html", items=items, total=total, promo_gifts=PROMO_GIFTS)
 @app.get("/cart/remove/<int:pid>")   
 def remove_from_cart(pid):
     cart = session.get("cart", {})
@@ -595,6 +598,38 @@ def cart_checkout():
             })
 
             total += item_unit_price
+
+    # Promo: 2 menus (ou plus) dans la commande = 1 produit offert au choix.
+    # Le contrôle est refait côté serveur pour empêcher un cadeau sans 2 menus.
+    menu_count = sum(1 for item in items if item.get("formula") == "menu")
+    promo_gift = request.form.get("promo_gift", "").strip()
+
+    if menu_count >= 2:
+        if promo_gift not in PROMO_GIFTS:
+            con.close()
+            return "Choisissez votre produit offert.", 400
+
+        gift_product = con.execute(
+            "SELECT * FROM products WHERE name = ? AND active = 1 LIMIT 1",
+            (promo_gift,)
+        ).fetchone()
+        if not gift_product:
+            con.close()
+            return "Produit offert indisponible.", 400
+
+        items.append({
+            "product_id": int(gift_product["id"]),
+            "name": gift_product["name"],
+            "quantity": 1,
+            "price": 0.0,
+            "formula": "offert",
+            "drink": "",
+            "viande": "",
+            "sauce": "",
+            "supplements": [],
+            "garnitures": [],
+            "promo": True
+        })
 
     con.execute(
                 """INSERT INTO orders
