@@ -46,12 +46,15 @@ async function loadOrders() {
         const newOrders = orders.filter(o => !lastOrderIds.includes(o.id));
 
 if (lastOrderIds.length > 0 && newOrders.length > 0) {
-    const voice = new SpeechSynthesisUtterance("HC Burgueur, vous avez une nouvelle commande");
-voice.lang = "fr-FR";
-voice.voice = speechSynthesis.getVoices().find(v => v.lang === "fr-FR");
-speechSynthesis.speak(voice);
-}
+    const voice = new SpeechSynthesisUtterance("Nouvelle commande");
+    voice.lang = "fr-FR";
+    voice.volume = 1;
+    voice.rate = 1;
+    voice.pitch = 1;
 
+    speechSynthesis.cancel();
+    speechSynthesis.speak(voice);
+}
 lastOrderIds = orders.map(o => o.id);
         const activeOrders = orders.filter(order => order.status !== "done" && order.status !== "rejected");
         const container = document.getElementById('orders');
