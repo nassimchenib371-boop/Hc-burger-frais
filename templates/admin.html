@@ -17,7 +17,7 @@
 </div>
 
 <script>
-    speechSynthesis.onvoiceschanged = () => alert(speechSynthesis.getVoices().map((v,i) => i + " - " + v.name + " - " + v.lang).join("\n"));
+    setTimeout(() => alert(speechSynthesis.getVoices().map((v,i) => i + " - " + v.name + " - " + v.lang).join("\n")), 1000);
     let lastOrderIds = [];
     function actionButtons(order) {
     if (order.status === "pending") {
