@@ -46,7 +46,7 @@ async function loadOrders() {
         const newOrders = orders.filter(o => !lastOrderIds.includes(o.id));
 
 if (lastOrderIds.length > 0 && newOrders.length > 0) {
-    const voice = new SpeechSynthesisUtterance("Nouvelle commande");
+    const voice = new SpeechSynthesisUtterance("HC Burgueur, vous avez une nouvelle commande");
     voice.lang = "fr-FR";
     speechSynthesis.speak(voice);
 }
