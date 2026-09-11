@@ -110,6 +110,37 @@
             <option value="{{ gift }}">{{ gift }}</option>
             {% endfor %}
         </select>
+
+        <div id="promo-tacos-options" style="display:none; margin-top:14px;">
+            <p><strong>🌮 Options du Tacos M offert</strong></p>
+            <label>🥩 Viande :</label><br>
+            <select name="promo_gift_viande" id="promo_gift_viande">
+                <option value="">— Choisir la viande —</option>
+                <option>Kebab</option><option>Viande hachée</option><option>Poulet mariné</option>
+                <option>Escalope</option><option>Tenders</option><option>Cordon bleu</option><option>Nuggets</option>
+            </select><br><br>
+            <label>🥫 Sauce :</label><br>
+            <select name="promo_gift_sauce" id="promo_gift_sauce_tacos">
+                <option value="">— Choisir la sauce —</option>
+                <option>Algérienne</option><option>Harissa</option><option>Mayonnaise</option><option>Biggy</option>
+                <option>Barbecue</option><option>Andalouse</option><option>Samouraï</option><option>Brésil</option><option>Ketchup</option>
+            </select>
+        </div>
+
+        <div id="promo-sandwich-options" style="display:none; margin-top:14px;">
+            <p><strong>🥪 Options du Sandwich Kebab offert</strong></p>
+            <label>🥫 Sauce :</label><br>
+            <select id="promo_gift_sauce_sandwich">
+                <option value="">— Choisir la sauce —</option>
+                <option>Algérienne</option><option>Harissa</option><option>Mayonnaise</option><option>Biggy</option>
+                <option>Barbecue</option><option>Andalouse</option><option>Samouraï</option><option>Brésil</option><option>Ketchup</option>
+            </select>
+            <p>🥗 Garnitures :</p>
+            <label><input type="checkbox" name="promo_gift_garnitures" value="Salade"> Salade</label><br>
+            <label><input type="checkbox" name="promo_gift_garnitures" value="Tomate"> Tomate</label><br>
+            <label><input type="checkbox" name="promo_gift_garnitures" value="Oignon"> Oignon</label>
+        </div>
+
         <p><strong>Prix : 0,00 €</strong></p>
     </div>
     {% set ns = namespace(has_menu=false) %}
@@ -184,6 +215,30 @@ window.addEventListener("load", function () {
         sessionStorage.removeItem("cartScroll");
     }
 });
+function updateGiftOptions() {
+    const gift = document.getElementById('promo_gift');
+    const tacosBox = document.getElementById('promo-tacos-options');
+    const sandwichBox = document.getElementById('promo-sandwich-options');
+    const viande = document.getElementById('promo_gift_viande');
+    const tacosSauce = document.getElementById('promo_gift_sauce_tacos');
+    const sandwichSauce = document.getElementById('promo_gift_sauce_sandwich');
+    if (!gift) return;
+
+    const isTacos = gift.value === 'Tacos M';
+    const isSandwich = gift.value === 'Sandwich Kebab';
+    tacosBox.style.display = isTacos ? 'block' : 'none';
+    sandwichBox.style.display = isSandwich ? 'block' : 'none';
+    viande.required = isTacos;
+    tacosSauce.required = isTacos;
+    sandwichSauce.required = isSandwich;
+
+    // Les deux listes de sauce alimentent le même champ envoyé au serveur.
+    tacosSauce.name = isTacos ? 'promo_gift_sauce' : '';
+    sandwichSauce.name = isSandwich ? 'promo_gift_sauce' : '';
+}
+
+document.getElementById('promo_gift')?.addEventListener('change', updateGiftOptions);
+
 function updatePromoGift() {
     let menuCount = 0;
     document.querySelectorAll('.product-card').forEach(function(card) {
@@ -257,6 +312,7 @@ if (totalElement) {
 });
 
 updatePromoGift();
+updateGiftOptions();
 </script> 
 </body>
 </html>
