@@ -10,6 +10,11 @@
 
 <h1>🍔 Administration HC Burger Frais</h1>
 
+<div id="restaurant-control" style="margin:16px 0;padding:16px;border:2px solid #222;border-radius:12px;text-align:center;">
+    <div id="restaurant-state" style="font-weight:700;font-size:20px;margin-bottom:10px;">Chargement...</div>
+    <button id="restaurant-toggle" onclick="toggleRestaurant()" style="font-size:18px;padding:12px 18px;font-weight:700;">...</button>
+</div>
+
 <h2>Commandes</h2>
 
 <div id="orders">
@@ -18,6 +23,26 @@
 
 <script>
     let lastOrderIds = [];
+    let restaurantOpen = true;
+
+    async function loadRestaurantStatus() {
+        const r = await fetch('/api/admin/restaurant-status');
+        const data = await r.json();
+        restaurantOpen = !!data.open;
+        const state = document.getElementById('restaurant-state');
+        const btn = document.getElementById('restaurant-toggle');
+        state.textContent = restaurantOpen ? '🟢 RESTAURANT OUVERT' : '🔴 RESTAURANT FERMÉ';
+        btn.textContent = restaurantOpen ? '🔴 FERMER LES COMMANDES' : '🟢 OUVRIR LES COMMANDES';
+    }
+
+    async function toggleRestaurant() {
+        const r = await fetch('/api/admin/restaurant-status', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({open: !restaurantOpen})
+        });
+        if (r.ok) loadRestaurantStatus();
+    }
     function actionButtons(order) {
     if (order.status === "pending") {
         return `
@@ -165,6 +190,7 @@ text += `\x1D\x21\x00Date: ${dateText} - ${timeText}\n`;
     const base64 = btoa(unescape(encodeURIComponent(text)));
     window.location.href = "rawbt:base64," + base64;
 }
+loadRestaurantStatus();
 loadOrders();
 setInterval(loadOrders, 2000);
 document.addEventListener("visibilitychange", loadOrders);
