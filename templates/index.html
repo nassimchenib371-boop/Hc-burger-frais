@@ -11,6 +11,13 @@
 
     <h1>🍔 HC Burger Frais</h1>
 
+    {% if not restaurant_open %}
+    <div style="margin:12px auto 18px;max-width:760px;padding:18px;border:2px solid #c62828;border-radius:14px;text-align:center;background:#ffebee;color:#8e0000;">
+        <strong style="font-size:22px;">🔴 RESTAURANT FERMÉ</strong><br>
+        <span>Vous pouvez consulter le menu, mais les commandes sont actuellement fermées.</span>
+    </div>
+    {% endif %}
+
     <div style="margin:12px auto 18px; max-width:760px; padding:16px; border:2px solid #f4c400; border-radius:14px; text-align:center; background:#fff8d8; color:#222;">
         <strong style="font-size:20px;">🎁 OFFRE CADEAU</strong><br>
         <span>Commandez <strong>2 Menus ou plus</strong> et choisissez <strong>1 produit OFFERT</strong> !</span><br>
@@ -29,6 +36,8 @@
     'Tacos',
     'Sandwichs',
     'Poutines',
+    'Tenders',
+    'Menu Enfant',
     'Pâtes',
     'Frites',
     'Salades',
@@ -86,10 +95,14 @@
 
         <strong>{{ product.price }} €</strong>
 
+        {% if restaurant_open %}
         <a href="{{ url_for('add_to_cart', pid=product.id) }}"
            onclick="customizeOrAdd(event, this)">
             Ajouter au panier 🛒
         </a>
+        {% else %}
+        <span style="display:block;margin-top:10px;font-weight:700;color:#b71c1c;">🔴 Commandes fermées</span>
+        {% endif %}
 
     </div>
 {% endfor %}
