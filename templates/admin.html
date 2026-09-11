@@ -70,7 +70,9 @@ container.innerHTML = activeOrders.map(order => `
 <p><strong>Type :</strong> ${order.order_type || "—"}</p>
 <p><strong>Commande :</strong><br>
 ${order.items?.map(item => {
-    const formule = item.formula === "menu"
+    const formule = (item.formula === "offert" || item.promo === true)
+    ? "🎁 OFFERT"
+    : item.formula === "menu"
         ? `🍟🥤 Menu${item.drink ? " (" + item.drink + ")" : ""}`
         : "🍔 Seul";
 
