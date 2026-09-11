@@ -57,7 +57,7 @@
         </p>
 
       {% set n = item.name|lower %}
-{% if 'burger' in n or 'tacos' in n or 'sandwich' in n or 'poutine' in n or 'hermanos' in n or 'pollo' in n or 'smash' in n or 'philly' in n %}
+{% if ('burger' in n or 'tacos' in n or 'sandwich' in n or 'poutine' in n or 'hermanos' in n or 'pollo' in n or 'smash' in n or 'philly' in n or 'tender' in n) and 'menu enfant' not in n %}
         <p>
             <strong>Formule :</strong><br>
 
@@ -66,7 +66,7 @@
                        name="formula_{{ item.id }}"
                        value="seul"
                        checked>
-                Burger seul
+                {% if 'tender' in n %}Tenders seuls{% else %}Burger seul{% endif %}
             </label><br>
 
             <label>
