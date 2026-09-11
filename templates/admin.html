@@ -125,18 +125,26 @@ const clean = s => String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, 
     let text = "\x1D\x21\x11HC BURGER FRAIS\x1D\x21\x00\n";
     text += "------------------------------\n";
     text += `\x1D\x21\x11Commande #${order.id}\n`;
+    const orderDate = order.created_at ? new Date(order.created_at) : new Date();
+const dateText = orderDate.toLocaleDateString("fr-FR", { timeZone: "Europe/Paris" });
+const timeText = orderDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
+text += `Date: ${dateText} - ${timeText}\n`;
     text += `\x1D\x21\x00Nom: ${clean(order.customer_name)}\n`;
     text += `Telephone: ${clean(order.phone)}\n`;
     text += `Adresse: ${clean(order.address || "-")}\n`;
     text += `Type: ${clean(order.order_type)}\n`;
     (order.items || []).forEach(item => {
-        text += `${clean(item.name)} x ${item.quantity}\n`;
+    if (item.formula === "offert" || item.promo === true) {
+        text += "*** OFFERT ***\n";
+    }
 
-        if (item.formula === "menu") {
-            text += `Menu - ${clean(item.drink || "")}\n`;
-        } else {
-            text += "Seul\n";
-        }
+    text += `${clean(item.name)} x ${item.quantity}\n`;
+
+    if (item.formula === "menu") {
+        text += `Menu - ${clean(item.drink || "")}\n`;
+    } else if (!(item.formula === "offert" || item.promo === true)) {
+        text += "Seul\n";
+    }
 
         if (item.viande) text += `Viande: ${clean(item.viande)}\n`;
         if (item.sauce) text += `Sauce: ${clean(item.sauce)}\n`;
