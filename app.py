@@ -67,6 +67,13 @@ def init_db():
         for p in DEFAULT_PRODUCTS:
             con.execute("""INSERT INTO products(category,name,description,price,menu_price,image,active)
                            VALUES(?,?,?,?,?,?,1)""",(p["cat"],p["name"],p["desc"],p["price"],p["menu"],p["img"]))
+    else:
+        # Ajoute automatiquement les nouveaux produits du menu sans toucher aux produits existants.
+        existing={(r["category"], r["name"]) for r in con.execute("SELECT category,name FROM products").fetchall()}
+        for p in DEFAULT_PRODUCTS:
+            if (p["cat"], p["name"]) not in existing:
+                con.execute("""INSERT INTO products(category,name,description,price,menu_price,image,active)
+                               VALUES(?,?,?,?,?,?,1)""",(p["cat"],p["name"],p["desc"],p["price"],p["menu"],p["img"]))
     defaults={
         "restaurant_name":"HC BURGER FRAIS",
         "address":"24 Boulevard Banon, 13004 Marseille",

@@ -51,9 +51,9 @@
     "cat": "Burgers",
     "name": "Burger Royal",
     "desc": "steak, raclette, œuf, oignons caramélisés, bacon, sauce barbecue",
-  "price": 7.9,
-"menu": 10.4,
-"img": "212DE1B7-E0E0-4FF2-A829-D0EED6740CFA.png"
+    "price": 7.9,
+    "menu": 10.4,
+    "img": "212DE1B7-E0E0-4FF2-A829-D0EED6740CFA.png"
   },
   {
     "cat": "Burgers",
@@ -61,7 +61,7 @@
     "desc": "steak, poulet pané, fromage, oignons caramélisés, bacon, sauce secrète",
     "price": 8.5,
     "menu": 11.0,
-  "img": "IMG_2952.jpeg"
+    "img": "IMG_2952.jpeg"
   },
   {
     "cat": "Sandwichs",
@@ -189,7 +189,7 @@
     "desc": "",
     "price": 5.9,
     "menu": null,
-  "img": "6018272A-446C-4B65-A580-216D16EC6801.png"
+    "img": "6018272A-446C-4B65-A580-216D16EC6801.png"
   },
   {
     "cat": "Pâtes",
@@ -205,7 +205,7 @@
     "desc": "oignons, poivrons",
     "price": 7.9,
     "menu": null,
-   "img": "F6C73057-ECA7-4E58-A2A6-2E7696455639.png"
+    "img": "F6C73057-ECA7-4E58-A2A6-2E7696455639.png"
   },
   {
     "cat": "Pâtes",
@@ -232,12 +232,12 @@
     "img": "product_05.jpeg"
   },
   {
-  "cat": "Frites",
-  "name": "Cheese Cordons BBQ",
-  "desc": "",
-  "price": 6.5,
-  "menu": null,
-"img": "EDBF5A19-E422-4B81-ADEB-A4C51185AAC6.jpeg"
+    "cat": "Frites",
+    "name": "Cheese Cordons BBQ",
+    "desc": "",
+    "price": 6.5,
+    "menu": null,
+    "img": "EDBF5A19-E422-4B81-ADEB-A4C51185AAC6.jpeg"
   },
   {
     "cat": "Salades",
@@ -245,7 +245,7 @@
     "desc": "",
     "price": 6.9,
     "menu": null,
-  "img": "30AFBF77-1E66-4E19-8564-08E1D709FFF5.png"
+    "img": "30AFBF77-1E66-4E19-8564-08E1D709FFF5.png"
   },
   {
     "cat": "Salades",
@@ -272,107 +272,147 @@
     "img": "124A30D6-DABF-4A55-8746-2BD8809601DC.png"
   },
   {
-  "cat": "Boissons",
-  "name": "Lipton Ice Tea",
-  "desc": "",
-  "price": 1.5,
-  "menu": null,
-  "img": ""
-},
-{
-  "cat": "Boissons",
-  "name": "Coca-Cola Zero",
-  "desc": "",
-  "price": 1.5,
-  "menu": null,
-  "img": ""
-},
-{
-  "cat": "Boissons",
-  "name": "Schweppes Agrumes",
-  "desc": "",
-  "price": 1.5,
-  "menu": null,
-  "img": ""
-},
-{
-  "cat": "Boissons",
-  "name": "Cristalline Citron",
-  "desc": "",
-  "price": 1.5,
-  "menu": null,
-  "img": ""
-},
-{
-  "cat": "Boissons",
-  "name": "Cristalline Pêche",
-  "desc": "",
-  "price": 1.5,
-  "menu": null,
-  "img": ""
-},
-{
-  "cat": "Boissons",
-  "name": "Cristalline Pommes Cassis",
-  "desc": "",
-  "price": 1.5,
-  "menu": null,
-  "img": ""
-},
-{
-  "cat": "Boissons",
-  "name": "Oasis Tropical",
-  "desc": "",
-  "price": 1.5,
-  "menu": null,
-  "img": ""
-},
-{
-  "cat": "Boissons",
-  "name": "Orangina",
-  "desc": "",
-  "price": 1.5,
-  "menu": null,
-  "img": ""
-},
-{
-  "cat": "Boissons",
-  "name": "Cola",
-  "desc": "",
-  "price": 1.5,
-  "menu": null,
-  "img": ""
-},
-{
-  "cat": "Boissons",
-  "name": "Coca-Chérie",
-  "desc": "",
-  "price": 1.5,
-  "menu": null,
-  "img": ""
-},
-{
-  "cat": "Boissons",
-  "name": "Coca-Cola 1L",
-  "desc": "",
-  "price": 3.0,
-  "menu": null,
-  "img": ""
-},
-{
-  "cat": "Boissons",
-  "name": "Eau petite",
-  "desc": "",
-  "price": 1.0,
-  "menu": null,
-  "img": ""
-},
-{
-  "cat": "Boissons",
-  "name": "Eau grande",
-  "desc": "",
-  "price": 1.5,
-  "menu": null,
-  "img": ""
-}
+    "cat": "Boissons",
+    "name": "Lipton Ice Tea",
+    "desc": "",
+    "price": 1.5,
+    "menu": null,
+    "img": ""
+  },
+  {
+    "cat": "Boissons",
+    "name": "Coca-Cola Zero",
+    "desc": "",
+    "price": 1.5,
+    "menu": null,
+    "img": ""
+  },
+  {
+    "cat": "Boissons",
+    "name": "Schweppes Agrumes",
+    "desc": "",
+    "price": 1.5,
+    "menu": null,
+    "img": ""
+  },
+  {
+    "cat": "Boissons",
+    "name": "Cristalline Citron",
+    "desc": "",
+    "price": 1.5,
+    "menu": null,
+    "img": ""
+  },
+  {
+    "cat": "Boissons",
+    "name": "Cristalline Pêche",
+    "desc": "",
+    "price": 1.5,
+    "menu": null,
+    "img": ""
+  },
+  {
+    "cat": "Boissons",
+    "name": "Cristalline Pommes Cassis",
+    "desc": "",
+    "price": 1.5,
+    "menu": null,
+    "img": ""
+  },
+  {
+    "cat": "Boissons",
+    "name": "Oasis Tropical",
+    "desc": "",
+    "price": 1.5,
+    "menu": null,
+    "img": ""
+  },
+  {
+    "cat": "Boissons",
+    "name": "Orangina",
+    "desc": "",
+    "price": 1.5,
+    "menu": null,
+    "img": ""
+  },
+  {
+    "cat": "Boissons",
+    "name": "Cola",
+    "desc": "",
+    "price": 1.5,
+    "menu": null,
+    "img": ""
+  },
+  {
+    "cat": "Boissons",
+    "name": "Coca-Chérie",
+    "desc": "",
+    "price": 1.5,
+    "menu": null,
+    "img": ""
+  },
+  {
+    "cat": "Boissons",
+    "name": "Coca-Cola 1L",
+    "desc": "",
+    "price": 3.0,
+    "menu": null,
+    "img": ""
+  },
+  {
+    "cat": "Boissons",
+    "name": "Eau petite",
+    "desc": "",
+    "price": 1.0,
+    "menu": null,
+    "img": ""
+  },
+  {
+    "cat": "Boissons",
+    "name": "Eau grande",
+    "desc": "",
+    "price": 1.5,
+    "menu": null,
+    "img": ""
+  },
+  {
+    "cat": "Tenders",
+    "name": "3 Tenders",
+    "desc": "3 pièces de tenders",
+    "price": 5.0,
+    "menu": 7.5,
+    "img": ""
+  },
+  {
+    "cat": "Tenders",
+    "name": "5 Tenders",
+    "desc": "5 pièces de tenders",
+    "price": 8.0,
+    "menu": 10.5,
+    "img": ""
+  },
+  {
+    "cat": "Menu Enfant",
+    "name": "Menu Enfant - Burger simple",
+    "desc": "Burger simple + frites + Capri-Sun",
+    "price": 6.9,
+    "menu": null,
+    "img": "F82246A2-76CF-4148-8860-F3A48D7F5651.png"
+  },
+  {
+    "cat": "Menu Enfant",
+    "name": "Menu Enfant - 5 Nuggets",
+    "desc": "5 nuggets + frites + Capri-Sun",
+    "price": 6.9,
+    "menu": null,
+    "img": ""
+  },
+  {
+    "cat": "Menu Enfant",
+    "name": "Menu Enfant - 2 Tenders",
+    "desc": "2 tenders + frites + Capri-Sun",
+    "price": 6.9,
+    "menu": null,
+    "img": ""
+  }
 ]
