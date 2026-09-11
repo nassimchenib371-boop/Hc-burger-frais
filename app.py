@@ -117,8 +117,20 @@ def ticket_text(o):
     lines=[s["restaurant_name"],s["address"],s["phone"],"-"*32,
            f"COMMANDE #{o['id']}",o["created_at"],"-"*32]
     for it in items:
-        lines.append(f"{it['qty']}x {it['name']} ({it['kind']})")
-        lines.append(f"   {money(it['unit']*it['qty'])}")
+        if it.get("formula") == "offert" or it.get("promo") is True:
+            lines.append("*** OFFERT ***")
+        qty = it.get("qty", it.get("quantity", 1))
+        name = it.get("name", "")
+        formula = it.get("formula", "")
+        if formula == "menu":
+            detail = f"Menu - {it.get('drink','')}"
+        elif formula == "offert":
+            detail = "Seul"
+        else:
+            detail = it.get("kind", "Seul")
+        lines.append(f"{name} x {qty}")
+        lines.append(detail)
+        lines.append("-"*32)
     lines += ["-"*32,f"TOTAL: {money(o['total'])}",o["order_type"],
               f"Client: {o['customer_name']}",f"Tel: {o['phone']}"]
     if o["address"]: lines.append(f"Adresse: {o['address']}")
