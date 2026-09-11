@@ -186,7 +186,7 @@ def create_order():
     con=db()
     cur=con.execute("""INSERT INTO orders(created_at,status,customer_name,phone,order_type,address,payment,payment_status,note,total,items_json)
                        VALUES(?,?,?,?,?,?,?,?,?,?,?)""",
-                    (datetime.now().strftime("%Y-%m-%d %H:%M:%S"),"new",name,phone,typ,
+                    (datetime.now(PARIS_TZ).isoformat(),"new",name,phone,typ,
                      (address+" "+postcode).strip(),payment,"unpaid",note,total,json.dumps(clean,ensure_ascii=False)))
     oid=cur.lastrowid; con.commit()
     o=con.execute("SELECT * FROM orders WHERE id=?",(oid,)).fetchone()
@@ -510,7 +510,7 @@ def order(pid):
                  address, payment, payment_status, note, total, items_json)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
-                    datetime.now().isoformat(),
+                    datetime.now(PARIS_TZ).isoformat(),
                     "pending",
                     name,
                     phone,
@@ -637,7 +637,7 @@ def cart_checkout():
          address, payment, payment_status, note, total, items_json)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
-            datetime.now().isoformat(),
+            datetime.now(PARIS_TZ).isoformat(),
             "pending",
             name,
             phone,
