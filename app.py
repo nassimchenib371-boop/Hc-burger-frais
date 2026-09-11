@@ -629,6 +629,21 @@ def cart_checkout():
             con.close()
             return "Produit offert indisponible.", 400
 
+        # Options du cadeau gratuit (mêmes choix utiles que le produit normal).
+        gift_viande = request.form.get("promo_gift_viande", "").strip()
+        gift_sauce = request.form.get("promo_gift_sauce", "").strip()
+        gift_garnitures = [g.strip() for g in request.form.getlist("promo_gift_garnitures") if g.strip()]
+
+        # On ne garde que les options qui correspondent au cadeau choisi.
+        if promo_gift == "Tacos M":
+            gift_garnitures = []
+        elif promo_gift == "Sandwich Kebab":
+            gift_viande = ""
+        else:
+            gift_viande = ""
+            gift_sauce = ""
+            gift_garnitures = []
+
         items.append({
             "product_id": int(gift_product["id"]),
             "name": gift_product["name"],
@@ -636,10 +651,10 @@ def cart_checkout():
             "price": 0.0,
             "formula": "offert",
             "drink": "",
-            "viande": "",
-            "sauce": "",
+            "viande": gift_viande,
+            "sauce": gift_sauce,
             "supplements": [],
-            "garnitures": [],
+            "garnitures": gift_garnitures,
             "promo": True
         })
 
