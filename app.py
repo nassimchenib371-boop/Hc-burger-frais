@@ -21,14 +21,12 @@ PARIS_TZ = ZoneInfo("Europe/Paris")
 # Offre découverte : dès 2 menus dans le panier, 1 produit offert au choix.
 PROMO_GIFTS = ["Tacos M", "Simple Smash", "Sandwich Kebab", "Pâtes à la crème"]
 def restaurant_is_open():
-    now = datetime.now(PARIS_TZ)
-    day = now.weekday()
-    hour = now.hour
-    if day == 6:
-         return False
-    if day == 4:
-         return 14 <= hour < 23
-    return 11 <= hour < 23
+    # Ouverture/fermeture manuelle depuis la page Administration.
+    # La valeur est stockée en base et reste donc active après fermeture du navigateur.
+    try:
+        return get_settings().get("restaurant_open", "1") == "1"
+    except Exception:
+        return True
 def db():
     conn = sqlite3.connect(DB)
     conn.row_factory = sqlite3.Row
@@ -82,7 +80,8 @@ def init_db():
         "allow_takeaway":"1",
         "allow_delivery":"1",
         "allow_pay_restaurant":"1",
-        "allow_pay_online":"1"
+        "allow_pay_online":"1",
+        "restaurant_open":"1"
     }
     for k,v in defaults.items():
         con.execute("INSERT OR IGNORE INTO settings(key,value) VALUES(?,?)",(k,v))
@@ -151,10 +150,12 @@ def try_network_print(o):
 
 @app.route("/")
 def home():
-    return render_template("index.html", products=get_products(), settings=get_settings())
+    return render_template("index.html", products=get_products(), settings=get_settings(), restaurant_open=restaurant_is_open())
 
 @app.post("/api/orders")
 def create_order():
+    if not restaurant_is_open():
+        return jsonify(ok=False,error="Restaurant fermé — commandes indisponibles actuellement."),403
     data=request.get_json(force=True)
     items=data.get("items") or []
     if not items: return jsonify(ok=False,error="Panier vide"),400
@@ -275,6 +276,22 @@ def admin_orders():
         d=dict(r); d["items"]=json.loads(d.pop("items_json"))
         out.append(d)
     return jsonify(out)
+
+@app.get("/api/admin/restaurant-status")
+@admin_required
+def admin_restaurant_status():
+    return jsonify(open=restaurant_is_open())
+
+@app.post("/api/admin/restaurant-status")
+@admin_required
+def admin_set_restaurant_status():
+    data = request.get_json(silent=True) or {}
+    is_open = bool(data.get("open"))
+    con = db()
+    con.execute("INSERT INTO settings(key,value) VALUES('restaurant_open',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", ("1" if is_open else "0",))
+    con.commit(); con.close()
+    return jsonify(ok=True, open=is_open)
+
 @app.post("/api/admin/orders/<int:oid>/status")
 @admin_required
 def admin_status(oid):
@@ -487,6 +504,8 @@ def order(pid):
         return "Produit introuvable", 404
 
     if request.method == "POST":
+        if not restaurant_is_open():
+            return "🔴 Restaurant fermé — commandes indisponibles actuellement.", 403
         name = request.form.get("name", "").strip()
         phone = request.form.get("phone", "").strip()
         quantity = int(request.form.get("quantity", 1))
