@@ -381,7 +381,7 @@
     "desc": "3 pièces de tenders",
     "price": 5.0,
     "menu": 7.5,
-    "img": ""
+    "img": "tenders_hc.png"
   },
   {
     "cat": "Tenders",
@@ -389,7 +389,7 @@
     "desc": "5 pièces de tenders",
     "price": 8.0,
     "menu": 10.5,
-    "img": ""
+    "img": "tenders_hc.png"
   },
   {
     "cat": "Menu Enfant",
@@ -397,7 +397,7 @@
     "desc": "Burger simple + frites + Capri-Sun",
     "price": 6.9,
     "menu": null,
-    "img": "F82246A2-76CF-4148-8860-F3A48D7F5651.png"
+    "img": "menu_enfant_hc.png"
   },
   {
     "cat": "Menu Enfant",
@@ -405,7 +405,7 @@
     "desc": "5 nuggets + frites + Capri-Sun",
     "price": 6.9,
     "menu": null,
-    "img": ""
+    "img": "menu_enfant_hc.png"
   },
   {
     "cat": "Menu Enfant",
@@ -413,6 +413,6 @@
     "desc": "2 tenders + frites + Capri-Sun",
     "price": 6.9,
     "menu": null,
-    "img": ""
+    "img": "menu_enfant_hc.png"
   }
 ]
