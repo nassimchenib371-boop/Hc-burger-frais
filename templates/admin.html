@@ -65,7 +65,7 @@ container.innerHTML = activeOrders.map(order => `
         <h3>Commande #${order.id}</h3>
 <p><strong>Nom :</strong> ${order.customer_name}</p>
 <p><strong>Téléphone :</strong> ${order.phone}</p>
-<p><strong>Quantité :</strong> ${order.items?.[0]?.quantity ?? ""}</p>
+<p><strong>Quantité :</strong> ${(order.items || []).reduce((sum, item) => sum + Number(item.quantity || 0), 0)}</p>
 <p><strong>Adresse :</strong> ${order.address || "—"}</p>
 <p><strong>Type :</strong> ${order.order_type || "—"}</p>
 <p><strong>Commande :</strong><br>
