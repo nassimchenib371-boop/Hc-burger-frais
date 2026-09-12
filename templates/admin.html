@@ -95,11 +95,13 @@ container.innerHTML = activeOrders.map(order => `
 <p><strong>Type :</strong> ${order.order_type || "—"}</p>
 <p><strong>Commande :</strong><br>
 ${order.items?.map(item => {
-    const formule = (item.formula === "offert" || item.promo === true)
-    ? "🎁 OFFERT"
-    : item.formula === "menu"
-        ? `🍟🥤 Menu${item.drink ? " (" + item.drink + ")" : ""}`
-        : "🍔 Seul";
+    const formule = item.loyalty_gift === true
+    ? `🎁 FIDÉLITÉ — MENU OFFERT${item.drink ? " (" + item.drink + ")" : ""}`
+    : (item.formula === "offert" || item.promo === true)
+        ? "🎁 OFFERT"
+        : item.formula === "menu"
+            ? `🍟🥤 Menu${item.drink ? " (" + item.drink + ")" : ""}`
+            : "🍔 Seul";
 
     return `${item.name} × ${item.quantity} — ${formule}
     ${item.viande ? `<br>🥩 Viande : ${item.viande}` : ""}
@@ -159,13 +161,16 @@ text += `\x1D\x21\x00Date: ${dateText} - ${timeText}\n`;
     text += `Adresse: ${clean(order.address || "-")}\n`;
     text += `Type: ${clean(order.order_type)}\n`;
     (order.items || []).forEach(item => {
-    if (item.formula === "offert" || item.promo === true) {
+    if (item.loyalty_gift === true) {
+        text += "*** CADEAU FIDELITE - MENU OFFERT ***\n";
+        text += "5 MENUS FIDELITE VALIDES\n";
+    } else if (item.formula === "offert" || item.promo === true) {
         text += "*** OFFERT ***\n";
     }
 
     text += `${clean(item.name)} x ${item.quantity}\n`;
 
-    if (item.formula === "menu") {
+    if (item.formula === "menu" || item.formula === "loyalty") {
         text += `Menu - ${clean(item.drink || "")}\n`;
     } else if (!(item.formula === "offert" || item.promo === true)) {
         text += "Seul\n";

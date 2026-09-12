@@ -21,8 +21,35 @@
 
     <p>
         <label>Téléphone :</label><br>
-        <input type="tel" name="phone" required>
+        <input type="tel" name="phone" id="customer_phone" required>
     </p>
+    <div class="product-card" style="border:2px solid #f4c400; margin-bottom:16px;">
+        <h3>⭐ FIDÉLITÉ</h3>
+        <p><strong>5 Menus achetés = le 6ème Menu OFFERT 🎁</strong></p>
+        <p>Valable sur les commandes avec 1 Menu Burger, Tacos ou Sandwich. Les produits seuls ne donnent pas de point.</p>
+        <p id="loyalty-status">Entrez votre numéro de téléphone pour voir vos points.</p>
+        <div id="loyalty-gift-box" style="display:none;">
+            <p><strong>🎁 Votre 6ème Menu est OFFERT !</strong></p>
+            <select name="loyalty_gift" id="loyalty_gift">
+                <option value="">— Garder mon cadeau pour plus tard —</option>
+                <option>Big Burger</option>
+                <option>Big Philippe</option>
+                <option>Pâtes à la crème Poulet</option>
+                <option>Pâtes à la crème Viande hachée</option>
+                <option>Simple Smash</option>
+            </select><br><br>
+            <label>🥤 Boisson du Menu offert :</label><br>
+            <select name="loyalty_drink" id="loyalty_drink">
+                <option value="Coca-Cola">Coca-Cola 33cl</option><option value="Fanta">Fanta 33cl</option>
+                <option value="Oasis">Oasis 33cl</option><option value="Eau">Eau</option>
+                <option value="Coca-Cola Zéro">Coca-Cola Zéro</option><option value="Coca Cherry">Coca Cherry</option>
+                <option value="Lipton Ice Tea">Lipton Ice Tea</option><option value="Selecto">Selecto</option>
+                <option value="Perrier">Perrier</option><option value="Cristaline Citron">Cristaline Citron</option>
+                <option value="Cristaline Pêche">Cristaline Pêche</option>
+            </select>
+            <p><strong>Prix du Menu fidélité : 0,00 €</strong></p>
+        </div>
+    </div>
 
     {% for item in items %}
     <div class="product-card">
@@ -238,6 +265,27 @@ function updateGiftOptions() {
 }
 
 document.getElementById('promo_gift')?.addEventListener('change', updateGiftOptions);
+
+let loyaltyTimer;
+async function loadLoyalty() {
+    const phone = document.getElementById('customer_phone')?.value.trim() || '';
+    const status = document.getElementById('loyalty-status');
+    const giftBox = document.getElementById('loyalty-gift-box');
+    if (!status || !giftBox) return;
+    if (phone.replace(/\D/g,'').length < 8) {
+        status.textContent = 'Entrez votre numéro de téléphone pour voir vos points.';
+        giftBox.style.display = 'none'; return;
+    }
+    try {
+        const r = await fetch('/api/loyalty?phone=' + encodeURIComponent(phone));
+        const d = await r.json();
+        status.textContent = d.gift_available ? '⭐⭐⭐⭐⭐ 5/5 — Cadeau disponible !' : `⭐ ${d.points}/5 points — encore ${5-d.points} Menu(s) avant votre cadeau.`;
+        giftBox.style.display = d.gift_available ? 'block' : 'none';
+    } catch(e) { status.textContent = 'Points fidélité momentanément indisponibles.'; }
+}
+document.getElementById('customer_phone')?.addEventListener('input', function(){
+    clearTimeout(loyaltyTimer); loyaltyTimer=setTimeout(loadLoyalty,350);
+});
 
 function updatePromoGift() {
     let menuCount = 0;
