@@ -109,7 +109,7 @@
     "desc": "2 steaks, raclette, cheddar, bacon, œuf",
     "price": 8.5,
     "menu": 11.0,
-    "img": "2237BA15-AB06-426D-96A3-55BD4C5BC11D.jpeg"
+    "img": "sandwich_chef_new.jpeg"
   },
   {
     "cat": "Tacos",
@@ -189,7 +189,7 @@
     "desc": "",
     "price": 5.9,
     "menu": null,
-    "img": "6018272A-446C-4B65-A580-216D16EC6801.png"
+    "img": "pates_creme_new.jpeg"
   },
   {
     "cat": "Pâtes",
@@ -205,7 +205,7 @@
     "desc": "oignons, poivrons",
     "price": 7.9,
     "menu": null,
-    "img": "F6C73057-ECA7-4E58-A2A6-2E7696455639.png"
+    "img": "pates_creme_viande_hachee_new.jpeg"
   },
   {
     "cat": "Pâtes",
@@ -229,7 +229,7 @@
     "desc": "",
     "price": 6.5,
     "menu": null,
-    "img": "product_05.jpeg"
+    "img": "cheesy_nuggets_bresil_new.jpeg"
   },
   {
     "cat": "Frites",
