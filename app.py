@@ -695,14 +695,34 @@ def cart_checkout():
 
             total += item_unit_price
 
-    # Fidélité : si le client a 5 points, il peut utiliser son 6e menu offert.
+    # Fidélité : après 5 points, le 6e menu éligible devient automatiquement OFFERT.
+    # Le client peut aussi choisir explicitement son cadeau dans le bloc fidélité.
     loyalty_choice = request.form.get("loyalty_gift", "").strip()
     loyalty_drink = request.form.get("loyalty_drink", "").strip()
     phone_key = normalize_phone(phone)
-    if loyalty_choice:
+    balance = loyalty_balance(phone_key, con)
+
+    # Si le client a 5 points et commande exactement un menu éligible,
+    # on transforme ce menu en cadeau fidélité (0,00 €) automatiquement.
+    if not loyalty_choice and balance >= 5:
+        paid_menus = [it for it in items if it.get("formula") == "menu" and not it.get("promo")]
+        reverse_gifts = {db_name: label for label, db_name in LOYALTY_GIFTS.items()}
+        if len(paid_menus) == 1 and paid_menus[0].get("name") in reverse_gifts:
+            gift_item = paid_menus[0]
+            loyalty_choice = reverse_gifts[gift_item.get("name")]
+            loyalty_drink = gift_item.get("drink", "")
+            total -= float(gift_item.get("price", 0.0))
+            gift_item["name"] = loyalty_choice
+            gift_item["price"] = 0.0
+            gift_item["formula"] = "loyalty"
+            gift_item["loyalty_gift"] = True
+
+    # Si le cadeau a déjà été converti automatiquement, ne pas l'ajouter une 2e fois.
+    auto_loyalty = any(it.get("loyalty_gift") is True for it in items)
+    if loyalty_choice and not auto_loyalty:
         if loyalty_choice not in LOYALTY_GIFTS:
             con.close(); return "Cadeau fidélité invalide.", 400
-        if loyalty_balance(phone_key, con) < 5:
+        if balance < 5:
             con.close(); return "Vous n'avez pas encore 5 points fidélité.", 400
         db_name = LOYALTY_GIFTS[loyalty_choice]
         gift_product = con.execute("SELECT * FROM products WHERE name=? AND active=1 LIMIT 1", (db_name,)).fetchone()
