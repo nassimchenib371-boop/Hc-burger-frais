@@ -20,6 +20,14 @@ PARIS_TZ = ZoneInfo("Europe/Paris")
 
 # Offre découverte : dès 2 menus dans le panier, 1 produit offert au choix.
 PROMO_GIFTS = ["Tacos M", "Simple Smash", "Sandwich Kebab", "Pâtes à la crème"]
+# Fidélité : 5 commandes avec exactement 1 menu Burger/Tacos/Sandwich = 6e menu offert.
+LOYALTY_GIFTS = {
+    "Big Burger": "Big Burger",
+    "Big Philippe": "Big Philly Cheese",
+    "Pâtes à la crème Poulet": "Pâtes à la crème - Poulet",
+    "Pâtes à la crème Viande hachée": "Pâtes à la crème - Viande hachée",
+    "Simple Smash": "Simple Smash",
+}
 def restaurant_is_open():
     # Ouverture/fermeture manuelle depuis la page Administration.
     # La valeur est stockée en base et reste donc active après fermeture du navigateur.
@@ -61,6 +69,15 @@ def init_db():
     con.execute("""CREATE TABLE IF NOT EXISTS settings(
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL
+    )""")
+    con.execute("""CREATE TABLE IF NOT EXISTS loyalty_events(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        order_id INTEGER NOT NULL,
+        phone TEXT NOT NULL,
+        delta INTEGER NOT NULL,
+        kind TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        UNIQUE(order_id, kind)
     )""")
     count=con.execute("SELECT COUNT(*) c FROM products").fetchone()["c"]
     if count==0:
@@ -117,18 +134,38 @@ def admin_required(fn):
 
 def money(x): return f"{x:.2f} €".replace(".",",")
 
+def normalize_phone(phone):
+    return "".join(ch for ch in (phone or "") if ch.isdigit())
+
+def loyalty_balance(phone, con=None):
+    phone = normalize_phone(phone)
+    if not phone: return 0
+    own = con is None
+    if own: con = db()
+    row = con.execute("SELECT COALESCE(SUM(delta),0) AS b FROM loyalty_events WHERE phone=?", (phone,)).fetchone()
+    if own: con.close()
+    return max(0, int(row["b"] or 0))
+
+@app.get("/api/loyalty")
+def api_loyalty():
+    phone = request.args.get("phone", "")
+    b = loyalty_balance(phone)
+    return jsonify(ok=True, points=b, gift_available=b >= 5)
+
 def ticket_text(o):
     items=json.loads(o["items_json"])
     s=get_settings()
     lines=[s["restaurant_name"],s["address"],s["phone"],"-"*32,
            f"COMMANDE #{o['id']}",o["created_at"],"-"*32]
     for it in items:
-        if it.get("formula") == "offert" or it.get("promo") is True:
+        if it.get("loyalty_gift") is True:
+            lines.append("*** CADEAU FIDELITE - MENU OFFERT ***")
+        elif it.get("formula") == "offert" or it.get("promo") is True:
             lines.append("*** OFFERT ***")
         qty = it.get("qty", it.get("quantity", 1))
         name = it.get("name", "")
         formula = it.get("formula", "")
-        if formula == "menu":
+        if formula in ("menu", "loyalty"):
             detail = f"Menu - {it.get('drink','')}"
         elif formula == "offert":
             detail = "Seul"
@@ -304,7 +341,22 @@ def admin_set_restaurant_status():
 def admin_status(oid):
     st=request.json.get("status")
     if st not in ["accepted","rejected","done"]: return jsonify(ok=False),400
-    con=db(); con.execute("UPDATE orders SET status=? WHERE id=?",(st,oid)); con.commit(); con.close()
+    con=db()
+    order=con.execute("SELECT * FROM orders WHERE id=?",(oid,)).fetchone()
+    if not order: con.close(); return jsonify(ok=False),404
+    items=json.loads(order["items_json"] or "[]")
+    phone=normalize_phone(order["phone"])
+    # Les points sont gagnés seulement quand la commande est acceptée.
+    if st == "accepted":
+        paid_menus=[it for it in items if it.get("formula")=="menu" and not it.get("promo") and not it.get("loyalty_gift")]
+        eligible=[it for it in paid_menus if str(it.get("category","")).lower() in ("burgers","tacos","sandwichs")]
+        if len(paid_menus)==1 and len(eligible)==1:
+            con.execute("INSERT OR IGNORE INTO loyalty_events(order_id,phone,delta,kind,created_at) VALUES(?,?,?,?,?)",
+                        (oid,phone,1,"earned",datetime.now(PARIS_TZ).isoformat()))
+    elif st == "rejected":
+        # Une commande refusée ne consomme pas le cadeau et ne gagne pas de point.
+        con.execute("DELETE FROM loyalty_events WHERE order_id=?",(oid,))
+    con.execute("UPDATE orders SET status=? WHERE id=?",(st,oid)); con.commit(); con.close()
     return jsonify(ok=True)
 
 @app.post("/api/admin/orders/<int:oid>/print")
@@ -602,6 +654,10 @@ def cart_checkout():
 
         quantity = int(quantity)
         formula = request.form.get(f"formula_{pid}", "seul")
+        # Un menu est autorisé uniquement pour les produits qui ont un prix menu.
+        # Les Menu Enfant restent à prix fixe (6,90 €).
+        if formula == "menu" and product["menu_price"] is None:
+            formula = "seul"
         drink = request.form.get(f"drink_{pid}", "")
 
         unit_price = float(product["price"])
@@ -620,11 +676,13 @@ def cart_checkout():
             item_unit_price = unit_price + len(supplements) * 1.0
 
             if formula == "menu":
-                 item_unit_price += 2.50
+                # Utilise le vrai prix menu enregistré (ex. Tenders 5→7,50 ; 8→10,50).
+                item_unit_price = float(product["menu_price"]) + len(supplements) * 1.0
 
             items.append({
                 "product_id": int(pid),
                 "name": item_name,
+                "category": product["category"],
                 "quantity": 1,
                 "price": item_unit_price,
                 "formula": formula,
@@ -636,6 +694,25 @@ def cart_checkout():
             })
 
             total += item_unit_price
+
+    # Fidélité : si le client a 5 points, il peut utiliser son 6e menu offert.
+    loyalty_choice = request.form.get("loyalty_gift", "").strip()
+    loyalty_drink = request.form.get("loyalty_drink", "").strip()
+    phone_key = normalize_phone(phone)
+    if loyalty_choice:
+        if loyalty_choice not in LOYALTY_GIFTS:
+            con.close(); return "Cadeau fidélité invalide.", 400
+        if loyalty_balance(phone_key, con) < 5:
+            con.close(); return "Vous n'avez pas encore 5 points fidélité.", 400
+        db_name = LOYALTY_GIFTS[loyalty_choice]
+        gift_product = con.execute("SELECT * FROM products WHERE name=? AND active=1 LIMIT 1", (db_name,)).fetchone()
+        if not gift_product:
+            con.close(); return "Menu fidélité indisponible.", 400
+        items.append({
+            "product_id": int(gift_product["id"]), "name": loyalty_choice, "category": gift_product["category"],
+            "quantity": 1, "price": 0.0, "formula": "loyalty", "drink": loyalty_drink,
+            "viande": "", "sauce": "", "supplements": [], "garnitures": [], "loyalty_gift": True
+        })
 
     # Promo: 2 menus (ou plus) dans la commande = 1 produit offert au choix.
     # Le contrôle est refait côté serveur pour empêcher un cadeau sans 2 menus.
@@ -684,7 +761,7 @@ def cart_checkout():
             "promo": True
         })
 
-    con.execute(
+    cur = con.execute(
                 """INSERT INTO orders
         (created_at, status, customer_name, phone, order_type,
          address, payment, payment_status, note, total, items_json)
@@ -703,6 +780,10 @@ def cart_checkout():
             json.dumps(items)
         )
     )
+    oid = cur.lastrowid
+    if loyalty_choice:
+        con.execute("INSERT INTO loyalty_events(order_id,phone,delta,kind,created_at) VALUES(?,?,?,?,?)",
+                    (oid,phone_key,-5,"redeemed",datetime.now(PARIS_TZ).isoformat()))
     con.commit()
     con.close()
 
