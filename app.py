@@ -146,7 +146,7 @@ def sync_loyalty_history(phone, con):
     phone = normalize_phone(phone)
     if not phone:
         return
-    rows = con.execute("SELECT * FROM orders WHERE status != 'rejected' ORDER BY id ASC").fetchall()
+    rows = con.execute("SELECT * FROM orders WHERE status IN ('accepted','done') ORDER BY id ASC").fetchall()
     for order in rows:
         if normalize_phone(order["phone"]) != phone:
             continue
@@ -162,12 +162,14 @@ def sync_loyalty_history(phone, con):
             items = json.loads(order["items_json"] or "[]")
         except Exception:
             items = []
+        # Chaque Menu payé compte 1 point, quelle que soit sa catégorie
+        # (Burger, Tacos, Sandwich, Tenders, etc.). Les cadeaux/promo ne comptent pas.
         paid_menus = [it for it in items if it.get("formula") == "menu" and not it.get("promo") and not it.get("loyalty_gift")]
-        eligible = [it for it in paid_menus if str(it.get("category", "")).lower() in ("burgers", "tacos", "sandwichs")]
-        if len(paid_menus) == 1 and len(eligible) == 1:
+        earned_points = sum(max(1, int(it.get("quantity", 1) or 1)) for it in paid_menus)
+        if earned_points > 0:
             con.execute(
                 "INSERT OR IGNORE INTO loyalty_events(order_id,phone,delta,kind,created_at) VALUES(?,?,?,?,?)",
-                (order["id"], phone, 1, "earned", order["created_at"] or datetime.now(PARIS_TZ).isoformat())
+                (order["id"], phone, earned_points, "earned", order["created_at"] or datetime.now(PARIS_TZ).isoformat())
             )
     con.commit()
 
@@ -382,9 +384,18 @@ def admin_status(oid):
     if not order: con.close(); return jsonify(ok=False),404
     items=json.loads(order["items_json"] or "[]")
     phone=normalize_phone(order["phone"])
-    # Les points fidélité sont maintenant crédités dès la création de la commande.
-    # Ici, on ne fait rien à l'acceptation pour éviter de compter 2 fois.
-    # Si la commande est refusée, on annule le point gagné ou le cadeau consommé.
+    # Les points fidélité sont crédités uniquement quand l'admin accepte la commande.
+    # Chaque Menu payé = 1 point. INSERT OR IGNORE évite tout double comptage.
+    if st == "accepted" and str(order["order_type"] or "").lower() in ("emporter", "sur_place"):
+        if not any(it.get("loyalty_gift") for it in items):
+            paid_menus = [it for it in items if it.get("formula") == "menu" and not it.get("promo") and not it.get("loyalty_gift")]
+            earned_points = sum(max(1, int(it.get("quantity", 1) or 1)) for it in paid_menus)
+            if earned_points > 0:
+                con.execute(
+                    "INSERT OR IGNORE INTO loyalty_events(order_id,phone,delta,kind,created_at) VALUES(?,?,?,?,?)",
+                    (oid, phone, earned_points, "earned", datetime.now(PARIS_TZ).isoformat())
+                )
+    # Si la commande est refusée, on annule les points gagnés ou le cadeau consommé.
     if st == "rejected":
         con.execute("DELETE FROM loyalty_events WHERE order_id=?",(oid,))
     con.execute("UPDATE orders SET status=? WHERE id=?",(st,oid)); con.commit(); con.close()
@@ -848,14 +859,8 @@ def cart_checkout():
         # Le 6e cadeau consomme les 5 points.
         con.execute("INSERT OR IGNORE INTO loyalty_events(order_id,phone,delta,kind,created_at) VALUES(?,?,?,?,?)",
                     (oid,phone_key,-5,"redeemed",datetime.now(PARIS_TZ).isoformat()))
-    elif order_type in ("emporter", "sur_place"):
-        # Chaque commande avec exactement 1 Menu Burger/Tacos/Sandwich gagne 1 point
-        # immédiatement, sans attendre le bouton Accepter dans l'admin.
-        paid_menus = [it for it in items if it.get("formula") == "menu" and not it.get("promo") and not it.get("loyalty_gift")]
-        eligible = [it for it in paid_menus if str(it.get("category", "")).lower() in ("burgers", "tacos", "sandwichs")]
-        if len(paid_menus) == 1 and len(eligible) == 1:
-            con.execute("INSERT OR IGNORE INTO loyalty_events(order_id,phone,delta,kind,created_at) VALUES(?,?,?,?,?)",
-                        (oid,phone_key,1,"earned",datetime.now(PARIS_TZ).isoformat()))
+    # Les points des Menus payés ne sont PAS crédités ici.
+    # Ils seront ajoutés seulement lorsque l'admin clique « Accepter ».
 
     con.commit()
     con.close()
