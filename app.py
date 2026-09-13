@@ -387,14 +387,15 @@ def admin_status(oid):
     # Les points fidélité sont crédités uniquement quand l'admin accepte la commande.
     # Chaque Menu payé = 1 point. INSERT OR IGNORE évite tout double comptage.
     if st == "accepted" and str(order["order_type"] or "").lower() in ("emporter", "sur_place"):
-        if not any(it.get("loyalty_gift") for it in items):
-            paid_menus = [it for it in items if it.get("formula") == "menu" and not it.get("promo") and not it.get("loyalty_gift")]
-            earned_points = sum(max(1, int(it.get("quantity", 1) or 1)) for it in paid_menus)
-            if earned_points > 0:
-                con.execute(
-                    "INSERT OR IGNORE INTO loyalty_events(order_id,phone,delta,kind,created_at) VALUES(?,?,?,?,?)",
-                    (oid, phone, earned_points, "earned", datetime.now(PARIS_TZ).isoformat())
-                )
+        # Un cadeau fidélité ne rapporte pas de point, mais les Menus payants
+        # ajoutés dans la même commande rapportent bien leurs points.
+        paid_menus = [it for it in items if it.get("formula") == "menu" and not it.get("promo") and not it.get("loyalty_gift")]
+        earned_points = sum(max(1, int(it.get("quantity", 1) or 1)) for it in paid_menus)
+        if earned_points > 0:
+            con.execute(
+                "INSERT OR IGNORE INTO loyalty_events(order_id,phone,delta,kind,created_at) VALUES(?,?,?,?,?)",
+                (oid, phone, earned_points, "earned", datetime.now(PARIS_TZ).isoformat())
+            )
     # Si la commande est refusée, on annule les points gagnés ou le cadeau consommé.
     if st == "rejected":
         con.execute("DELETE FROM loyalty_events WHERE order_id=?",(oid,))
@@ -875,3 +876,16 @@ init_db()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8000")), debug=False)
+
+# Pages légales
+@app.route('/mentions-legales')
+def mentions_legales():
+    return render_template('mentions_legales.html')
+
+@app.route('/confidentialite')
+def confidentialite():
+    return render_template('confidentialite.html')
+
+@app.route('/cgv')
+def cgv():
+    return render_template('cgv.html')
