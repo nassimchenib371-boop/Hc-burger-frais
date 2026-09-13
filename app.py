@@ -141,11 +141,43 @@ def money(x): return f"{x:.2f} €".replace(".",",")
 def normalize_phone(phone):
     return "".join(ch for ch in (phone or "") if ch.isdigit())
 
+def sync_loyalty_history(phone, con):
+    """Rattrape les anciennes commandes éligibles qui n'avaient pas encore reçu leur point."""
+    phone = normalize_phone(phone)
+    if not phone:
+        return
+    rows = con.execute("SELECT * FROM orders WHERE status != 'rejected' ORDER BY id ASC").fetchall()
+    for order in rows:
+        if normalize_phone(order["phone"]) != phone:
+            continue
+        if str(order["order_type"] or "").lower() not in ("emporter", "sur_place"):
+            continue
+        already = con.execute(
+            "SELECT 1 FROM loyalty_events WHERE order_id=? AND kind IN ('earned','redeemed') LIMIT 1",
+            (order["id"],)
+        ).fetchone()
+        if already:
+            continue
+        try:
+            items = json.loads(order["items_json"] or "[]")
+        except Exception:
+            items = []
+        paid_menus = [it for it in items if it.get("formula") == "menu" and not it.get("promo") and not it.get("loyalty_gift")]
+        eligible = [it for it in paid_menus if str(it.get("category", "")).lower() in ("burgers", "tacos", "sandwichs")]
+        if len(paid_menus) == 1 and len(eligible) == 1:
+            con.execute(
+                "INSERT OR IGNORE INTO loyalty_events(order_id,phone,delta,kind,created_at) VALUES(?,?,?,?,?)",
+                (order["id"], phone, 1, "earned", order["created_at"] or datetime.now(PARIS_TZ).isoformat())
+            )
+    con.commit()
+
+
 def loyalty_balance(phone, con=None):
     phone = normalize_phone(phone)
     if not phone: return 0
     own = con is None
     if own: con = db()
+    sync_loyalty_history(phone, con)
     row = con.execute("SELECT COALESCE(SUM(delta),0) AS b FROM loyalty_events WHERE phone=?", (phone,)).fetchone()
     if own: con.close()
     return max(0, int(row["b"] or 0))
