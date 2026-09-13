@@ -347,7 +347,7 @@ def admin_status(oid):
     items=json.loads(order["items_json"] or "[]")
     phone=normalize_phone(order["phone"])
     # Les points sont gagnés seulement quand la commande est acceptée.
-    if st == "accepted":
+    if st == "accepted" and order["order_type"] in ("emporter", "sur_place"):
         paid_menus=[it for it in items if it.get("formula")=="menu" and not it.get("promo") and not it.get("loyalty_gift")]
         eligible=[it for it in paid_menus if str(it.get("category","")).lower() in ("burgers","tacos","sandwichs")]
         if len(paid_menus)==1 and len(eligible)==1:
@@ -633,9 +633,9 @@ def cart_checkout():
     address = request.form.get("address", "").strip()
     postal = request.form.get("postal_code", "").strip()
     if order_type == "livraison":
-        address = f"{address}, {postal}"  
-        if not postal.startswith("130") or postal not in [f"130{i:02d}" for i in range(1, 17)]:
-            return "Livraison uniquement à Marseille", 400
+        address = f"{address}, {postal}"
+        if postal != "13004":
+            return "Livraison disponible uniquement dans le 13004.", 400
     if not name or not phone:
             return "Nom et téléphone requis", 400
 
@@ -695,16 +695,16 @@ def cart_checkout():
 
             total += item_unit_price
 
-    # Fidélité : après 5 points, le 6e menu éligible devient automatiquement OFFERT.
-    # Le client peut aussi choisir explicitement son cadeau dans le bloc fidélité.
-    loyalty_choice = request.form.get("loyalty_gift", "").strip()
-    loyalty_drink = request.form.get("loyalty_drink", "").strip()
+    # Fidélité : après 5 points, le 6e menu éligible choisi dans le panier devient automatiquement OFFERT.
+    # Aucun cadeau séparé n'est ajouté : c'est le Menu n°6 lui-même qui passe à 0,00 €.
+    loyalty_choice = ""
+    loyalty_drink = ""
     phone_key = normalize_phone(phone)
     balance = loyalty_balance(phone_key, con)
 
     # Si le client a 5 points et commande exactement un menu éligible,
     # on transforme ce menu en cadeau fidélité (0,00 €) automatiquement.
-    if not loyalty_choice and balance >= 5:
+    if order_type in ("emporter", "sur_place") and not loyalty_choice and balance >= 5:
         paid_menus = [it for it in items if it.get("formula") == "menu" and not it.get("promo")]
         reverse_gifts = {db_name: label for label, db_name in LOYALTY_GIFTS.items()}
         if len(paid_menus) == 1 and paid_menus[0].get("name") in reverse_gifts:
@@ -719,7 +719,7 @@ def cart_checkout():
 
     # Si le cadeau a déjà été converti automatiquement, ne pas l'ajouter une 2e fois.
     auto_loyalty = any(it.get("loyalty_gift") is True for it in items)
-    if loyalty_choice and not auto_loyalty:
+    if False and loyalty_choice and not auto_loyalty:
         if loyalty_choice not in LOYALTY_GIFTS:
             con.close(); return "Cadeau fidélité invalide.", 400
         if balance < 5:
@@ -780,6 +780,12 @@ def cart_checkout():
             "garnitures": gift_garnitures,
             "promo": True
         })
+
+    # Livraison : uniquement 13004, avec un minimum de 10 € à payer.
+    # La fidélité (6e menu offert) ne s'applique pas aux livraisons.
+    if order_type == "livraison" and total < 10.0:
+        con.close()
+        return "Pour une livraison dans le 13004, le minimum de commande est de 10,00 €.", 400
 
     cur = con.execute(
                 """INSERT INTO orders
