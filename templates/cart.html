@@ -29,25 +29,8 @@
         <p>Valable sur les commandes avec 1 Menu Burger, Tacos ou Sandwich. Les produits seuls ne donnent pas de point.</p>
         <p id="loyalty-status">Entrez votre numéro de téléphone pour voir vos points.</p>
         <div id="loyalty-gift-box" style="display:none;">
-            <p><strong>🎁 Votre 6ème Menu est OFFERT !</strong></p>
-            <select name="loyalty_gift" id="loyalty_gift">
-                <option value="">— Garder mon cadeau pour plus tard —</option>
-                <option>Big Burger</option>
-                <option>Big Philippe</option>
-                <option>Pâtes à la crème Poulet</option>
-                <option>Pâtes à la crème Viande hachée</option>
-                <option>Simple Smash</option>
-            </select><br><br>
-            <label>🥤 Boisson du Menu offert :</label><br>
-            <select name="loyalty_drink" id="loyalty_drink">
-                <option value="Coca-Cola">Coca-Cola 33cl</option><option value="Fanta">Fanta 33cl</option>
-                <option value="Oasis">Oasis 33cl</option><option value="Eau">Eau</option>
-                <option value="Coca-Cola Zéro">Coca-Cola Zéro</option><option value="Coca Cherry">Coca Cherry</option>
-                <option value="Lipton Ice Tea">Lipton Ice Tea</option><option value="Selecto">Selecto</option>
-                <option value="Perrier">Perrier</option><option value="Cristaline Citron">Cristaline Citron</option>
-                <option value="Cristaline Pêche">Cristaline Pêche</option>
-            </select>
-            <p><strong>Prix du Menu fidélité : 0,00 €</strong></p>
+            <p><strong>🎁 Votre cadeau est prêt !</strong></p>
+            <p>Choisissez votre 6ème Menu normalement parmi : Big Burger, Big Philippe, Pâtes à la crème Poulet, Pâtes à la crème Viande hachée ou Simple Smash. Dès que votre numéro est reconnu, ce Menu passe automatiquement à <strong>0,00 €</strong>.</p>
         </div>
     </div>
 
@@ -208,20 +191,21 @@
       if (orderType.value === "livraison") { 
     addressInput.style.display = "block";
     postalInput.style.display = "block";
-    deliveryInfo.textContent = "Livraison disponible à Marseille.";
+    deliveryInfo.textContent = "Livraison uniquement dans le 13004 • minimum 10,00 €.";
     } else {
-    addressInput.style.display = "none";  
+    addressInput.style.display = "none";
     postalInput.style.display = "none";
     deliveryInfo.textContent = "";
     }
+    if (typeof refreshLoyaltyTotal === 'function') refreshLoyaltyTotal();
 });
     addressInput.style.display = "none";
     postalInput.style.display = "none";
     postalInput.addEventListener("input", function () {
     const code = postalInput.value.trim(); 
-    const marseille = /^130(0[1-9]|1[0-6])$/.test(code);
-    deliveryInfo.textContent = code.length === 5 && !marseille ? "❌ Livraison uniquement à Marseille." : "Livraison disponible à Marseille.";
-    document.querySelector('button[type="submit"]').disabled = code.length === 5 && !marseille;
+    const allowed = code === "13004";
+    deliveryInfo.textContent = code.length === 5 && !allowed ? "❌ Livraison uniquement dans le 13004." : "Livraison 13004 • minimum 10,00 €.";
+    document.querySelector('button[type="submit"]').disabled = code.length === 5 && !allowed;
 });
     async function updateCart(event, link) {    
     event.preventDefault();
@@ -267,21 +251,88 @@ function updateGiftOptions() {
 document.getElementById('promo_gift')?.addEventListener('change', updateGiftOptions);
 
 let loyaltyTimer;
+let loyaltyGiftAvailable = false;
+const loyaltyEligibleNames = new Set([
+    'Big Burger',
+    'Big Philly Cheese',
+    'Big Philippe',
+    'Pâtes à la crème - Poulet',
+    'Pâtes à la crème Poulet',
+    'Pâtes à la crème - Viande hachée',
+    'Pâtes à la crème Viande hachée',
+    'Simple Smash'
+]);
+
+function refreshLoyaltyTotal() {
+    const totalElement = document.getElementById('total-actuel');
+    const status = document.getElementById('loyalty-status');
+    if (!totalElement || !status) return;
+
+    let totalGeneral = 0;
+    let eligibleMenu = null;
+    let menuCount = 0;
+
+    document.querySelectorAll('.product-card').forEach(card => {
+        const subtotalLine = Array.from(card.querySelectorAll('p')).find(p => p.textContent.includes('Sous-total'));
+        if (!subtotalLine) return;
+        const match = subtotalLine.textContent.match(/[\d.]+/);
+        const subtotal = match ? parseFloat(match[0]) : 0;
+        totalGeneral += subtotal;
+
+        const selected = card.querySelector('input[type="radio"][name^="formula_"]:checked');
+        if (selected && selected.value === 'menu') {
+            const qtySpan = card.querySelector('p span');
+            const qty = parseInt(qtySpan?.textContent || '1', 10);
+            menuCount += qty;
+            const name = card.querySelector('h3')?.textContent.trim() || '';
+            if (loyaltyEligibleNames.has(name) && qty >= 1 && !eligibleMenu) {
+                eligibleMenu = { subtotal, qty, unit: qty ? subtotal / qty : subtotal, name };
+            }
+        }
+    });
+
+    if (orderType && orderType.value === 'livraison') {
+        totalElement.textContent = `Total actuel : ${totalGeneral.toFixed(2)} €`;
+        status.textContent = '🚚 Fidélité disponible uniquement Sur place ou À emporter.';
+        return;
+    }
+
+    if (loyaltyGiftAvailable && menuCount === 1 && eligibleMenu) {
+        const finalTotal = Math.max(0, totalGeneral - eligibleMenu.unit);
+        totalElement.textContent = `🎁 Cadeau fidélité appliqué — Total : ${finalTotal.toFixed(2)} €`;
+        status.textContent = `🎁 Votre cadeau ! Votre 6ème Menu ${eligibleMenu.name} est OFFERT — 0,00 €.`;
+    } else {
+        totalElement.textContent = `Total actuel : ${totalGeneral.toFixed(2)} €`;
+        if (loyaltyGiftAvailable) {
+            status.textContent = '⭐⭐⭐⭐⭐ 5/5 — Votre cadeau est disponible ! Choisissez 1 Menu offert parmi Big Burger, Big Philippe, Pâtes crème Poulet, Pâtes crème Viande hachée ou Simple Smash.';
+        }
+    }
+}
+
 async function loadLoyalty() {
     const phone = document.getElementById('customer_phone')?.value.trim() || '';
     const status = document.getElementById('loyalty-status');
     const giftBox = document.getElementById('loyalty-gift-box');
     if (!status || !giftBox) return;
     if (phone.replace(/\D/g,'').length < 8) {
+        loyaltyGiftAvailable = false;
         status.textContent = 'Entrez votre numéro de téléphone pour voir vos points.';
-        giftBox.style.display = 'none'; return;
+        giftBox.style.display = 'none';
+        refreshLoyaltyTotal();
+        return;
     }
     try {
         const r = await fetch('/api/loyalty?phone=' + encodeURIComponent(phone));
         const d = await r.json();
-        status.textContent = d.gift_available ? '⭐⭐⭐⭐⭐ 5/5 — Cadeau disponible !' : `⭐ ${d.points}/5 points — encore ${5-d.points} Menu(s) avant votre cadeau.`;
+        loyaltyGiftAvailable = !!d.gift_available;
+        status.textContent = d.gift_available ? '⭐⭐⭐⭐⭐ 5/5 — Votre cadeau est disponible !' : `⭐ ${d.points}/5 points — encore ${5-d.points} Menu(s) avant votre cadeau.`;
         giftBox.style.display = d.gift_available ? 'block' : 'none';
-    } catch(e) { status.textContent = 'Points fidélité momentanément indisponibles.'; }
+        refreshLoyaltyTotal();
+    } catch(e) {
+        loyaltyGiftAvailable = false;
+        status.textContent = 'Points fidélité momentanément indisponibles.';
+        refreshLoyaltyTotal();
+    }
 }
 document.getElementById('customer_phone')?.addEventListener('input', function(){
     clearTimeout(loyaltyTimer); loyaltyTimer=setTimeout(loadLoyalty,350);
@@ -356,11 +407,13 @@ if (totalElement) {
     totalElement.textContent = `Total actuel : ${totalGeneral.toFixed(2)} €`;
 }
         updatePromoGift();
+        refreshLoyaltyTotal();
     });
 });
 
 updatePromoGift();
 updateGiftOptions();
+refreshLoyaltyTotal();
 </script> 
 </body>
 </html>
