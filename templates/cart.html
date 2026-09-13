@@ -269,25 +269,34 @@ function refreshLoyaltyTotal() {
     if (!totalElement || !status) return;
 
     let totalGeneral = 0;
-    let eligibleMenu = null;
+    let giftCandidate = null;
+    let normalItemCount = 0;
     let menuCount = 0;
 
     document.querySelectorAll('.product-card').forEach(card => {
         const subtotalLine = Array.from(card.querySelectorAll('p')).find(p => p.textContent.includes('Sous-total'));
         if (!subtotalLine) return;
+
         const match = subtotalLine.textContent.match(/[\d.]+/);
         const subtotal = match ? parseFloat(match[0]) : 0;
         totalGeneral += subtotal;
 
+        const qtySpan = card.querySelector('p span');
+        const qty = parseInt(qtySpan?.textContent || '1', 10);
+        normalItemCount += qty;
+
+        const name = card.querySelector('h3')?.textContent.trim() || '';
         const selected = card.querySelector('input[type="radio"][name^="formula_"]:checked');
-        if (selected && selected.value === 'menu') {
-            const qtySpan = card.querySelector('p span');
-            const qty = parseInt(qtySpan?.textContent || '1', 10);
-            menuCount += qty;
-            const name = card.querySelector('h3')?.textContent.trim() || '';
-            if (loyaltyEligibleNames.has(name) && qty >= 1 && !eligibleMenu) {
-                eligibleMenu = { subtotal, qty, unit: qty ? subtotal / qty : subtotal, name };
-            }
+        const isMenu = !!selected && selected.value === 'menu';
+        if (isMenu) menuCount += qty;
+
+        const isPastaGift = name === 'Pâtes à la crème - Poulet' ||
+                            name === 'Pâtes à la crème Poulet' ||
+                            name === 'Pâtes à la crème - Viande hachée' ||
+                            name === 'Pâtes à la crème Viande hachée';
+        const eligibleGift = loyaltyEligibleNames.has(name) && (isMenu || isPastaGift);
+        if (eligibleGift && qty === 1 && !giftCandidate) {
+            giftCandidate = { subtotal, name };
         }
     });
 
@@ -297,10 +306,10 @@ function refreshLoyaltyTotal() {
         return;
     }
 
-    if (loyaltyGiftAvailable && menuCount === 1 && eligibleMenu) {
-        const finalTotal = Math.max(0, totalGeneral - eligibleMenu.unit);
+    if (loyaltyGiftAvailable && normalItemCount === 1 && giftCandidate) {
+        const finalTotal = Math.max(0, totalGeneral - giftCandidate.subtotal);
         totalElement.textContent = `🎁 Cadeau fidélité appliqué — Total : ${finalTotal.toFixed(2)} €`;
-        status.textContent = `🎁 Votre cadeau ! Votre 6ème Menu ${eligibleMenu.name} est OFFERT — 0,00 €.`;
+        status.textContent = `🎁 Votre cadeau ! ${giftCandidate.name} est OFFERT — 0,00 €.`;
     } else {
         totalElement.textContent = `Total actuel : ${totalGeneral.toFixed(2)} €`;
         if (loyaltyGiftAvailable) {
