@@ -346,15 +346,10 @@ def admin_status(oid):
     if not order: con.close(); return jsonify(ok=False),404
     items=json.loads(order["items_json"] or "[]")
     phone=normalize_phone(order["phone"])
-    # Les points sont gagnés seulement quand la commande est acceptée.
-    if st == "accepted" and order["order_type"] in ("emporter", "sur_place"):
-        paid_menus=[it for it in items if it.get("formula")=="menu" and not it.get("promo") and not it.get("loyalty_gift")]
-        eligible=[it for it in paid_menus if str(it.get("category","")).lower() in ("burgers","tacos","sandwichs")]
-        if len(paid_menus)==1 and len(eligible)==1:
-            con.execute("INSERT OR IGNORE INTO loyalty_events(order_id,phone,delta,kind,created_at) VALUES(?,?,?,?,?)",
-                        (oid,phone,1,"earned",datetime.now(PARIS_TZ).isoformat()))
-    elif st == "rejected":
-        # Une commande refusée ne consomme pas le cadeau et ne gagne pas de point.
+    # Les points fidélité sont maintenant crédités dès la création de la commande.
+    # Ici, on ne fait rien à l'acceptation pour éviter de compter 2 fois.
+    # Si la commande est refusée, on annule le point gagné ou le cadeau consommé.
+    if st == "rejected":
         con.execute("DELETE FROM loyalty_events WHERE order_id=?",(oid,))
     con.execute("UPDATE orders SET status=? WHERE id=?",(st,oid)); con.commit(); con.close()
     return jsonify(ok=True)
@@ -702,13 +697,22 @@ def cart_checkout():
     phone_key = normalize_phone(phone)
     balance = loyalty_balance(phone_key, con)
 
-    # Si le client a 5 points et commande exactement un menu éligible,
-    # on transforme ce menu en cadeau fidélité (0,00 €) automatiquement.
+    # Si le client a 5 points, le 6e produit/menu éligible devient directement OFFERT.
+    # Pour les Burgers/Smash, il doit être choisi en formule Menu.
+    # Les Pâtes fidélité, qui n'ont pas de bouton formule Menu, sont aussi éligibles.
     if order_type in ("emporter", "sur_place") and not loyalty_choice and balance >= 5:
-        paid_menus = [it for it in items if it.get("formula") == "menu" and not it.get("promo")]
         reverse_gifts = {db_name: label for label, db_name in LOYALTY_GIFTS.items()}
-        if len(paid_menus) == 1 and paid_menus[0].get("name") in reverse_gifts:
-            gift_item = paid_menus[0]
+        normal_items = [it for it in items if not it.get("promo") and not it.get("loyalty_gift")]
+        candidates = []
+        for it in normal_items:
+            name = it.get("name")
+            if name not in reverse_gifts:
+                continue
+            is_pasta = str(it.get("category", "")).lower() in ("pâtes", "pates") or name.startswith("Pâtes à la crème")
+            if it.get("formula") == "menu" or is_pasta:
+                candidates.append(it)
+        if len(normal_items) == 1 and len(candidates) == 1:
+            gift_item = candidates[0]
             loyalty_choice = reverse_gifts[gift_item.get("name")]
             loyalty_drink = gift_item.get("drink", "")
             total -= float(gift_item.get("price", 0.0))
@@ -807,9 +811,20 @@ def cart_checkout():
         )
     )
     oid = cur.lastrowid
+
     if loyalty_choice:
-        con.execute("INSERT INTO loyalty_events(order_id,phone,delta,kind,created_at) VALUES(?,?,?,?,?)",
+        # Le 6e cadeau consomme les 5 points.
+        con.execute("INSERT OR IGNORE INTO loyalty_events(order_id,phone,delta,kind,created_at) VALUES(?,?,?,?,?)",
                     (oid,phone_key,-5,"redeemed",datetime.now(PARIS_TZ).isoformat()))
+    elif order_type in ("emporter", "sur_place"):
+        # Chaque commande avec exactement 1 Menu Burger/Tacos/Sandwich gagne 1 point
+        # immédiatement, sans attendre le bouton Accepter dans l'admin.
+        paid_menus = [it for it in items if it.get("formula") == "menu" and not it.get("promo") and not it.get("loyalty_gift")]
+        eligible = [it for it in paid_menus if str(it.get("category", "")).lower() in ("burgers", "tacos", "sandwichs")]
+        if len(paid_menus) == 1 and len(eligible) == 1:
+            con.execute("INSERT OR IGNORE INTO loyalty_events(order_id,phone,delta,kind,created_at) VALUES(?,?,?,?,?)",
+                        (oid,phone_key,1,"earned",datetime.now(PARIS_TZ).isoformat()))
+
     con.commit()
     con.close()
 
