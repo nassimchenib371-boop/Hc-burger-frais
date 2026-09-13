@@ -22,11 +22,15 @@ PARIS_TZ = ZoneInfo("Europe/Paris")
 PROMO_GIFTS = ["Tacos M", "Simple Smash", "Sandwich Kebab", "Pâtes à la crème"]
 # Fidélité : 5 commandes avec exactement 1 menu Burger/Tacos/Sandwich = 6e menu offert.
 LOYALTY_GIFTS = {
-    "Big Burger": "Big Burger",
-    "Big Philippe": "Big Philly Cheese",
-    "Pâtes à la crème Poulet": "Pâtes à la crème - Poulet",
-    "Pâtes à la crème Viande hachée": "Pâtes à la crème - Viande hachée",
-    "Simple Smash": "Simple Smash",
+    "Menu Simple Smash": "Simple Smash",
+    "Menu Big Burger": "Big Burger",
+    "Menu Big Philippe Cheese": "Big Philly Cheese",
+    "Menu Sandwich Steak Cheddar": "Sandwich Steak Cheddar",
+    "Menu Sandwich Kebab": "Sandwich Kebab",
+    "Poutine Hermanos seule": "Poutine Hermanos",
+    "Pâtes à la crème Poulet seule": "Pâtes à la crème - Poulet",
+    "Pâtes à la crème Viande hachée seule": "Pâtes à la crème - Viande hachée",
+    "Menu Tacos M": "Tacos M",
 }
 def restaurant_is_open():
     # Ouverture/fermeture manuelle depuis la page Administration.
@@ -451,7 +455,22 @@ def cart():
 
     total = sum(item["price"] * item["quantity"] for item in items)
 
-    return render_template("cart.html", items=items, total=total, promo_gifts=PROMO_GIFTS)
+    return render_template("cart.html", items=items, total=total, promo_gifts=PROMO_GIFTS,
+                           loyalty_gifts=list(LOYALTY_GIFTS.keys()),
+                           pending_loyalty_gift=session.get("loyalty_gift_choice", ""))
+
+@app.post("/loyalty/gift/add")
+def add_loyalty_gift():
+    phone = request.form.get("phone", "").strip()
+    choice = request.form.get("loyalty_gift", "").strip()
+    if loyalty_balance(phone) < 5:
+        return "Vous n'avez pas encore 5 points fidélité.", 400
+    if choice not in LOYALTY_GIFTS:
+        return "Cadeau fidélité invalide.", 400
+    session["loyalty_gift_choice"] = choice
+    session["loyalty_phone"] = normalize_phone(phone)
+    return redirect(url_for("cart"))
+
 @app.get("/cart/remove/<int:pid>")   
 def remove_from_cart(pid):
     cart = session.get("cart", {})
@@ -619,7 +638,8 @@ def cart_checkout():
         return "🔴 Restaurant fermé — commandes indisponibles actuellement.", 403  
     cart_data = session.get("cart", {})
 
-    if not cart_data:
+    pending_loyalty_gift = session.get("loyalty_gift_choice", "")
+    if not cart_data and not pending_loyalty_gift:
         return redirect(url_for("cart"))
 
     name = request.form.get("name", "").strip()
@@ -690,51 +710,31 @@ def cart_checkout():
 
             total += item_unit_price
 
-    # Fidélité : après 5 points, le 6e menu éligible choisi dans le panier devient automatiquement OFFERT.
-    # Aucun cadeau séparé n'est ajouté : c'est le Menu n°6 lui-même qui passe à 0,00 €.
-    loyalty_choice = ""
-    loyalty_drink = ""
+    # Fidélité : après 5 points, le client choisit son cadeau. Il peut le prendre seul
+    # ou ajouter d'autres produits. Valable uniquement Sur place / À emporter.
+    loyalty_choice = session.get("loyalty_gift_choice", "").strip()
+    loyalty_drink = request.form.get("loyalty_drink", "").strip()
     phone_key = normalize_phone(phone)
     balance = loyalty_balance(phone_key, con)
 
-    # Si le client a 5 points, le 6e produit/menu éligible devient directement OFFERT.
-    # Pour les Burgers/Smash, il doit être choisi en formule Menu.
-    # Les Pâtes fidélité, qui n'ont pas de bouton formule Menu, sont aussi éligibles.
-    if order_type in ("emporter", "sur_place") and not loyalty_choice and balance >= 5:
-        reverse_gifts = {db_name: label for label, db_name in LOYALTY_GIFTS.items()}
-        normal_items = [it for it in items if not it.get("promo") and not it.get("loyalty_gift")]
-        candidates = []
-        for it in normal_items:
-            name = it.get("name")
-            if name not in reverse_gifts:
-                continue
-            is_pasta = str(it.get("category", "")).lower() in ("pâtes", "pates") or name.startswith("Pâtes à la crème")
-            if it.get("formula") == "menu" or is_pasta:
-                candidates.append(it)
-        if len(normal_items) == 1 and len(candidates) == 1:
-            gift_item = candidates[0]
-            loyalty_choice = reverse_gifts[gift_item.get("name")]
-            loyalty_drink = gift_item.get("drink", "")
-            total -= float(gift_item.get("price", 0.0))
-            gift_item["name"] = loyalty_choice
-            gift_item["price"] = 0.0
-            gift_item["formula"] = "loyalty"
-            gift_item["loyalty_gift"] = True
-
-    # Si le cadeau a déjà été converti automatiquement, ne pas l'ajouter une 2e fois.
-    auto_loyalty = any(it.get("loyalty_gift") is True for it in items)
-    if False and loyalty_choice and not auto_loyalty:
-        if loyalty_choice not in LOYALTY_GIFTS:
-            con.close(); return "Cadeau fidélité invalide.", 400
+    if loyalty_choice:
+        if order_type not in ("emporter", "sur_place"):
+            con.close(); return "Le cadeau fidélité est disponible uniquement Sur place ou À emporter.", 400
+        if session.get("loyalty_phone") and session.get("loyalty_phone") != phone_key:
+            con.close(); return "Utilisez le même numéro de téléphone que celui de votre fidélité.", 400
         if balance < 5:
             con.close(); return "Vous n'avez pas encore 5 points fidélité.", 400
+        if loyalty_choice not in LOYALTY_GIFTS:
+            con.close(); return "Cadeau fidélité invalide.", 400
         db_name = LOYALTY_GIFTS[loyalty_choice]
         gift_product = con.execute("SELECT * FROM products WHERE name=? AND active=1 LIMIT 1", (db_name,)).fetchone()
         if not gift_product:
-            con.close(); return "Menu fidélité indisponible.", 400
+            con.close(); return "Cadeau fidélité indisponible.", 400
+        is_menu_gift = loyalty_choice.startswith("Menu ")
         items.append({
             "product_id": int(gift_product["id"]), "name": loyalty_choice, "category": gift_product["category"],
-            "quantity": 1, "price": 0.0, "formula": "loyalty", "drink": loyalty_drink,
+            "quantity": 1, "price": 0.0, "formula": "loyalty",
+            "drink": loyalty_drink if is_menu_gift else "",
             "viande": "", "sauce": "", "supplements": [], "garnitures": [], "loyalty_gift": True
         })
 
@@ -830,6 +830,8 @@ def cart_checkout():
 
     session["cart"] = {}
     session["cart_customizations"] = {}
+    session.pop("loyalty_gift_choice", None)
+    session.pop("loyalty_phone", None)
     return redirect(url_for("home"))
 
 init_db()
