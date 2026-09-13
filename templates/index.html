@@ -26,7 +26,31 @@
     <div style="margin:12px auto 18px; max-width:760px; padding:16px; border:2px solid #f4c400; border-radius:14px; text-align:center; background:#fff8d8; color:#222;">
         <strong style="font-size:20px;">⭐ FIDÉLITÉ HC BURGER</strong><br>
         <span><strong>5 Menus achetés = le 6ème Menu OFFERT 🎁</strong></span><br>
-        <small>1 Menu Burger, Tacos ou Sandwich = 1 point • Produits seuls exclus</small>
+        <small>1 Menu Burger, Tacos ou Sandwich = 1 point • Produits seuls exclus</small><br>
+        <strong style="display:inline-block;margin-top:8px;color:#b00020;">⚠️ IMPORTANT : Utilisez toujours le même numéro de téléphone pour cumuler vos points et recevoir votre cadeau après 5 Menus. 🎁</strong>
+        <div style="margin-top:12px;">
+            <input id="fid-phone" type="tel" placeholder="Votre téléphone" style="padding:10px;max-width:220px;">
+            <button type="button" onclick="checkFidelity()" style="padding:10px;">Voir mes points</button>
+        </div>
+        <div id="fid-result" style="margin-top:10px;"></div>
+        <form id="fid-gift-form" method="POST" action="{{ url_for('add_loyalty_gift') }}" style="display:none;margin-top:12px;">
+            <input type="hidden" name="phone" id="fid-form-phone">
+            <strong>🎁 Votre cadeau est prêt ! Choisissez :</strong><br>
+            <select name="loyalty_gift" required style="margin-top:8px;padding:10px;max-width:95%;">
+                <option value="">— Choisir mon cadeau —</option>
+                <option>Menu Simple Smash</option>
+                <option>Menu Big Burger</option>
+                <option>Menu Big Philippe Cheese</option>
+                <option>Menu Sandwich Steak Cheddar</option>
+                <option>Menu Sandwich Kebab</option>
+                <option>Poutine Hermanos seule</option>
+                <option>Pâtes à la crème Poulet seule</option>
+                <option>Pâtes à la crème Viande hachée seule</option>
+                <option>Menu Tacos M</option>
+            </select><br>
+            <button type="submit" style="margin-top:10px;padding:11px 16px;font-weight:bold;">🎁 CHOISIR MON CADEAU</button>
+            <div><small>Vous pouvez prendre le cadeau seul ou ajouter d'autres produits.</small></div>
+        </form>
     </div>
 <a href="{{ url_for('cart') }}" class="cart-btn">
     🛒
@@ -421,6 +445,25 @@ if (cartBtn) {
             moved = false;
         }
     });
+}
+</script>
+
+<script>
+async function checkFidelity(){
+  const phone=document.getElementById('fid-phone').value.trim();
+  const result=document.getElementById('fid-result');
+  const form=document.getElementById('fid-gift-form');
+  if(phone.replace(/\D/g,'').length<8){ result.textContent='Entrez votre numéro de téléphone.'; form.style.display='none'; return; }
+  try{
+    const r=await fetch('/api/loyalty?phone='+encodeURIComponent(phone));
+    const d=await r.json();
+    if(d.gift_available){
+      result.innerHTML='<strong>⭐⭐⭐⭐⭐ 5/5 — Votre cadeau est disponible !</strong>';
+      document.getElementById('fid-form-phone').value=phone; form.style.display='block';
+    }else{
+      result.textContent='⭐ '+d.points+'/5 points — encore '+(5-d.points)+' Menu(s) avant votre cadeau.'; form.style.display='none';
+    }
+  }catch(e){ result.textContent='Points fidélité momentanément indisponibles.'; form.style.display='none'; }
 }
 </script>
 </body>

@@ -11,7 +11,7 @@
 
     <h1>🛒 Mon panier</h1>
 
-    {% if items %}
+    {% if items or pending_loyalty_gift %}
 <form method="POST" action="{{ url_for('cart_checkout') }}">
 
     <p>
@@ -33,6 +33,14 @@
             <p>Choisissez votre 6ème Menu normalement parmi : Big Burger, Big Philippe, Pâtes à la crème Poulet, Pâtes à la crème Viande hachée ou Simple Smash. Dès que votre numéro est reconnu, ce Menu passe automatiquement à <strong>0,00 €</strong>.</p>
         </div>
     </div>
+
+    {% if pending_loyalty_gift %}
+    <div class="product-card" style="border:3px solid #f4c400;background:#fff8d8;">
+      <h3>🎁 CADEAU FIDÉLITÉ</h3><p><strong>{{ pending_loyalty_gift }}</strong></p><p><strong>Prix : 0,00 €</strong></p>
+      {% if pending_loyalty_gift.startswith('Menu ') %}<label>🥤 Boisson :</label><br><select name="loyalty_drink" required><option>Coca-Cola</option><option>Fanta</option><option>Oasis</option><option>Eau</option><option>Coca-Cola Zéro</option><option>Coca Cherry</option><option>Lipton Ice Tea</option><option>Selecto</option><option>Perrier</option></select>{% endif %}
+      <p>Vous pouvez confirmer ce cadeau seul ou ajouter d'autres produits.</p>
+    </div>
+    {% endif %}
 
     {% for item in items %}
     <div class="product-card">
@@ -306,16 +314,8 @@ function refreshLoyaltyTotal() {
         return;
     }
 
-    if (loyaltyGiftAvailable && normalItemCount === 1 && giftCandidate) {
-        const finalTotal = Math.max(0, totalGeneral - giftCandidate.subtotal);
-        totalElement.textContent = `🎁 Cadeau fidélité appliqué — Total : ${finalTotal.toFixed(2)} €`;
-        status.textContent = `🎁 Votre cadeau ! ${giftCandidate.name} est OFFERT — 0,00 €.`;
-    } else {
-        totalElement.textContent = `Total actuel : ${totalGeneral.toFixed(2)} €`;
-        if (loyaltyGiftAvailable) {
-            status.textContent = '⭐⭐⭐⭐⭐ 5/5 — Votre cadeau est disponible ! Choisissez 1 Menu offert parmi Big Burger, Big Philippe, Pâtes crème Poulet, Pâtes crème Viande hachée ou Simple Smash.';
-        }
-    }
+    totalElement.textContent = `Total actuel : ${totalGeneral.toFixed(2)} €`;
+    if (loyaltyGiftAvailable) status.textContent = '⭐⭐⭐⭐⭐ 5/5 — Votre cadeau est disponible ! Choisissez-le depuis l’accueil.';
 }
 
 async function loadLoyalty() {
