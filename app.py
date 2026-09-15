@@ -463,6 +463,17 @@ def inject_cart_count():
     cart_data = session.get("cart", {})
     cart_count = sum(int(q) for q in cart_data.values())
     return {"cart_count": cart_count}
+def supplements_extra_price(category, supplements):
+    """Prix des suppléments selon la catégorie, calculé côté serveur."""
+    if not supplements:
+        return 0.0
+    if category == "Salades":
+        prices = {"Œuf": 1.0, "Poulet mariné": 2.5, "Tender": 2.5, "Steak haché": 2.5}
+        return sum(prices.get(x, 0.0) for x in supplements)
+    if category in ("Burgers", "Tacos"):
+        return 1.0 * len(supplements)
+    return 0.0
+
 @app.get("/cart")
 def cart():
     cart_data = session.get("cart", {})
@@ -482,7 +493,7 @@ def cart():
             choice = choices[-1] if choices else {}
 
             supplements = choice.get("supplements", [])
-            extra_price = len(supplements) * 1.0
+            extra_price = supplements_extra_price(product["category"], supplements)
 
             items.append({
                 "id": product["id"],
@@ -568,13 +579,16 @@ def add_to_cart(pid):
     }
 
     supplement_map = {
-        "1": "Œuf",
-        "2": "Emmental",
-        "3": "Cheddar",
-        "4": "Chèvre",
-        "5": "Raclette",
-        "6": "Vache Kiri",
-        "7": "Bacon"
+        # Tacos (existants)
+        "1": "Œuf", "2": "Emmental", "3": "Cheddar", "4": "Chèvre",
+        "5": "Raclette", "6": "Vache Kiri", "7": "Bacon",
+        # Burgers
+        "b_oeuf": "Œuf", "b_bacon": "Bacon", "b_raclette": "Raclette",
+        "b_chevre": "Chèvre", "b_vache": "La Vache qui rit", "b_kiri": "Kiri",
+        "b_emmental": "Emmental", "b_oignons": "Oignons cuits",
+        # Salades
+        "s_oeuf": "Œuf", "s_poulet": "Poulet mariné",
+        "s_tender": "Tender", "s_steak": "Steak haché"
     }
     garniture_map = {
         "1": "Salade",
@@ -641,6 +655,10 @@ def order(pid):
         customizations = session.get("cart_customizations", {})
         choices = customizations.get(str(pid), [])
         choice = choices[-1] if choices else {}
+        choice_supplements = choice.get("supplements", [])
+        extra_price = supplements_extra_price(product["category"], choice_supplements)
+        unit_price += extra_price
+        total = unit_price * quantity
         items = [{
             "product_id": pid,
             "name": item_name,
@@ -648,7 +666,7 @@ def order(pid):
             "price": unit_price,
             "viande": choice.get("viande"),
             "sauce": choice.get("sauce"),
-            "supplements": choice.get("supplements", []),
+            "supplements": choice_supplements,
             "formula": formula,
             "drink": drink
         }]
@@ -732,11 +750,11 @@ def cart_checkout():
             supplements = choice.get("supplements", [])
             garnitures = choice.get("garnitures", [])
 
-            item_unit_price = unit_price + len(supplements) * 1.0
+            item_unit_price = unit_price + supplements_extra_price(product["category"], supplements)
 
             if formula == "menu":
                 # Utilise le vrai prix menu enregistré (ex. Tenders 5→7,50 ; 8→10,50).
-                item_unit_price = float(product["menu_price"]) + len(supplements) * 1.0
+                item_unit_price = float(product["menu_price"]) + supplements_extra_price(product["category"], supplements)
 
             items.append({
                 "product_id": int(pid),
