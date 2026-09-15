@@ -269,7 +269,18 @@ def try_network_print(o):
 
 @app.route("/")
 def home():
-    return render_template("index.html", products=get_products(), settings=get_settings(), restaurant_open=restaurant_is_open())
+    # Une seule connexion DB pour charger l’accueil.
+    # Avec Neon, ouvrir 3 connexions successives rendait le retour après “Ajouter au panier” perceptiblement plus lent.
+    con = db()
+    products = [dict(r) for r in con.execute(
+        "SELECT * FROM products WHERE active=1 ORDER BY category,name"
+    ).fetchall()]
+    settings = {r["key"]: r["value"] for r in con.execute(
+        "SELECT key,value FROM settings"
+    ).fetchall()}
+    con.close()
+    restaurant_open = settings.get("restaurant_open", "1") == "1"
+    return render_template("index.html", products=products, settings=settings, restaurant_open=restaurant_open)
 
 @app.post("/api/orders")
 def create_order():
