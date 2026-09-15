@@ -217,7 +217,7 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 
 
-function chooseSupplements(options, title = "Choisis tes suppléments", maxChoices = null) {
+function chooseSupplements(options, title = "Choisis tes suppléments", maxChoices = null, priceNote = "Plusieurs choix possibles (+1€ chacun)") {
     return new Promise((resolve) => {
         const overlay = document.createElement("div");
         overlay.style.cssText = `
@@ -234,8 +234,8 @@ function chooseSupplements(options, title = "Choisis tes suppléments", maxChoic
         `;
 
         box.innerHTML = `
-            <h2 style="text-align:center;">Choisis tes suppléments</h2>
-            <p style="text-align:center;">Plusieurs choix possibles (+1€ chacun)</p>
+            <h2 style="text-align:center;">${title}</h2>
+            <p style="text-align:center;">${priceNote}</p>
         `;
 
         const selected = [];
@@ -312,6 +312,39 @@ if (productName.includes("double l")) {
     maxViandes = 2;
 }
     const category = card.dataset.category;
+
+if (category === "Burgers") {
+    const supplements = await chooseSupplements([
+        ["b_oeuf", "Œuf (+1€)"],
+        ["b_bacon", "Bacon (+1€)"],
+        ["b_raclette", "Raclette (+1€)"],
+        ["b_chevre", "Chèvre (+1€)"],
+        ["b_vache", "La Vache qui rit (+1€)"],
+        ["b_kiri", "Kiri (+1€)"],
+        ["b_emmental", "Emmental (+1€)"],
+        ["b_oignons", "Oignons cuits (+1€)"]
+    ], "Suppléments Burger", null, "Plusieurs choix possibles");
+    const url = new URL(link.href, window.location.origin);
+    url.searchParams.set("supplements", supplements);
+    link.href = url.toString();
+    addToCart(event, link);
+    return;
+}
+
+if (category === "Salades") {
+    const supplements = await chooseSupplements([
+        ["s_oeuf", "Œuf (+1€)"],
+        ["s_poulet", "Poulet mariné (+2,50€)"],
+        ["s_tender", "Tender (+2,50€)"],
+        ["s_steak", "Steak haché (+2,50€)"]
+    ], "Suppléments Salade", null, "Plusieurs choix possibles");
+    const url = new URL(link.href, window.location.origin);
+    url.searchParams.set("supplements", supplements);
+    link.href = url.toString();
+    addToCart(event, link);
+    return;
+}
+
 if (category.toLowerCase().includes("sandwich")) {
     const sauce = await chooseOne("Choisis ta sauce", [
         ["1", "Algérienne"],
