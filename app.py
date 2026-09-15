@@ -1,5 +1,7 @@
 
 import os, json, sqlite3, socket
+
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from functools import wraps
@@ -39,15 +41,50 @@ def restaurant_is_open():
         return get_settings().get("restaurant_open", "1") == "1"
     except Exception:
         return True
+class PostgresConnection:
+    """Petit adaptateur pour garder le code existant compatible avec Neon/PostgreSQL."""
+    def __init__(self, conn):
+        self.conn = conn
+
+    @staticmethod
+    def _sql(query):
+        query = query.replace("INSERT OR IGNORE INTO", "INSERT INTO")
+        query = query.replace("?", "%s")
+        # Les INSERT OR IGNORE SQLite deviennent ON CONFLICT DO NOTHING dans PostgreSQL.
+        if "INSERT INTO" in query.upper() and "OR IGNORE" not in query.upper():
+            original_markers = ("loyalty_events", "settings(key,value)")
+            if any(marker in query for marker in original_markers) and "ON CONFLICT" not in query.upper():
+                query = query.rstrip() + " ON CONFLICT DO NOTHING"
+        return query
+
+    def execute(self, query, params=()):
+        return self.conn.execute(self._sql(query), params)
+
+    def commit(self):
+        return self.conn.commit()
+
+    def rollback(self):
+        return self.conn.rollback()
+
+    def close(self):
+        return self.conn.close()
+
 def db():
+    # Sur Render, DATABASE_URL pointe vers Neon : les commandes et points deviennent persistants.
+    # En local, sans DATABASE_URL, on garde SQLite pour faciliter les tests.
+    if DATABASE_URL:
+        import psycopg
+        from psycopg.rows import dict_row
+        return PostgresConnection(psycopg.connect(DATABASE_URL, row_factory=dict_row))
     conn = sqlite3.connect(DB)
     conn.row_factory = sqlite3.Row
     return conn
 
 def init_db():
     con=db()
-    con.execute("""CREATE TABLE IF NOT EXISTS orders(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+    pk = "BIGSERIAL PRIMARY KEY" if DATABASE_URL else "INTEGER PRIMARY KEY AUTOINCREMENT"
+    con.execute(f"""CREATE TABLE IF NOT EXISTS orders(
+        id {pk},
         created_at TEXT NOT NULL,
         status TEXT NOT NULL,
         customer_name TEXT NOT NULL,
@@ -60,8 +97,8 @@ def init_db():
         total REAL NOT NULL,
         items_json TEXT NOT NULL
     )""")
-    con.execute("""CREATE TABLE IF NOT EXISTS products(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+    con.execute(f"""CREATE TABLE IF NOT EXISTS products(
+        id {pk},
         category TEXT NOT NULL,
         name TEXT NOT NULL,
         description TEXT,
@@ -74,8 +111,8 @@ def init_db():
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL
     )""")
-    con.execute("""CREATE TABLE IF NOT EXISTS loyalty_events(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+    con.execute(f"""CREATE TABLE IF NOT EXISTS loyalty_events(
+        id {pk},
         order_id INTEGER NOT NULL,
         phone TEXT NOT NULL,
         delta INTEGER NOT NULL,
@@ -279,11 +316,15 @@ def create_order():
         total += float(s.get("delivery_fee","0") or 0)
 
     con=db()
-    cur=con.execute("""INSERT INTO orders(created_at,status,customer_name,phone,order_type,address,payment,payment_status,note,total,items_json)
-                       VALUES(?,?,?,?,?,?,?,?,?,?,?)""",
+    insert_sql = """INSERT INTO orders(created_at,status,customer_name,phone,order_type,address,payment,payment_status,note,total,items_json)
+                       VALUES(?,?,?,?,?,?,?,?,?,?,?)"""
+    if DATABASE_URL:
+        insert_sql += " RETURNING id"
+    cur=con.execute(insert_sql,
                     (datetime.now(PARIS_TZ).isoformat(),"new",name,phone,typ,
                      (address+" "+postcode).strip(),payment,"unpaid",note,total,json.dumps(clean,ensure_ascii=False)))
-    oid=cur.lastrowid; con.commit()
+    oid = cur.fetchone()["id"] if DATABASE_URL else cur.lastrowid
+    con.commit()
     o=con.execute("SELECT * FROM orders WHERE id=?",(oid,)).fetchone()
     printed,msg=try_network_print(o)
     con.close()
@@ -853,11 +894,14 @@ def cart_checkout():
         con.close()
         return "Pour une livraison dans le 13004, le minimum de commande est de 10,00 €.", 400
 
-    cur = con.execute(
-                """INSERT INTO orders
+    checkout_insert_sql = """INSERT INTO orders
         (created_at, status, customer_name, phone, order_type,
          address, payment, payment_status, note, total, items_json)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+    if DATABASE_URL:
+        checkout_insert_sql += " RETURNING id"
+    cur = con.execute(
+        checkout_insert_sql,
         (
             datetime.now(PARIS_TZ).isoformat(),
             "pending",
@@ -872,7 +916,7 @@ def cart_checkout():
             json.dumps(items)
         )
     )
-    oid = cur.lastrowid
+    oid = cur.fetchone()["id"] if DATABASE_URL else cur.lastrowid
 
     if loyalty_choice:
         # Le 6e cadeau consomme les 5 points.
