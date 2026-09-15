@@ -673,6 +673,10 @@ def add_to_cart(pid):
 
         customizations[key] = choices
         session["cart_customizations"] = customizations
+    # AJAX add-to-cart: do not follow a redirect back to /, because that
+    # needlessly reloads products/settings from the remote database.
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return ("", 204)
     return redirect(url_for("home"))
 @app.route("/order/<int:pid>", methods=["GET", "POST"])
 def order(pid):
