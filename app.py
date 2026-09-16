@@ -52,7 +52,7 @@ class PostgresConnection:
         query = query.replace("?", "%s")
         # Les INSERT OR IGNORE SQLite deviennent ON CONFLICT DO NOTHING dans PostgreSQL.
         if "INSERT INTO" in query.upper() and "OR IGNORE" not in query.upper():
-            original_markers = ("loyalty_events", "settings(key,value)")
+            original_markers = ("loyalty_events",)
             if any(marker in query for marker in original_markers) and "ON CONFLICT" not in query.upper():
                 query = query.rstrip() + " ON CONFLICT DO NOTHING"
         return query
@@ -70,19 +70,23 @@ class PostgresConnection:
         return self.conn.close()
 
 def db():
-    # Sur Render, DATABASE_URL pointe vers Neon : les commandes et points deviennent persistants.
-    # En local, sans DATABASE_URL, on garde SQLite pour faciliter les tests.
-    if DATABASE_URL:
-        import psycopg
-        from psycopg.rows import dict_row
-        return PostgresConnection(psycopg.connect(DATABASE_URL, row_factory=dict_row))
+    # Base locale rapide : commandes, produits et réglages restent en SQLite.
+    # Neon n'est plus consulté pour charger les pages ou gérer le panier.
     conn = sqlite3.connect(DB)
     conn.row_factory = sqlite3.Row
     return conn
 
+def loyalty_db():
+    # Neon sert uniquement à conserver les points fidélité.
+    if DATABASE_URL:
+        import psycopg
+        from psycopg.rows import dict_row
+        return PostgresConnection(psycopg.connect(DATABASE_URL, row_factory=dict_row))
+    return db()
+
 def init_db():
     con=db()
-    pk = "BIGSERIAL PRIMARY KEY" if DATABASE_URL else "INTEGER PRIMARY KEY AUTOINCREMENT"
+    pk = "INTEGER PRIMARY KEY AUTOINCREMENT"
     con.execute(f"""CREATE TABLE IF NOT EXISTS orders(
         id {pk},
         created_at TEXT NOT NULL,
@@ -152,6 +156,20 @@ def init_db():
         con.execute("INSERT OR IGNORE INTO settings(key,value) VALUES(?,?)",(k,v))
     con.commit(); con.close()
 
+    # Initialise seulement la table fidélité sur Neon.
+    if DATABASE_URL:
+        lcon = loyalty_db()
+        lcon.execute("""CREATE TABLE IF NOT EXISTS loyalty_events(
+            id BIGSERIAL PRIMARY KEY,
+            order_id INTEGER NOT NULL,
+            phone TEXT NOT NULL,
+            delta INTEGER NOT NULL,
+            kind TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            UNIQUE(order_id, kind)
+        )""")
+        lcon.commit(); lcon.close()
+
 def get_settings():
     con=db(); rows=con.execute("SELECT key,value FROM settings").fetchall(); con.close()
     return {r["key"]:r["value"] for r in rows}
@@ -178,47 +196,24 @@ def money(x): return f"{x:.2f} €".replace(".",",")
 def normalize_phone(phone):
     return "".join(ch for ch in (phone or "") if ch.isdigit())
 
-def sync_loyalty_history(phone, con):
-    """Rattrape les anciennes commandes éligibles qui n'avaient pas encore reçu leur point."""
-    phone = normalize_phone(phone)
-    if not phone:
-        return
-    rows = con.execute("SELECT * FROM orders WHERE status IN ('accepted','done') ORDER BY id ASC").fetchall()
-    for order in rows:
-        if normalize_phone(order["phone"]) != phone:
-            continue
-        if str(order["order_type"] or "").lower() not in ("emporter", "sur_place"):
-            continue
-        already = con.execute(
-            "SELECT 1 FROM loyalty_events WHERE order_id=? AND kind IN ('earned','redeemed') LIMIT 1",
-            (order["id"],)
-        ).fetchone()
-        if already:
-            continue
-        try:
-            items = json.loads(order["items_json"] or "[]")
-        except Exception:
-            items = []
-        # Chaque Menu payé compte 1 point, quelle que soit sa catégorie
-        # (Burger, Tacos, Sandwich, Tenders, etc.). Les cadeaux/promo ne comptent pas.
-        paid_menus = [it for it in items if it.get("formula") == "menu" and not it.get("promo") and not it.get("loyalty_gift")]
-        earned_points = sum(max(1, int(it.get("quantity", 1) or 1)) for it in paid_menus)
-        if earned_points > 0:
-            con.execute(
-                "INSERT OR IGNORE INTO loyalty_events(order_id,phone,delta,kind,created_at) VALUES(?,?,?,?,?)",
-                (order["id"], phone, earned_points, "earned", order["created_at"] or datetime.now(PARIS_TZ).isoformat())
-            )
-    con.commit()
-
+def loyalty_event_order_id(created_at, local_order_id):
+    """Identifiant stable même si le SQLite local repart à 1 après un redéploi Render."""
+    try:
+        ms = int(datetime.fromisoformat(str(created_at)).timestamp() * 1000)
+    except Exception:
+        ms = int(datetime.now(PARIS_TZ).timestamp() * 1000)
+    return ms * 10000 + int(local_order_id)
 
 def loyalty_balance(phone, con=None):
     phone = normalize_phone(phone)
-    if not phone: return 0
+    if not phone:
+        return 0
     own = con is None
-    if own: con = db()
-    sync_loyalty_history(phone, con)
+    if own:
+        con = loyalty_db()
     row = con.execute("SELECT COALESCE(SUM(delta),0) AS b FROM loyalty_events WHERE phone=?", (phone,)).fetchone()
-    if own: con.close()
+    if own:
+        con.close()
     return max(0, int(row["b"] or 0))
 
 @app.get("/api/loyalty")
@@ -329,12 +324,10 @@ def create_order():
     con=db()
     insert_sql = """INSERT INTO orders(created_at,status,customer_name,phone,order_type,address,payment,payment_status,note,total,items_json)
                        VALUES(?,?,?,?,?,?,?,?,?,?,?)"""
-    if DATABASE_URL:
-        insert_sql += " RETURNING id"
     cur=con.execute(insert_sql,
                     (datetime.now(PARIS_TZ).isoformat(),"new",name,phone,typ,
                      (address+" "+postcode).strip(),payment,"unpaid",note,total,json.dumps(clean,ensure_ascii=False)))
-    oid = cur.fetchone()["id"] if DATABASE_URL else cur.lastrowid
+    oid = cur.lastrowid
     con.commit()
     o=con.execute("SELECT * FROM orders WHERE id=?",(oid,)).fetchone()
     printed,msg=try_network_print(o)
@@ -436,6 +429,7 @@ def admin_status(oid):
     if not order: con.close(); return jsonify(ok=False),404
     items=json.loads(order["items_json"] or "[]")
     phone=normalize_phone(order["phone"])
+    loyalty_order_id = loyalty_event_order_id(order["created_at"], oid)
     # Les points fidélité sont crédités uniquement quand l'admin accepte la commande.
     # Chaque Menu payé = 1 point. INSERT OR IGNORE évite tout double comptage.
     if st == "accepted" and str(order["order_type"] or "").lower() in ("emporter", "sur_place"):
@@ -444,13 +438,17 @@ def admin_status(oid):
         paid_menus = [it for it in items if it.get("formula") == "menu" and not it.get("promo") and not it.get("loyalty_gift")]
         earned_points = sum(max(1, int(it.get("quantity", 1) or 1)) for it in paid_menus)
         if earned_points > 0:
-            con.execute(
+            lcon = loyalty_db()
+            lcon.execute(
                 "INSERT OR IGNORE INTO loyalty_events(order_id,phone,delta,kind,created_at) VALUES(?,?,?,?,?)",
-                (oid, phone, earned_points, "earned", datetime.now(PARIS_TZ).isoformat())
+                (loyalty_order_id, phone, earned_points, "earned", datetime.now(PARIS_TZ).isoformat())
             )
-    # Si la commande est refusée, on annule les points gagnés ou le cadeau consommé.
+            lcon.commit(); lcon.close()
+    # Si la commande est refusée, on annule les points gagnés ou le cadeau consommé dans Neon.
     if st == "rejected":
-        con.execute("DELETE FROM loyalty_events WHERE order_id=?",(oid,))
+        lcon = loyalty_db()
+        lcon.execute("DELETE FROM loyalty_events WHERE order_id=?",(loyalty_order_id,))
+        lcon.commit(); lcon.close()
     con.execute("UPDATE orders SET status=? WHERE id=?",(st,oid)); con.commit(); con.close()
     return jsonify(ok=True)
 
@@ -833,7 +831,7 @@ def cart_checkout():
     loyalty_choice = session.get("loyalty_gift_choice", "").strip()
     loyalty_drink = request.form.get("loyalty_drink", "").strip()
     phone_key = normalize_phone(phone)
-    balance = loyalty_balance(phone_key, con)
+    balance = loyalty_balance(phone_key)
 
     if loyalty_choice:
         if order_type not in ("emporter", "sur_place"):
@@ -913,12 +911,11 @@ def cart_checkout():
         (created_at, status, customer_name, phone, order_type,
          address, payment, payment_status, note, total, items_json)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
-    if DATABASE_URL:
-        checkout_insert_sql += " RETURNING id"
+    order_created_at = datetime.now(PARIS_TZ).isoformat()
     cur = con.execute(
         checkout_insert_sql,
         (
-            datetime.now(PARIS_TZ).isoformat(),
+            order_created_at,
             "pending",
             name,
             phone,
@@ -931,12 +928,15 @@ def cart_checkout():
             json.dumps(items)
         )
     )
-    oid = cur.fetchone()["id"] if DATABASE_URL else cur.lastrowid
+    oid = cur.lastrowid
+    loyalty_order_id = loyalty_event_order_id(order_created_at, oid)
 
     if loyalty_choice:
-        # Le 6e cadeau consomme les 5 points.
-        con.execute("INSERT OR IGNORE INTO loyalty_events(order_id,phone,delta,kind,created_at) VALUES(?,?,?,?,?)",
-                    (oid,phone_key,-5,"redeemed",datetime.now(PARIS_TZ).isoformat()))
+        # Le 6e cadeau consomme les 5 points dans Neon uniquement.
+        lcon = loyalty_db()
+        lcon.execute("INSERT OR IGNORE INTO loyalty_events(order_id,phone,delta,kind,created_at) VALUES(?,?,?,?,?)",
+                     (loyalty_order_id,phone_key,-5,"redeemed",datetime.now(PARIS_TZ).isoformat()))
+        lcon.commit(); lcon.close()
     # Les points des Menus payés ne sont PAS crédités ici.
     # Ils seront ajoutés seulement lorsque l'admin clique « Accepter ».
 
