@@ -136,14 +136,22 @@ async function changeStatus(id, status) {
   });
   loadOrders();
 }
-function changeStatusAndPrint(id) {
-    fetch(`/api/admin/orders/${id}/status`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({status: "accepted"})
-    });
-
-    printOrder(id);
+async function changeStatusAndPrint(id) {
+    try {
+        const response = await fetch(`/api/admin/orders/${id}/status`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({status: "accepted"})
+        });
+        if (!response.ok) {
+            alert("Erreur : la commande n’a pas été acceptée.");
+            return;
+        }
+        await loadOrders();
+        printOrder(id);
+    } catch (e) {
+        alert("Erreur réseau : réessayez.");
+    }
 }
 function printOrder(id) {
     const order = window.currentOrders.find(o => o.id === id);
