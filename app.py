@@ -161,13 +161,18 @@ def init_db():
         lcon = loyalty_db()
         lcon.execute("""CREATE TABLE IF NOT EXISTS loyalty_events(
             id BIGSERIAL PRIMARY KEY,
-            order_id INTEGER NOT NULL,
+            order_id BIGINT NOT NULL,
             phone TEXT NOT NULL,
             delta INTEGER NOT NULL,
             kind TEXT NOT NULL,
             created_at TEXT NOT NULL,
             UNIQUE(order_id, kind)
         )""")
+        # Les identifiants de fidélité combinent le timestamp et l'id SQLite local
+        # (ex. ~1.7e16) afin d'éviter les collisions après un redéploi Render.
+        # Une ancienne table Neon pouvait encore avoir order_id en INTEGER 32 bits,
+        # ce qui faisait échouer « Accepter » avant la mise à jour du statut.
+        lcon.execute("ALTER TABLE loyalty_events ALTER COLUMN order_id TYPE BIGINT")
         lcon.commit(); lcon.close()
 
 def get_settings():
