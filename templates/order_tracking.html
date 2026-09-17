@@ -11,11 +11,13 @@
         <h1>🍔 Commande #{{ order_id }}</h1>
         <div id="order-status" style="font-size:24px;font-weight:700;margin:24px 0;">Chargement...</div>
         <p id="order-message" style="font-size:18px;"></p>
-        <p style="margin-top:24px;">Gardez cette page ouverte : le statut se met à jour automatiquement.</p>
+        <p style="margin-top:24px;">Vous pouvez retourner au menu : le suivi restera visible sur l’accueil.</p>
         <p><a href="/">← Retour à l'accueil</a></p>
     </div>
 <script>
 const orderId = {{ order_id|tojson }};
+// Mémorise la dernière commande dans ce navigateur (local uniquement, sans Neon).
+try { localStorage.setItem('hc_active_order_id', String(orderId)); } catch (e) {}
 let lastStatus = {{ initial_status|tojson }};
 
 function showStatus(status) {

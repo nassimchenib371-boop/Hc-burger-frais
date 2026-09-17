@@ -9,6 +9,11 @@
 
 <body>
 
+    <!-- Suivi léger de la dernière commande : SQLite local uniquement, aucun appel Neon. -->
+    <a id="hc-order-banner" href="#" style="display:none;position:fixed;left:12px;right:12px;bottom:14px;z-index:9999;max-width:720px;margin:auto;padding:13px 16px;border-radius:14px;background:#1f1f1f;color:#fff;text-align:center;text-decoration:none;font-weight:700;box-shadow:0 4px 18px rgba(0,0,0,.25);">
+        <span id="hc-order-banner-text"></span>
+    </a>
+
     <h1>🍔 HC Burger Frais</h1>
 
     {% if not restaurant_open %}
@@ -510,5 +515,49 @@ async function checkFidelity(){
   <a href="{{ url_for('confidentialite') }}">Confidentialité</a> •
   <a href="{{ url_for('cgv') }}">CGV</a>
 </footer>
+
+<script>
+(function () {
+  const banner = document.getElementById('hc-order-banner');
+  const text = document.getElementById('hc-order-banner-text');
+  let orderId = null;
+  try { orderId = localStorage.getItem('hc_active_order_id'); } catch (e) {}
+  if (!orderId || !/^\d+$/.test(orderId)) return;
+
+  banner.href = '/commande/' + orderId;
+
+  function render(status) {
+    if (status === 'accepted') text.textContent = '🟢 Commande #' + orderId + ' acceptée — en préparation';
+    else if (status === 'done') text.textContent = '✅ Commande #' + orderId + ' prête !';
+    else if (status === 'rejected') text.textContent = '🔴 Commande #' + orderId + ' refusée';
+    else text.textContent = '🟠 Commande #' + orderId + ' en attente';
+    banner.style.display = 'block';
+    return status === 'done' || status === 'rejected';
+  }
+
+  async function checkOrder() {
+    try {
+      const r = await fetch('/api/orders/' + orderId + '/status', {cache:'no-store'});
+      if (r.status === 404) {
+        try { localStorage.removeItem('hc_active_order_id'); } catch (e) {}
+        banner.style.display = 'none';
+        return true;
+      }
+      if (!r.ok) return false;
+      const d = await r.json();
+      return d.ok ? render(d.status) : false;
+    } catch (e) { return false; }
+  }
+
+  checkOrder().then(function (finished) {
+    if (finished) return;
+    const timer = setInterval(async function () {
+      if (document.hidden) return;
+      if (await checkOrder()) clearInterval(timer);
+    }, 10000);
+  });
+})();
+</script>
+
 </body>
 </html>
