@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi de commande - HC Burger Frais</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="product-card" style="max-width:620px;margin:40px auto;text-align:center;padding:24px;">
+        <h1>🍔 Commande #{{ order_id }}</h1>
+        <div id="order-status" style="font-size:24px;font-weight:700;margin:24px 0;">Chargement...</div>
+        <p id="order-message" style="font-size:18px;"></p>
+        <p style="margin-top:24px;">Gardez cette page ouverte : le statut se met à jour automatiquement.</p>
+        <p><a href="/">← Retour à l'accueil</a></p>
+    </div>
+<script>
+const orderId = {{ order_id|tojson }};
+let lastStatus = {{ initial_status|tojson }};
+
+function showStatus(status) {
+    const box = document.getElementById('order-status');
+    const msg = document.getElementById('order-message');
+    if (status === 'accepted') {
+        box.textContent = '🟢 Commande acceptée';
+        msg.textContent = 'Votre commande est en préparation. 👨‍🍳';
+    } else if (status === 'done') {
+        box.textContent = '✅ Commande prête';
+        msg.textContent = 'Votre commande est terminée.';
+    } else if (status === 'rejected') {
+        box.textContent = '🔴 Commande refusée';
+        msg.textContent = 'Veuillez contacter le restaurant pour plus d’informations.';
+    } else {
+        box.textContent = '🟠 En attente';
+        msg.textContent = 'Votre commande a bien été envoyée. Nous attendons sa confirmation.';
+    }
+}
+
+async function refreshStatus() {
+    try {
+        const r = await fetch(`/api/orders/${orderId}/status`, {cache: 'no-store'});
+        if (!r.ok) return;
+        const data = await r.json();
+        if (data.ok) {
+            if (lastStatus !== data.status && data.status === 'accepted' && navigator.vibrate) navigator.vibrate([200,100,200]);
+            lastStatus = data.status;
+            showStatus(data.status);
+        }
+    } catch (e) {}
+}
+
+showStatus(lastStatus);
+setInterval(refreshStatus, 3000);
+</script>
+</body>
+</html>
