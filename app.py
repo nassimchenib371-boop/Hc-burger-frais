@@ -340,7 +340,7 @@ def create_order():
 
     if payment=="Paiement CB en ligne":
         if not STRIPE_SECRET_KEY:
-            return jsonify(ok=True,order_id=oid,total=total,printed=printed,print_message=msg,
+            return jsonify(ok=True,order_id=oid,total=total,printed=printed,print_message=msg,tracking_url=url_for("order_tracking", oid=oid),
                            payment_required=True,payment_ready=False,
                            message="Commande enregistrée. Le compte de paiement doit encore être connecté.")
         try:
@@ -356,11 +356,11 @@ def create_order():
                 cancel_url=f"{PUBLIC_BASE_URL}/payment/cancel?order_id={oid}",
                 metadata={"order_id":str(oid)}
             )
-            return jsonify(ok=True,order_id=oid,total=total,printed=printed,checkout_url=checkout.url,payment_ready=True)
+            return jsonify(ok=True,order_id=oid,total=total,printed=printed,checkout_url=checkout.url,tracking_url=url_for("order_tracking", oid=oid),payment_ready=True)
         except Exception as e:
-            return jsonify(ok=True,order_id=oid,total=total,printed=printed,payment_ready=False,
+            return jsonify(ok=True,order_id=oid,total=total,printed=printed,payment_ready=False,tracking_url=url_for("order_tracking", oid=oid),
                            message=f"Commande enregistrée mais paiement non lancé: {e}")
-    return jsonify(ok=True,order_id=oid,total=total,printed=printed,print_message=msg,payment_ready=True)
+    return jsonify(ok=True,order_id=oid,total=total,printed=printed,print_message=msg,tracking_url=url_for("order_tracking", oid=oid),payment_ready=True)
 
 @app.get("/payment/success")
 def payment_success():
@@ -729,7 +729,7 @@ def order(pid):
             "formula": formula,
             "drink": drink
         }]
-        con.execute(
+        cur = con.execute(
                 """INSERT INTO orders
                 (created_at, status, customer_name, phone, order_type,
                  address, payment, payment_status, note, total, items_json)
@@ -748,9 +748,10 @@ def order(pid):
                     json.dumps(items)
                 )
             )
+        oid = cur.lastrowid
         con.commit()
         con.close()
-        return redirect(url_for("home"))
+        return redirect(url_for("order_tracking", oid=oid))
     con.close()
     return render_template("order.html", product=product)  
 @app.post("/cart/checkout")
@@ -952,7 +953,27 @@ def cart_checkout():
     session["cart_customizations"] = {}
     session.pop("loyalty_gift_choice", None)
     session.pop("loyalty_phone", None)
-    return redirect(url_for("home"))
+    return redirect(url_for("order_tracking", oid=oid))
+
+@app.get("/commande/<int:oid>")
+def order_tracking(oid):
+    # Page légère : aucune connexion Neon. Elle ne lit que le statut de la commande locale.
+    con = db()
+    order = con.execute("SELECT id, status FROM orders WHERE id=?", (oid,)).fetchone()
+    con.close()
+    if not order:
+        return "Commande introuvable", 404
+    return render_template("order_tracking.html", order_id=oid, initial_status=order["status"])
+
+@app.get("/api/orders/<int:oid>/status")
+def public_order_status(oid):
+    # Ne renvoie aucune donnée personnelle : seulement le numéro et le statut.
+    con = db()
+    order = con.execute("SELECT id, status FROM orders WHERE id=?", (oid,)).fetchone()
+    con.close()
+    if not order:
+        return jsonify(ok=False), 404
+    return jsonify(ok=True, order_id=order["id"], status=order["status"])
 
 init_db()
 
