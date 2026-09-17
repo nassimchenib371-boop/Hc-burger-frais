@@ -17,7 +17,11 @@
 <script>
 const orderId = {{ order_id|tojson }};
 // Mémorise la dernière commande dans ce navigateur (local uniquement, sans Neon).
-try { localStorage.setItem('hc_active_order_id', String(orderId)); } catch (e) {}
+try {
+    localStorage.setItem('hc_active_order_id', String(orderId));
+    if ({{ initial_status|tojson }} !== 'done') localStorage.removeItem('hc_active_order_done_at');
+    else if (!localStorage.getItem('hc_active_order_done_at')) localStorage.setItem('hc_active_order_done_at', String(Date.now()));
+} catch (e) {}
 let lastStatus = {{ initial_status|tojson }};
 
 function showStatus(status) {
@@ -45,6 +49,9 @@ async function refreshStatus() {
         const data = await r.json();
         if (data.ok) {
             if (lastStatus !== data.status && data.status === 'accepted' && navigator.vibrate) navigator.vibrate([200,100,200]);
+            if (data.status === 'done' && lastStatus !== 'done') {
+                try { localStorage.setItem('hc_active_order_done_at', String(Date.now())); } catch (e) {}
+            }
             lastStatus = data.status;
             showStatus(data.status);
         }

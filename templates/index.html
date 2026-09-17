@@ -528,7 +528,24 @@ async function checkFidelity(){
 
   function render(status) {
     if (status === 'accepted') text.textContent = '🟢 Commande #' + orderId + ' acceptée — en préparation';
-    else if (status === 'done') text.textContent = '✅ Commande #' + orderId + ' prête !';
+    else if (status === 'done') {
+      text.textContent = '✅ Commande #' + orderId + ' prête !';
+      let doneAt = 0;
+      try {
+        doneAt = Number(localStorage.getItem('hc_active_order_done_at') || 0);
+        if (!doneAt) { doneAt = Date.now(); localStorage.setItem('hc_active_order_done_at', String(doneAt)); }
+      } catch (e) { doneAt = Date.now(); }
+      const remaining = 10 * 60 * 1000 - (Date.now() - doneAt);
+      if (remaining <= 0) {
+        try { localStorage.removeItem('hc_active_order_id'); localStorage.removeItem('hc_active_order_done_at'); } catch (e) {}
+        banner.style.display = 'none';
+        return true;
+      }
+      setTimeout(function () {
+        try { localStorage.removeItem('hc_active_order_id'); localStorage.removeItem('hc_active_order_done_at'); } catch (e) {}
+        banner.style.display = 'none';
+      }, remaining);
+    }
     else if (status === 'rejected') text.textContent = '🔴 Commande #' + orderId + ' refusée';
     else text.textContent = '🟠 Commande #' + orderId + ' en attente';
     banner.style.display = 'block';
@@ -539,7 +556,7 @@ async function checkFidelity(){
     try {
       const r = await fetch('/api/orders/' + orderId + '/status', {cache:'no-store'});
       if (r.status === 404) {
-        try { localStorage.removeItem('hc_active_order_id'); } catch (e) {}
+        try { localStorage.removeItem('hc_active_order_id'); localStorage.removeItem('hc_active_order_done_at'); } catch (e) {}
         banner.style.display = 'none';
         return true;
       }
