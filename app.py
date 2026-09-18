@@ -1,5 +1,5 @@
 
-import os, json, sqlite3, socket
+import os, json, sqlite3, socket, urllib.request, urllib.error
 
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 from datetime import datetime
@@ -9,10 +9,6 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(BASE, "orders.db")
-# Etat ouverture/fermeture: fichier serveur distinct de Neon.
-# Sur Render, monter un Persistent Disk sur /var/data pour conserver cet etat
-# apres fermeture du navigateur, redemarrage ou redeploiement.
-SITE_STATE_FILE = os.getenv("SITE_STATE_FILE", "/var/data/restaurant_open.txt" if os.getenv("RENDER") else os.path.join(BASE, "restaurant_open.txt"))
 DEFAULT_PRODUCTS = json.load(open(os.path.join(BASE, "products.json"), encoding="utf-8"))
 
 app = Flask(__name__)
@@ -42,24 +38,52 @@ LOYALTY_GIFTS = {
     "Pâtes à la crème Poulet": "Pâtes à la crème - Poulet",
     "Menu Tacos": "Tacos M",
 }
+# Etat OUVERT/FERME persistant pour Render Free.
+# Il est conserve dans un GitHub Gist prive (pas dans Neon, ni session/localStorage,
+# ni le disque ephemere de Render). Configurer GITHUB_GIST_ID et GITHUB_GIST_TOKEN
+# dans Environment sur Render. Le Gist contient un fichier restaurant_status.json.
+GITHUB_GIST_ID = os.getenv("GITHUB_GIST_ID", "").strip()
+GITHUB_GIST_TOKEN = os.getenv("GITHUB_GIST_TOKEN", "").strip()
+STATUS_GIST_FILE = "restaurant_status.json"
+
+def _gist_request(method="GET", payload=None):
+    if not GITHUB_GIST_ID or not GITHUB_GIST_TOKEN:
+        raise RuntimeError("GITHUB_GIST_ID / GITHUB_GIST_TOKEN manquants")
+    url = f"https://api.github.com/gists/{GITHUB_GIST_ID}"
+    data = None if payload is None else json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(url, data=data, method=method)
+    req.add_header("Accept", "application/vnd.github+json")
+    req.add_header("Authorization", f"Bearer {GITHUB_GIST_TOKEN}")
+    req.add_header("X-GitHub-Api-Version", "2022-11-28")
+    req.add_header("User-Agent", "HC-Burger-Frais")
+    if data is not None:
+        req.add_header("Content-Type", "application/json")
+    with urllib.request.urlopen(req, timeout=5) as response:
+        return json.loads(response.read().decode("utf-8"))
+
 def restaurant_is_open():
-    # Etat 100 % serveur, independant du navigateur/session/localStorage et de Neon.
-    # Le fichier doit etre place sur le Persistent Disk Render (/var/data).
     try:
-        with open(SITE_STATE_FILE, "r", encoding="utf-8") as f:
-            return f.read().strip() != "0"
-    except FileNotFoundError:
-        return True
+        gist = _gist_request()
+        content = gist.get("files", {}).get(STATUS_GIST_FILE, {}).get("content", "")
+        return bool(json.loads(content).get("open", True))
+    except Exception as exc:
+        # Secours local seulement si GitHub est temporairement indisponible.
+        # On ne modifie jamais Neon pour cette fonction.
+        app.logger.warning("Lecture etat restaurant via GitHub impossible: %s", exc)
+        try:
+            return get_settings().get("restaurant_open", "1") == "1"
+        except Exception:
+            return True
 
 def set_restaurant_open(is_open):
-    directory = os.path.dirname(SITE_STATE_FILE) or BASE
-    os.makedirs(directory, exist_ok=True)
-    tmp = SITE_STATE_FILE + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        f.write("1" if is_open else "0")
-        f.flush()
-        os.fsync(f.fileno())
-    os.replace(tmp, SITE_STATE_FILE)
+    value = bool(is_open)
+    content = json.dumps({"open": value}, separators=(",", ":"))
+    _gist_request("PATCH", {"files": {STATUS_GIST_FILE: {"content": content}}})
+    # Copie locale de secours pour le processus courant / indisponibilite GitHub.
+    con = db()
+    con.execute("INSERT INTO settings(key,value) VALUES('restaurant_open',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", ("1" if value else "0",))
+    con.commit(); con.close()
+    return value
 class PostgresConnection:
     """Petit adaptateur pour garder le code existant compatible avec Neon/PostgreSQL."""
     def __init__(self, conn):
@@ -440,9 +464,9 @@ def admin_set_restaurant_status():
     is_open = bool(data.get("open"))
     try:
         set_restaurant_open(is_open)
-    except OSError as exc:
-        app.logger.exception("Impossible d'enregistrer l'etat ouverture/fermeture: %s", exc)
-        return jsonify(ok=False, error="Etat non enregistre sur le serveur"), 500
+    except Exception as exc:
+        app.logger.error("Ecriture etat restaurant via GitHub impossible: %s", exc)
+        return jsonify(ok=False, error="persistent_storage_unavailable"), 503
     return jsonify(ok=True, open=is_open)
 
 @app.post("/api/admin/orders/<int:oid>/status")
