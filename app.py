@@ -26,13 +26,17 @@ PROMO_GIFTS = ["Tacos M", "Simple Smash", "Sandwich Kebab", "Pâtes à la crème
 LOYALTY_GIFTS = {
     "Menu Simple Smash": "Simple Smash",
     "Menu Big Burger": "Big Burger",
-    "Menu Big Philippe Cheese": "Big Philly Cheese",
+    "Menu Big Philippe": "Big Philly Cheese",
+    "Menu Big Polo": "Big Pollo",
+    "Menu Sandwich Poulet Mariné": "Sandwich Poulet Mariné",
     "Menu Sandwich Steak Cheddar": "Sandwich Steak Cheddar",
     "Menu Sandwich Kebab": "Sandwich Kebab",
-    "Poutine Hermanos seule": "Poutine Hermanos",
-    "Pâtes à la crème Poulet seule": "Pâtes à la crème - Poulet",
-    "Pâtes à la crème Viande hachée seule": "Pâtes à la crème - Viande hachée",
-    "Menu Tacos M": "Tacos M",
+    "Menu Sandwich Escalope": "Sandwich Escalope",
+    "Menu Poutine Campagnard": "Poutine Campagna",
+    "Pâtes à la crème": "Pâtes à la crème",
+    "Pâtes à la crème Viande hachée": "Pâtes à la crème - Viande hachée",
+    "Pâtes à la crème Poulet": "Pâtes à la crème - Poulet",
+    "Menu Tacos": "Tacos M",
 }
 def restaurant_is_open():
     # Ouverture/fermeture manuelle depuis la page Administration.
@@ -435,9 +439,9 @@ def admin_status(oid):
     items=json.loads(order["items_json"] or "[]")
     phone=normalize_phone(order["phone"])
     loyalty_order_id = loyalty_event_order_id(order["created_at"], oid)
-    # Les points fidélité sont crédités uniquement quand l'admin accepte la commande.
+    # Les points fidélité sont crédités uniquement quand l'admin termine la commande.
     # Chaque Menu payé = 1 point. INSERT OR IGNORE évite tout double comptage.
-    if st == "accepted" and str(order["order_type"] or "").lower() in ("emporter", "sur_place"):
+    if st == "done" and str(order["order_type"] or "").lower() in ("emporter", "sur_place"):
         # Un cadeau fidélité ne rapporte pas de point, mais les Menus payants
         # ajoutés dans la même commande rapportent bien leurs points.
         paid_menus = [it for it in items if it.get("formula") == "menu" and not it.get("promo") and not it.get("loyalty_gift")]
@@ -836,6 +840,9 @@ def cart_checkout():
     # ou ajouter d'autres produits. Valable uniquement Sur place / À emporter.
     loyalty_choice = session.get("loyalty_gift_choice", "").strip()
     loyalty_drink = request.form.get("loyalty_drink", "").strip()
+    loyalty_viande = request.form.get("loyalty_viande", "").strip()
+    loyalty_sauce = request.form.get("loyalty_sauce", "").strip()
+    loyalty_garnitures = [g.strip() for g in request.form.getlist("loyalty_garnitures") if g.strip()]
     phone_key = normalize_phone(phone)
     balance = loyalty_balance(phone_key)
 
@@ -853,11 +860,27 @@ def cart_checkout():
         if not gift_product:
             con.close(); return "Cadeau fidélité indisponible.", 400
         is_menu_gift = loyalty_choice.startswith("Menu ")
+        is_tacos_gift = loyalty_choice == "Menu Tacos"
+        is_sandwich_gift = loyalty_choice.startswith("Menu Sandwich ")
+        allowed_viandes = {"Kebab", "Viande hachée", "Poulet mariné", "Escalope", "Tenders", "Cordon bleu", "Nuggets"}
+        allowed_sauces = {"Algérienne", "Harissa", "Mayonnaise", "Biggy", "Barbecue", "Andalouse", "Samouraï", "Brésil", "Ketchup"}
+        allowed_garnitures = {"Salade", "Tomate", "Oignon"}
+        if is_tacos_gift:
+            if loyalty_viande not in allowed_viandes or loyalty_sauce not in allowed_sauces:
+                con.close(); return "Choisissez la viande et la sauce de votre Tacos offert.", 400
+            loyalty_garnitures = []
+        elif is_sandwich_gift:
+            loyalty_viande = ""
+            if loyalty_sauce not in allowed_sauces:
+                con.close(); return "Choisissez la sauce de votre Sandwich offert.", 400
+            loyalty_garnitures = [g for g in loyalty_garnitures if g in allowed_garnitures]
+        else:
+            loyalty_viande = ""; loyalty_sauce = ""; loyalty_garnitures = []
         items.append({
             "product_id": int(gift_product["id"]), "name": loyalty_choice, "category": gift_product["category"],
             "quantity": 1, "price": 0.0, "formula": "loyalty",
             "drink": loyalty_drink if is_menu_gift else "",
-            "viande": "", "sauce": "", "supplements": [], "garnitures": [], "loyalty_gift": True
+            "viande": loyalty_viande, "sauce": loyalty_sauce, "supplements": [], "garnitures": loyalty_garnitures, "loyalty_gift": True
         })
 
     # Promo: 2 menus (ou plus) dans la commande = 1 produit offert au choix.
@@ -944,7 +967,7 @@ def cart_checkout():
                      (loyalty_order_id,phone_key,-5,"redeemed",datetime.now(PARIS_TZ).isoformat()))
         lcon.commit(); lcon.close()
     # Les points des Menus payés ne sont PAS crédités ici.
-    # Ils seront ajoutés seulement lorsque l'admin clique « Accepter ».
+    # Ils seront ajoutés seulement lorsque l'admin clique « Terminer ».
 
     con.commit()
     con.close()
