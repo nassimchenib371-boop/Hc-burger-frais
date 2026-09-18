@@ -30,14 +30,21 @@
         <p id="loyalty-status">Entrez votre numéro de téléphone pour voir vos points.</p>
         <div id="loyalty-gift-box" style="display:none;">
             <p><strong>🎁 Votre cadeau est prêt !</strong></p>
-            <p>Choisissez votre 6ème Menu normalement parmi : Big Burger, Big Philippe, Pâtes à la crème Poulet, Pâtes à la crème Viande hachée ou Simple Smash. Dès que votre numéro est reconnu, ce Menu passe automatiquement à <strong>0,00 €</strong>.</p>
+            <p>Choisissez votre cadeau parmi les choix proposés. Les Tacos et Sandwichs offerts gardent leurs options de personnalisation. Le cadeau passe à <strong>0,00 €</strong>.</p>
         </div>
     </div>
 
     {% if pending_loyalty_gift %}
     <div class="product-card" style="border:3px solid #f4c400;background:#fff8d8;">
       <h3>🎁 CADEAU FIDÉLITÉ</h3><p><strong>{{ pending_loyalty_gift }}</strong></p><p><strong>Prix : 0,00 €</strong></p>
-      {% if pending_loyalty_gift.startswith('Menu ') %}<label>🥤 Boisson :</label><br><select name="loyalty_drink" required><option>Coca-Cola</option><option>Fanta</option><option>Oasis</option><option>Eau</option><option>Coca-Cola Zéro</option><option>Coca Cherry</option><option>Lipton Ice Tea</option><option>Selecto</option><option>Perrier</option></select>{% endif %}
+      {% if pending_loyalty_gift.startswith('Menu ') %}<label>🥤 Boisson :</label><br><select name="loyalty_drink" required><option>Coca-Cola</option><option>Fanta</option><option>Oasis</option><option>Eau</option><option>Coca-Cola Zéro</option><option>Coca Cherry</option><option>Lipton Ice Tea</option><option>Selecto</option><option>Perrier</option><option>Cristaline Citron</option><option>Cristaline Pêche</option></select><br><br>{% endif %}
+      {% if pending_loyalty_gift == 'Menu Tacos' %}
+      <label>🥩 Viande :</label><br><select name="loyalty_viande" required><option value="">— Choisir la viande —</option><option>Kebab</option><option>Viande hachée</option><option>Poulet mariné</option><option>Escalope</option><option>Tenders</option><option>Cordon bleu</option><option>Nuggets</option></select><br><br>
+      <label>🥫 Sauce :</label><br><select name="loyalty_sauce" required><option value="">— Choisir la sauce —</option><option>Algérienne</option><option>Harissa</option><option>Mayonnaise</option><option>Biggy</option><option>Barbecue</option><option>Andalouse</option><option>Samouraï</option><option>Brésil</option><option>Ketchup</option></select>
+      {% elif pending_loyalty_gift.startswith('Menu Sandwich ') %}
+      <label>🥫 Sauce :</label><br><select name="loyalty_sauce" required><option value="">— Choisir la sauce —</option><option>Algérienne</option><option>Harissa</option><option>Mayonnaise</option><option>Biggy</option><option>Barbecue</option><option>Andalouse</option><option>Samouraï</option><option>Brésil</option><option>Ketchup</option></select>
+      <p>🥗 Garnitures :</p><label><input type="checkbox" name="loyalty_garnitures" value="Salade"> Salade</label><br><label><input type="checkbox" name="loyalty_garnitures" value="Tomate"> Tomate</label><br><label><input type="checkbox" name="loyalty_garnitures" value="Oignon"> Oignon</label>
+      {% endif %}
       <p>Vous pouvez confirmer ce cadeau seul ou ajouter d'autres produits.</p>
     </div>
     {% endif %}
