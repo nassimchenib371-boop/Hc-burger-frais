@@ -9,6 +9,24 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(BASE, "orders.db")
+
+# Zones de livraison HC Burger Frais.
+# 13003/13005 : gratuite dès 15 €, sinon 3 €.
+# 13012/13013/13014 : gratuite dès 20 €, sinon 3 €.
+DELIVERY_RULES = {
+    "13003": 15.0,
+    "13005": 15.0,
+    "13012": 20.0,
+    "13013": 20.0,
+    "13014": 20.0,
+}
+DELIVERY_FEE_BELOW_THRESHOLD = 3.0
+
+def delivery_fee_for(postcode, merchandise_total):
+    threshold = DELIVERY_RULES.get((postcode or "").strip())
+    if threshold is None:
+        return None
+    return 0.0 if float(merchandise_total) >= threshold else DELIVERY_FEE_BELOW_THRESHOLD
 DEFAULT_PRODUCTS = json.load(open(os.path.join(BASE, "products.json"), encoding="utf-8"))
 
 app = Flask(__name__)
@@ -146,9 +164,9 @@ def init_db():
         "phone":"04 91 49 38 68",
         "hours_1":"Lun–Jeu & Sam : 11:00 → 00:00",
         "hours_2":"Ven & Dim : 14:00 → 00:00",
-        "delivery_postcodes":"13004",
-        "delivery_fee":"0",
-        "delivery_label":"Livraison gratuite dans le 13004",
+        "delivery_postcodes":"13003,13005,13012,13013,13014",
+        "delivery_fee":"3",
+        "delivery_label":"Livraison 13003/13005/13012/13013/13014",
         "allow_sur_place":"1",
         "allow_takeaway":"1",
         "allow_delivery":"1",
@@ -308,8 +326,7 @@ def create_order():
     if not name or not phone: return jsonify(ok=False,error="Nom et téléphone requis"),400
     if typ not in allowed: return jsonify(ok=False,error="Type de commande non disponible"),400
     if typ=="Livraison":
-        postcodes=[x.strip() for x in s.get("delivery_postcodes","").split(",") if x.strip()]
-        if postcode not in postcodes:
+        if postcode not in DELIVERY_RULES:
             return jsonify(ok=False,error="Livraison non disponible pour ce code postal"),400
         if not address: return jsonify(ok=False,error="Adresse requise"),400
 
@@ -328,7 +345,10 @@ def create_order():
         total+=unit*qty
         clean.append({"name":key[0],"kind":key[1],"qty":qty,"unit":unit})
     if typ=="Livraison":
-        total += float(s.get("delivery_fee","0") or 0)
+        fee = delivery_fee_for(postcode, total)
+        if fee is None:
+            return jsonify(ok=False,error="Livraison non disponible pour ce code postal"),400
+        total += fee
 
     con=db()
     insert_sql = """INSERT INTO orders(created_at,status,customer_name,phone,order_type,address,payment,payment_status,note,total,items_json)
@@ -787,9 +807,11 @@ def cart_checkout():
     address = request.form.get("address", "").strip()
     postal = request.form.get("postal_code", "").strip()
     if order_type == "livraison":
+        if postal not in DELIVERY_RULES:
+            return "Livraison disponible uniquement dans les codes postaux 13003, 13005, 13012, 13013 et 13014.", 400
+        if not address:
+            return "Adresse de livraison requise.", 400
         address = f"{address}, {postal}"
-        if postal != "13004":
-            return "Livraison disponible uniquement dans le 13004.", 400
     if not name or not phone:
             return "Nom et téléphone requis", 400
 
@@ -943,11 +965,15 @@ def cart_checkout():
             "promo": True
         })
 
-    # Livraison : uniquement 13004, avec un minimum de 10 € à payer.
+    # Livraison : frais de 3 € sous le seuil de gratuité de la zone.
+    # 13003/13005 : gratuite dès 15 €. 13012/13013/13014 : gratuite dès 20 €.
     # La fidélité (6e menu offert) ne s'applique pas aux livraisons.
-    if order_type == "livraison" and total < 10.0:
-        con.close()
-        return "Pour une livraison dans le 13004, le minimum de commande est de 10,00 €.", 400
+    if order_type == "livraison":
+        fee = delivery_fee_for(postal, total)
+        if fee is None:
+            con.close()
+            return "Livraison non disponible pour ce code postal.", 400
+        total += fee
 
     checkout_insert_sql = """INSERT INTO orders
         (created_at, status, customer_name, phone, order_type,
