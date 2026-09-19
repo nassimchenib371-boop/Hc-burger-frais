@@ -834,10 +834,18 @@ def cart_checkout():
 
         quantity = int(quantity)
         formula = request.form.get(f"formula_{pid}", "seul")
-        # Un menu est autorisé uniquement pour les produits qui ont un prix menu.
-        # Les Menu Enfant restent à prix fixe (6,90 €).
-        if formula == "menu" and product["menu_price"] is None:
-            formula = "seul"
+        # Si plusieurs exemplaires du même produit sont dans le panier, le client
+        # peut choisir combien passent en menu; les autres restent seuls.
+        if quantity > 1:
+            try:
+                menu_qty = int(request.form.get(f"menu_qty_{pid}", 0))
+            except (TypeError, ValueError):
+                menu_qty = 0
+            menu_qty = max(0, min(quantity, menu_qty))
+        else:
+            menu_qty = 1 if formula == "menu" else 0
+        if product["menu_price"] is None:
+            menu_qty = 0
         drink = request.form.get(f"drink_{pid}", "")
 
         unit_price = float(product["price"])
@@ -855,7 +863,8 @@ def cart_checkout():
 
             item_unit_price = unit_price + supplements_extra_price(product["category"], supplements)
 
-            if formula == "menu":
+            item_formula = "menu" if i < menu_qty else "seul"
+            if item_formula == "menu":
                 # Utilise le vrai prix menu enregistré (ex. Tenders 5→7,50 ; 8→10,50).
                 item_unit_price = float(product["menu_price"]) + supplements_extra_price(product["category"], supplements)
 
@@ -865,8 +874,8 @@ def cart_checkout():
                 "category": product["category"],
                 "quantity": 1,
                 "price": item_unit_price,
-                "formula": formula,
-                "drink": drink if formula == "menu" else "",
+                "formula": item_formula,
+                "drink": drink if item_formula == "menu" else "",
                 "viande": viande,
                 "sauce": sauce,
                 "supplements": supplements,
