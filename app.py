@@ -1054,6 +1054,46 @@ def public_order_status(oid):
 def google_site_verification():
     return "google-site-verification: google48b9ad064bd54754.html", 200, {"Content-Type": "text/html; charset=utf-8"}
 
+
+@app.get("/sitemap.xml")
+def sitemap():
+    base = "https://hc-burger-frais.onrender.com"
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>{base}/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>{base}/mentions-legales</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  <url>
+    <loc>{base}/confidentialite</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  <url>
+    <loc>{base}/cgv</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+</urlset>"""
+    return xml, 200, {"Content-Type": "application/xml; charset=utf-8"}
+
+
+@app.get("/robots.txt")
+def robots():
+    body = """User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Sitemap: https://hc-burger-frais.onrender.com/sitemap.xml
+"""
+    return body, 200, {"Content-Type": "text/plain; charset=utf-8"}
+
 init_db()
 
 if __name__ == "__main__":
