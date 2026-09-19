@@ -392,6 +392,14 @@
     "img": "tenders_hc.png"
   },
   {
+    "cat": "Tenders",
+    "name": "6 Nuggets",
+    "desc": "6 pièces de nuggets",
+    "price": 4.5,
+    "menu": 7.0,
+    "img": "nuggets_6_hc.png"
+  },
+  {
     "cat": "Menu Enfant",
     "name": "Menu Enfant - Burger simple",
     "desc": "Burger simple + frites + Capri-Sun",
