@@ -464,10 +464,12 @@ def admin_status(oid):
     # Les points fidélité sont crédités uniquement quand l'admin termine la commande.
     # Chaque Menu payé = 1 point. INSERT OR IGNORE évite tout double comptage.
     if st == "done" and str(order["order_type"] or "").lower() in ("emporter", "sur_place"):
-        # Un cadeau fidélité ne rapporte pas de point, mais les Menus payants
-        # ajoutés dans la même commande rapportent bien leurs points.
+        # Règle commerciale : si la commande profite de l'offre
+        # "2 menus = 1 produit offert", AUCUN point fidélité n'est crédité
+        # pour toute la commande. Sinon, chaque Menu payé = 1 point.
+        has_promo_gift = any(it.get("promo") is True or it.get("formula") == "offert" for it in items)
         paid_menus = [it for it in items if it.get("formula") == "menu" and not it.get("promo") and not it.get("loyalty_gift")]
-        earned_points = sum(max(1, int(it.get("quantity", 1) or 1)) for it in paid_menus)
+        earned_points = 0 if has_promo_gift else sum(max(1, int(it.get("quantity", 1) or 1)) for it in paid_menus)
         if earned_points > 0:
             lcon = loyalty_db()
             lcon.execute(
@@ -925,9 +927,7 @@ def cart_checkout():
     menu_count = sum(1 for item in items if item.get("formula") == "menu")
     promo_gift = request.form.get("promo_gift", "").strip()
 
-    # Les deux offres ne sont pas cumulables : si un cadeau fidélité est utilisé,
-    # l'offre « 2 Menus = 1 produit offert » ne s'applique pas à cette commande.
-    if menu_count >= 2 and not loyalty_choice:
+    if menu_count >= 2:
         if promo_gift not in PROMO_GIFTS:
             con.close()
             return "Choisissez votre produit offert.", 400
