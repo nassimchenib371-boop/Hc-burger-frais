@@ -126,6 +126,7 @@
 
     <h2 id="total-actuel">Total actuel : {{ "%.2f"|format(total) }} €</h2>
 
+    {% if not pending_loyalty_gift %}
     <div id="promo-gift-box" class="product-card" style="display:none; border:2px solid #f4c400;">
         <h3>🎁 Votre produit offert</h3>
         <p>Vous avez au moins 2 menus : choisissez 1 produit offert.</p>
@@ -168,6 +169,13 @@
 
         <p><strong>Prix : 0,00 €</strong></p>
     </div>
+    {% else %}
+    <div class="product-card" style="border:2px solid #f4c400;">
+        <p><strong>ℹ️ Offres non cumulables</strong></p>
+        <p>Vous utilisez votre cadeau fidélité sur cette commande. L’offre « 2 Menus = 1 produit offert » ne peut pas être ajoutée en même temps.</p>
+    </div>
+    {% endif %}
+
     {% set ns = namespace(has_menu=false) %}
 {% for item in items %}
     {% set n = item.name|lower %}
