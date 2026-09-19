@@ -17,6 +17,9 @@
 
 <h2>Commandes</h2>
 
+<button id="alarm-enable" onclick="enableAlarm()" style="width:100%;padding:14px;margin:0 0 14px;background:#ffcc00;border:2px solid #111;border-radius:10px;font-weight:800;font-size:17px;">🔔 ACTIVER L’ALARME DES COMMANDES</button>
+<div id="alarm-state" style="display:none;margin:0 0 14px;padding:10px;border-radius:10px;background:#e8f7e8;font-weight:700;text-align:center;">🔔 Alarme activée</div>
+
 <div id="orders">
     Chargement des commandes...
 </div>
@@ -24,6 +27,57 @@
 <script>
     let lastOrderIds = [];
     let restaurantOpen = true;
+    let alarmEnabled = false;
+    let alarmTimer = null;
+    let audioCtx = null;
+
+    function enableAlarm() {
+        try {
+            audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === "suspended") audioCtx.resume();
+            alarmEnabled = true;
+            document.getElementById("alarm-enable").style.display = "none";
+            document.getElementById("alarm-state").style.display = "block";
+            updateAlarmFromOrders(window.currentOrders || []);
+        } catch (e) {
+            alert("Impossible d’activer le son. Vérifiez le volume de la tablette.");
+        }
+    }
+
+    function ringOnce() {
+        if (!alarmEnabled || !audioCtx) return;
+        try {
+            if (audioCtx.state === "suspended") audioCtx.resume();
+            const now = audioCtx.currentTime;
+            [0, 0.28, 0.56].forEach(delay => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = "square";
+                osc.frequency.value = 880;
+                gain.gain.setValueAtTime(0.0001, now + delay);
+                gain.gain.exponentialRampToValueAtTime(0.35, now + delay + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + 0.20);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(now + delay); osc.stop(now + delay + 0.22);
+            });
+        } catch (e) {}
+    }
+
+    function startAlarm() {
+        if (!alarmEnabled || alarmTimer) return;
+        ringOnce();
+        alarmTimer = setInterval(ringOnce, 3000);
+    }
+
+    function stopAlarm() {
+        if (alarmTimer) clearInterval(alarmTimer);
+        alarmTimer = null;
+    }
+
+    function updateAlarmFromOrders(orders) {
+        const hasPending = Array.isArray(orders) && orders.some(o => o.status === "pending");
+        if (hasPending) startAlarm(); else stopAlarm();
+    }
 
     async function loadRestaurantStatus() {
         const r = await fetch('/api/admin/restaurant-status');
@@ -69,13 +123,8 @@ async function loadOrders() {
         const orders = await response.json();
         window.currentOrders = orders;
         const newOrders = orders.filter(o => !lastOrderIds.includes(o.id));
-
-if (lastOrderIds.length > 0 && newOrders.length > 0) {
-    const voice = new SpeechSynthesisUtterance("HC Burgueur, vous avez une nouvelle commande");
-    speechSynthesis.cancel();
-    speechSynthesis.speak(voice);
-}
-lastOrderIds = orders.map(o => o.id);
+        lastOrderIds = orders.map(o => o.id);
+        updateAlarmFromOrders(orders);
         const activeOrders = orders.filter(order => order.status !== "done" && order.status !== "rejected");
         const container = document.getElementById('orders');
 
@@ -208,10 +257,17 @@ loadOrders();
 setInterval(loadOrders, 2000);
 document.addEventListener("visibilitychange", loadOrders);
 window.addEventListener("focus", loadOrders);
-navigator.wakeLock?.request("screen").catch(() => {});
-let voice = new SpeechSynthesisUtterance("HC Burgueur, vous avez une nouvelle commande");
-voice.lang = "fr-FR";
-speechSynthesis.speak(voice);
+let wakeLock = null;
+async function keepScreenAwake() {
+    try { wakeLock = await navigator.wakeLock?.request("screen"); } catch (e) {}
+}
+keepScreenAwake();
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+        keepScreenAwake();
+        loadOrders();
+    }
+});
 </script>
 
 </body>
