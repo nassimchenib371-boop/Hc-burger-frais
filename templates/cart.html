@@ -206,7 +206,7 @@
       if (orderType.value === "livraison") { 
     addressInput.style.display = "block";
     postalInput.style.display = "block";
-    deliveryInfo.textContent = "13003 / 13005 : gratuite dès 15 € • 13012 / 13013 / 13014 : gratuite dès 20 € • sinon +3 €.";
+    deliveryInfo.textContent = "13004 : gratuite dès 10 € • 13003 / 13005 : gratuite dès 15 € • 13012 / 13013 / 13014 : gratuite dès 20 € • sinon +3 €.";
     } else {
     addressInput.style.display = "none";
     postalInput.style.display = "none";
@@ -218,16 +218,18 @@
     postalInput.style.display = "none";
     postalInput.addEventListener("input", function () {
     const code = postalInput.value.trim();
-    const allowedCodes = ["13003", "13005", "13012", "13013", "13014"];
+    const allowedCodes = ["13003", "13004", "13005", "13012", "13013", "13014"];
     const allowed = allowedCodes.includes(code);
     if (code.length === 5 && !allowed) {
         deliveryInfo.textContent = "❌ Livraison non disponible dans ce code postal.";
+    } else if (code === "13004") {
+        deliveryInfo.textContent = "🛵 Livraison gratuite dès 10 € • sinon +3 €.";
     } else if (code === "13003" || code === "13005") {
         deliveryInfo.textContent = "🛵 Livraison gratuite dès 15 € • sinon +3 €.";
     } else if (["13012", "13013", "13014"].includes(code)) {
         deliveryInfo.textContent = "🛵 Livraison gratuite dès 20 € • sinon +3 €.";
     } else {
-        deliveryInfo.textContent = "13003 / 13005 : gratuite dès 15 € • 13012 / 13013 / 13014 : gratuite dès 20 € • sinon +3 €.";
+        deliveryInfo.textContent = "13004 : gratuite dès 10 € • 13003 / 13005 : gratuite dès 15 € • 13012 / 13013 / 13014 : gratuite dès 20 € • sinon +3 €.";
     }
     document.querySelector('button[type="submit"]').disabled = code.length === 5 && !allowed;
     refreshLoyaltyTotal();
@@ -328,6 +330,7 @@ function refreshLoyaltyTotal() {
     if (orderType && orderType.value === 'livraison') {
         const code = postalInput?.value.trim() || '';
         let threshold = null;
+        if (code === '13004') threshold = 10;
         if (code === '13003' || code === '13005') threshold = 15;
         if (code === '13012' || code === '13013' || code === '13014') threshold = 20;
         const fee = threshold !== null && totalGeneral < threshold ? 3 : 0;
