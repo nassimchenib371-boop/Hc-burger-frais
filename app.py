@@ -925,7 +925,9 @@ def cart_checkout():
     menu_count = sum(1 for item in items if item.get("formula") == "menu")
     promo_gift = request.form.get("promo_gift", "").strip()
 
-    if menu_count >= 2:
+    # Les deux offres ne sont pas cumulables : si un cadeau fidélité est utilisé,
+    # l'offre « 2 Menus = 1 produit offert » ne s'applique pas à cette commande.
+    if menu_count >= 2 and not loyalty_choice:
         if promo_gift not in PROMO_GIFTS:
             con.close()
             return "Choisissez votre produit offert.", 400
