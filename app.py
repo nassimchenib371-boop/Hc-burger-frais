@@ -11,10 +11,12 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(BASE, "orders.db")
 
 # Zones de livraison HC Burger Frais.
+# 13004 : gratuite dès 10 €, sinon 3 €.
 # 13003/13005 : gratuite dès 15 €, sinon 3 €.
 # 13012/13013/13014 : gratuite dès 20 €, sinon 3 €.
 DELIVERY_RULES = {
     "13003": 15.0,
+    "13004": 10.0,
     "13005": 15.0,
     "13012": 20.0,
     "13013": 20.0,
@@ -164,9 +166,9 @@ def init_db():
         "phone":"04 91 49 38 68",
         "hours_1":"Lun–Jeu & Sam : 11:00 → 00:00",
         "hours_2":"Ven & Dim : 14:00 → 00:00",
-        "delivery_postcodes":"13003,13005,13012,13013,13014",
+        "delivery_postcodes":"13003,13004,13005,13012,13013,13014",
         "delivery_fee":"3",
-        "delivery_label":"Livraison 13003/13005/13012/13013/13014",
+        "delivery_label":"Livraison 13003/13004/13005/13012/13013/13014",
         "allow_sur_place":"1",
         "allow_takeaway":"1",
         "allow_delivery":"1",
@@ -808,7 +810,7 @@ def cart_checkout():
     postal = request.form.get("postal_code", "").strip()
     if order_type == "livraison":
         if postal not in DELIVERY_RULES:
-            return "Livraison disponible uniquement dans les codes postaux 13003, 13005, 13012, 13013 et 13014.", 400
+            return "Livraison disponible uniquement dans les codes postaux 13003, 13004, 13005, 13012, 13013 et 13014.", 400
         if not address:
             return "Adresse de livraison requise.", 400
         address = f"{address}, {postal}"
@@ -966,7 +968,7 @@ def cart_checkout():
         })
 
     # Livraison : frais de 3 € sous le seuil de gratuité de la zone.
-    # 13003/13005 : gratuite dès 15 €. 13012/13013/13014 : gratuite dès 20 €.
+    # 13004 : gratuite dès 10 €. 13003/13005 : gratuite dès 15 €. 13012/13013/13014 : gratuite dès 20 €.
     # La fidélité (6e menu offert) ne s'applique pas aux livraisons.
     if order_type == "livraison":
         fee = delivery_fee_for(postal, total)
