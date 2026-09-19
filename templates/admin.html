@@ -49,16 +49,25 @@
         try {
             if (audioCtx.state === "suspended") audioCtx.resume();
             const now = audioCtx.currentTime;
-            [0, 0.28, 0.56].forEach(delay => {
+
+            // Sonnerie "nouvelle commande" : deux tons alternés, plus forts et plus faciles à entendre de loin.
+            const notes = [
+                [0.00, 1047], [0.18, 1319], [0.36, 1047], [0.54, 1319],
+                [0.90, 1047], [1.08, 1319], [1.26, 1047], [1.44, 1319]
+            ];
+            notes.forEach(([delay, frequency]) => {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = "square";
-                osc.frequency.value = 880;
+                osc.frequency.setValueAtTime(frequency, now + delay);
                 gain.gain.setValueAtTime(0.0001, now + delay);
-                gain.gain.exponentialRampToValueAtTime(0.35, now + delay + 0.02);
-                gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + 0.20);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(now + delay); osc.stop(now + delay + 0.22);
+                gain.gain.exponentialRampToValueAtTime(0.65, now + delay + 0.015);
+                gain.gain.setValueAtTime(0.65, now + delay + 0.11);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + 0.16);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now + delay);
+                osc.stop(now + delay + 0.18);
             });
         } catch (e) {}
     }
