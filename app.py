@@ -5,7 +5,7 @@ DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from functools import wraps
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, Response
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(BASE, "orders.db")
@@ -304,27 +304,7 @@ def home():
     ).fetchall()}
     con.close()
     restaurant_open = settings.get("restaurant_open", "1") == "1"
-    return render_template("index.html", products=products, settings=settings, restaurant_open=restaurant_open, public_base_url=PUBLIC_BASE_URL.rstrip("/"))
-
-
-@app.route("/robots.txt")
-def robots_txt():
-    base = PUBLIC_BASE_URL.rstrip("/")
-    body = f"User-agent: *\nAllow: /\nDisallow: /admin\nSitemap: {base}/sitemap.xml\n"
-    return Response(body, mimetype="text/plain")
-
-@app.route("/sitemap.xml")
-def sitemap_xml():
-    base = PUBLIC_BASE_URL.rstrip("/")
-    urls = [
-        ("/", "daily", "1.0"),
-        ("/mentions-legales", "monthly", "0.2"),
-        ("/confidentialite", "monthly", "0.2"),
-        ("/cgv", "monthly", "0.2"),
-    ]
-    rows = "".join(f"<url><loc>{base}{path}</loc><changefreq>{freq}</changefreq><priority>{priority}</priority></url>" for path, freq, priority in urls)
-    xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{rows}</urlset>'
-    return Response(xml, mimetype="application/xml")
+    return render_template("index.html", products=products, settings=settings, restaurant_open=restaurant_open)
 
 @app.post("/api/orders")
 def create_order():
@@ -1069,6 +1049,10 @@ def public_order_status(oid):
     if not order:
         return jsonify(ok=False), 404
     return jsonify(ok=True, order_id=order["id"], status=order["status"])
+
+@app.get("/google48b9ad064bd54754.html")
+def google_site_verification():
+    return "google-site-verification: google48b9ad064bd54754.html", 200, {"Content-Type": "text/html; charset=utf-8"}
 
 init_db()
 
