@@ -206,7 +206,7 @@
       if (orderType.value === "livraison") { 
     addressInput.style.display = "block";
     postalInput.style.display = "block";
-    deliveryInfo.textContent = "Livraison uniquement dans le 13004 • minimum 10,00 €.";
+    deliveryInfo.textContent = "13003 / 13005 : gratuite dès 15 € • 13012 / 13013 / 13014 : gratuite dès 20 € • sinon +3 €.";
     } else {
     addressInput.style.display = "none";
     postalInput.style.display = "none";
@@ -217,10 +217,20 @@
     addressInput.style.display = "none";
     postalInput.style.display = "none";
     postalInput.addEventListener("input", function () {
-    const code = postalInput.value.trim(); 
-    const allowed = code === "13004";
-    deliveryInfo.textContent = code.length === 5 && !allowed ? "❌ Livraison uniquement dans le 13004." : "Livraison 13004 • minimum 10,00 €.";
+    const code = postalInput.value.trim();
+    const allowedCodes = ["13003", "13005", "13012", "13013", "13014"];
+    const allowed = allowedCodes.includes(code);
+    if (code.length === 5 && !allowed) {
+        deliveryInfo.textContent = "❌ Livraison non disponible dans ce code postal.";
+    } else if (code === "13003" || code === "13005") {
+        deliveryInfo.textContent = "🛵 Livraison gratuite dès 15 € • sinon +3 €.";
+    } else if (["13012", "13013", "13014"].includes(code)) {
+        deliveryInfo.textContent = "🛵 Livraison gratuite dès 20 € • sinon +3 €.";
+    } else {
+        deliveryInfo.textContent = "13003 / 13005 : gratuite dès 15 € • 13012 / 13013 / 13014 : gratuite dès 20 € • sinon +3 €.";
+    }
     document.querySelector('button[type="submit"]').disabled = code.length === 5 && !allowed;
+    refreshLoyaltyTotal();
 });
     async function updateCart(event, link) {    
     event.preventDefault();
@@ -316,7 +326,12 @@ function refreshLoyaltyTotal() {
     });
 
     if (orderType && orderType.value === 'livraison') {
-        totalElement.textContent = `Total actuel : ${totalGeneral.toFixed(2)} €`;
+        const code = postalInput?.value.trim() || '';
+        let threshold = null;
+        if (code === '13003' || code === '13005') threshold = 15;
+        if (code === '13012' || code === '13013' || code === '13014') threshold = 20;
+        const fee = threshold !== null && totalGeneral < threshold ? 3 : 0;
+        totalElement.textContent = `Total actuel : ${(totalGeneral + fee).toFixed(2)} €${fee ? ' (dont 3,00 € livraison)' : (threshold !== null ? ' (livraison gratuite)' : '')}`;
         status.textContent = '🚚 Fidélité disponible uniquement Sur place ou À emporter.';
         return;
     }
