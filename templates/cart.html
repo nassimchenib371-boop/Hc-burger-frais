@@ -85,21 +85,18 @@
 {% if ('burger' in n or 'tacos' in n or 'sandwich' in n or 'poutine' in n or 'hermanos' in n or 'pollo' in n or 'smash' in n or 'philly' in n or 'tender' in n or 'nugget' in n) and 'menu enfant' not in n %}
         <p>
             <strong>Formule :</strong><br>
-
-            <label>
-                <input type="radio"
-                       name="formula_{{ item.id }}"
-                       value="seul"
-                       checked>
-                {% if 'tender' in n %}Tenders seuls{% elif 'nugget' in n %}Nuggets seuls{% else %}Burger seul{% endif %}
+            {% if item.quantity == 1 %}
+            <label><input type="radio" name="formula_{{ item.id }}" value="seul" checked>
+                {% if 'tender' in n %}Tenders seuls{% elif 'nugget' in n %}Nuggets seuls{% else %}Produit seul{% endif %}
             </label><br>
-
-            <label>
-                <input type="radio"
-                       name="formula_{{ item.id }}"
-                       value="menu">
-                🍟🥤 Menu +2.50 €
-            </label>
+            <label><input type="radio" name="formula_{{ item.id }}" value="menu"> 🍟🥤 Menu +2.50 €</label>
+            {% else %}
+            <label>🍟🥤 Nombre en Menu (+2.50 € chacun) :</label><br>
+            <select name="menu_qty_{{ item.id }}" class="menu-qty">
+                {% for q in range(item.quantity + 1) %}<option value="{{ q }}">{{ q }}</option>{% endfor %}
+            </select>
+            <small> — le reste sera commandé seul.</small>
+            {% endif %}
         </p>
 
         <p>
@@ -126,7 +123,6 @@
 
     <h2 id="total-actuel">Total actuel : {{ "%.2f"|format(total) }} €</h2>
 
-    {% if not pending_loyalty_gift %}
     <div id="promo-gift-box" class="product-card" style="display:none; border:2px solid #f4c400;">
         <h3>🎁 Votre produit offert</h3>
         <p>Vous avez au moins 2 menus : choisissez 1 produit offert.</p>
@@ -169,13 +165,6 @@
 
         <p><strong>Prix : 0,00 €</strong></p>
     </div>
-    {% else %}
-    <div class="product-card" style="border:2px solid #f4c400;">
-        <p><strong>ℹ️ Offres non cumulables</strong></p>
-        <p>Vous utilisez votre cadeau fidélité sur cette commande. L’offre « 2 Menus = 1 produit offert » ne peut pas être ajoutée en même temps.</p>
-    </div>
-    {% endif %}
-
     {% set ns = namespace(has_menu=false) %}
 {% for item in items %}
     {% set n = item.name|lower %}
@@ -287,6 +276,14 @@ document.getElementById('promo_gift')?.addEventListener('change', updateGiftOpti
 
 let loyaltyTimer;
 let loyaltyGiftAvailable = false;
+function getMenuCountForCard(card) {
+    const qty = parseInt(card.querySelector('p span')?.textContent || '1', 10);
+    const menuQty = card.querySelector('select.menu-qty');
+    if (menuQty) return Math.max(0, Math.min(qty, parseInt(menuQty.value || '0', 10)));
+    const selected = card.querySelector('input[type="radio"][name^="formula_"]:checked');
+    return selected && selected.value === 'menu' ? qty : 0;
+}
+
 const loyaltyEligibleNames = new Set([
     'Big Burger',
     'Big Philly Cheese',
@@ -321,9 +318,9 @@ function refreshLoyaltyTotal() {
         normalItemCount += qty;
 
         const name = card.querySelector('h3')?.textContent.trim() || '';
-        const selected = card.querySelector('input[type="radio"][name^="formula_"]:checked');
-        const isMenu = !!selected && selected.value === 'menu';
-        if (isMenu) menuCount += qty;
+        const cardMenuCount = getMenuCountForCard(card);
+        const isMenu = cardMenuCount > 0;
+        menuCount += cardMenuCount;
 
         const isPastaGift = name === 'Pâtes à la crème - Poulet' ||
                             name === 'Pâtes à la crème Poulet' ||
@@ -383,11 +380,7 @@ document.getElementById('customer_phone')?.addEventListener('input', function(){
 function updatePromoGift() {
     let menuCount = 0;
     document.querySelectorAll('.product-card').forEach(function(card) {
-        const selected = card.querySelector('input[type="radio"][name^="formula_"]:checked');
-        if (selected && selected.value === 'menu') {
-            const quantitySpan = card.querySelector('p span');
-            menuCount += parseInt(quantitySpan?.textContent || '1', 10);
-        }
+        menuCount += getMenuCountForCard(card);
     });
 
     const box = document.getElementById('promo-gift-box');
@@ -400,57 +393,21 @@ function updatePromoGift() {
     if (!eligible) select.value = '';
 }
 
-document.querySelectorAll('input[type="radio"][name^="formula_"]').forEach(function(radio) {
-    radio.addEventListener('change', function() {
-        const card = this.closest('.product-card');
-
-        const quantitySpan = card.querySelector('p span');
-        const quantity = parseInt(quantitySpan.textContent) || 1;
-
-        const priceLine = Array.from(card.querySelectorAll('p')).find(function(p) {
-            return p.textContent.includes('Prix');
-        });
-
-        const priceMatch = priceLine.textContent.match(/[\d.]+/);
-        const basePrice = parseFloat(priceMatch[0]);
-
-        let unitPrice = basePrice;
-
-        if (this.value === 'menu') {
-            unitPrice += 2.50;
-        }
-
-        const subtotal = unitPrice * quantity;
-
-        const subtotalElement = Array.from(card.querySelectorAll('strong')).find(function(el) {
-            return el.textContent.includes('Sous-total');
-        });
-
-        if (subtotalElement) {
-            subtotalElement.textContent = 'Sous-total : ' + subtotal.toFixed(2) + ' €';
-        }
-        const totalElement = document.getElementById("total-actuel");
-
-let totalGeneral = 0;
-
-document.querySelectorAll(".product-card").forEach(card => {
-    const subtotalLine = Array.from(card.querySelectorAll("p"))
-        .find(p => p.textContent.includes("Sous-total"));
-
-    if (subtotalLine) {
-        const match = subtotalLine.textContent.match(/[\d.]+/);
-        if (match) {
-            totalGeneral += parseFloat(match[0]);
-        }
-    }
-});
-
-if (totalElement) {
-    totalElement.textContent = `Total actuel : ${totalGeneral.toFixed(2)} €`;
+function recalculateCard(card) {
+    const quantity = parseInt(card.querySelector('p span')?.textContent || '1', 10);
+    const priceLine = Array.from(card.querySelectorAll('p')).find(p => p.textContent.includes('Prix'));
+    const priceMatch = priceLine?.textContent.match(/[\d.]+/);
+    const basePrice = priceMatch ? parseFloat(priceMatch[0]) : 0;
+    const menuCount = getMenuCountForCard(card);
+    const subtotal = (basePrice * quantity) + (2.50 * menuCount);
+    const subtotalElement = Array.from(card.querySelectorAll('strong')).find(el => el.textContent.includes('Sous-total'));
+    if (subtotalElement) subtotalElement.textContent = 'Sous-total : ' + subtotal.toFixed(2) + ' €';
+    updatePromoGift();
+    refreshLoyaltyTotal();
 }
-        updatePromoGift();
-        refreshLoyaltyTotal();
-    });
+
+document.querySelectorAll('input[type="radio"][name^="formula_"], select.menu-qty').forEach(function(control) {
+    control.addEventListener('change', function() { recalculateCard(this.closest('.product-card')); });
 });
 
 updatePromoGift();
