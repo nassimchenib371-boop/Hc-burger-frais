@@ -3,7 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HC Burger Frais</title>
+    <title>HC Burger Frais Marseille | Burgers, Tacos & Commande en ligne</title>
+    <meta name="description" content="Commandez en ligne chez HC Burger Frais à Marseille 13004 : burgers, tacos, sandwichs, poutines et menus. Livraison dans plusieurs secteurs de Marseille.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ public_base_url }}/">
+    <meta property="og:title" content="HC Burger Frais Marseille | Commande en ligne">
+    <meta property="og:description" content="Burgers, tacos, sandwichs, poutines et menus à commander en ligne chez HC Burger Frais à Marseille.">
+    <meta property="og:type" content="restaurant">
+    <meta property="og:url" content="{{ public_base_url }}/">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FastFoodRestaurant",
+      "name": "HC Burger Frais",
+      "url": {{ public_base_url|tojson }},
+      "telephone": "+33491493868",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "24 Boulevard Banon",
+        "postalCode": "13004",
+        "addressLocality": "Marseille",
+        "addressCountry": "FR"
+      },
+      "servesCuisine": ["Burger", "Tacos", "Sandwich", "Poutine", "Fast food"],
+      "priceRange": "€€"
+    }
+    </script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
