@@ -9,10 +9,6 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(BASE, "orders.db")
-# Etat ouverture/fermeture: fichier serveur distinct de Neon.
-# Sur Render, monter un Persistent Disk sur /var/data pour conserver cet etat
-# apres fermeture du navigateur, redemarrage ou redeploiement.
-SITE_STATE_FILE = os.getenv("SITE_STATE_FILE", "/var/data/restaurant_open.txt" if os.getenv("RENDER") else os.path.join(BASE, "restaurant_open.txt"))
 DEFAULT_PRODUCTS = json.load(open(os.path.join(BASE, "products.json"), encoding="utf-8"))
 
 app = Flask(__name__)
@@ -43,23 +39,12 @@ LOYALTY_GIFTS = {
     "Menu Tacos": "Tacos M",
 }
 def restaurant_is_open():
-    # Etat 100 % serveur, independant du navigateur/session/localStorage et de Neon.
-    # Le fichier doit etre place sur le Persistent Disk Render (/var/data).
+    # Ouverture/fermeture manuelle depuis la page Administration.
+    # La valeur est stockée en base et reste donc active après fermeture du navigateur.
     try:
-        with open(SITE_STATE_FILE, "r", encoding="utf-8") as f:
-            return f.read().strip() != "0"
-    except FileNotFoundError:
+        return get_settings().get("restaurant_open", "1") == "1"
+    except Exception:
         return True
-
-def set_restaurant_open(is_open):
-    directory = os.path.dirname(SITE_STATE_FILE) or BASE
-    os.makedirs(directory, exist_ok=True)
-    tmp = SITE_STATE_FILE + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        f.write("1" if is_open else "0")
-        f.flush()
-        os.fsync(f.fileno())
-    os.replace(tmp, SITE_STATE_FILE)
 class PostgresConnection:
     """Petit adaptateur pour garder le code existant compatible avec Neon/PostgreSQL."""
     def __init__(self, conn):
@@ -438,11 +423,9 @@ def admin_restaurant_status():
 def admin_set_restaurant_status():
     data = request.get_json(silent=True) or {}
     is_open = bool(data.get("open"))
-    try:
-        set_restaurant_open(is_open)
-    except OSError as exc:
-        app.logger.exception("Impossible d'enregistrer l'etat ouverture/fermeture: %s", exc)
-        return jsonify(ok=False, error="Etat non enregistre sur le serveur"), 500
+    con = db()
+    con.execute("INSERT INTO settings(key,value) VALUES('restaurant_open',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", ("1" if is_open else "0",))
+    con.commit(); con.close()
     return jsonify(ok=True, open=is_open)
 
 @app.post("/api/admin/orders/<int:oid>/status")
