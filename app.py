@@ -1,5 +1,5 @@
 
-import os, json, sqlite3, socket, re, urllib.request, urllib.error
+import os, json, sqlite3, socket
 
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 from datetime import datetime
@@ -42,56 +42,16 @@ LOYALTY_GIFTS = {
     "Pâtes à la crème Poulet": "Pâtes à la crème - Poulet",
     "Menu Tacos": "Tacos M",
 }
-def _gist_id():
-    """Extrait l'ID du Gist depuis SITE_STATE_URL (URL Raw déjà configurée sur Render)."""
-    url = os.getenv("SITE_STATE_URL", "").strip()
-    if not url:
-        return ""
-    m = re.search(r"gist(?:usercontent)?\.com/[^/]+/([0-9a-fA-F]+)", url)
-    return m.group(1) if m else ""
-
-def _gist_request(method="GET", payload=None):
-    gist_id = _gist_id()
-    if not gist_id:
-        raise RuntimeError("SITE_STATE_URL manquant ou invalide")
-    headers = {"Accept": "application/vnd.github+json", "User-Agent": "HC-Burger-Frais"}
-    token = os.getenv("GITHUB_GIST_TOKEN", "").strip()
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-    data = None if payload is None else json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(
-        f"https://api.github.com/gists/{gist_id}", data=data, headers=headers, method=method
-    )
-    with urllib.request.urlopen(req, timeout=8) as response:
-        return json.loads(response.read().decode("utf-8"))
-
 def restaurant_is_open():
-    # Etat permanent côté serveur via le Gist configuré dans SITE_STATE_URL.
-    # Neon reste réservé à la fidélité/aux points. Aucun état n'est stocké dans le navigateur.
-    if _gist_id():
-        try:
-            gist = _gist_request("GET")
-            f = gist.get("files", {}).get("site_state.txt")
-            if f:
-                return f.get("content", "open").strip().lower() not in ("0", "closed", "false")
-        except Exception as exc:
-            app.logger.warning("Lecture état restaurant depuis Gist impossible: %s", exc)
-    # Secours local (utile en développement ou si GitHub est momentanément indisponible).
+    # Etat 100 % serveur, independant du navigateur/session/localStorage et de Neon.
+    # Le fichier doit etre place sur le Persistent Disk Render (/var/data).
     try:
         with open(SITE_STATE_FILE, "r", encoding="utf-8") as f:
-            return f.read().strip().lower() not in ("0", "closed", "false")
+            return f.read().strip() != "0"
     except FileNotFoundError:
         return True
 
 def set_restaurant_open(is_open):
-    # Sur Render Free, l'écriture permanente se fait dans le Gist, pas dans le disque éphémère.
-    if _gist_id():
-        token = os.getenv("GITHUB_GIST_TOKEN", "").strip()
-        if not token:
-            raise RuntimeError("GITHUB_GIST_TOKEN manquant")
-        _gist_request("PATCH", {"files": {"site_state.txt": {"content": "open" if is_open else "closed"}}})
-        return
-    # Secours local hors Render / sans Gist.
     directory = os.path.dirname(SITE_STATE_FILE) or BASE
     os.makedirs(directory, exist_ok=True)
     tmp = SITE_STATE_FILE + ".tmp"
@@ -100,7 +60,6 @@ def set_restaurant_open(is_open):
         f.flush()
         os.fsync(f.fileno())
     os.replace(tmp, SITE_STATE_FILE)
-
 class PostgresConnection:
     """Petit adaptateur pour garder le code existant compatible avec Neon/PostgreSQL."""
     def __init__(self, conn):
@@ -481,7 +440,7 @@ def admin_set_restaurant_status():
     is_open = bool(data.get("open"))
     try:
         set_restaurant_open(is_open)
-    except Exception as exc:
+    except OSError as exc:
         app.logger.exception("Impossible d'enregistrer l'etat ouverture/fermeture: %s", exc)
         return jsonify(ok=False, error="Etat non enregistre sur le serveur"), 500
     return jsonify(ok=True, open=is_open)
