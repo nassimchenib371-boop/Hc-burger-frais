@@ -569,20 +569,33 @@ def cart():
 
     total = sum(item["price"] * item["quantity"] for item in items)
 
+    # Ne jamais afficher un cadeau fidélité conservé dans une ancienne session
+    # si le client n'a plus réellement 5 points dans Neon.
+    pending_loyalty_gift = session.get("loyalty_gift_choice", "").strip()
+    loyalty_phone = normalize_phone(session.get("loyalty_phone", ""))
+    if pending_loyalty_gift:
+        if not loyalty_phone or loyalty_balance(loyalty_phone) < 5:
+            session.pop("loyalty_gift_choice", None)
+            session.pop("loyalty_phone", None)
+            pending_loyalty_gift = ""
+
     return render_template("cart.html", items=items, total=total, promo_gifts=PROMO_GIFTS,
                            loyalty_gifts=list(LOYALTY_GIFTS.keys()),
-                           pending_loyalty_gift=session.get("loyalty_gift_choice", ""))
+                           pending_loyalty_gift=pending_loyalty_gift)
 
 @app.post("/loyalty/gift/add")
 def add_loyalty_gift():
     phone = request.form.get("phone", "").strip()
+    phone_key = normalize_phone(phone)
     choice = request.form.get("loyalty_gift", "").strip()
-    if loyalty_balance(phone) < 5:
+    if not phone_key or loyalty_balance(phone_key) < 5:
+        session.pop("loyalty_gift_choice", None)
+        session.pop("loyalty_phone", None)
         return "Vous n'avez pas encore 5 points fidélité.", 400
     if choice not in LOYALTY_GIFTS:
         return "Cadeau fidélité invalide.", 400
     session["loyalty_gift_choice"] = choice
-    session["loyalty_phone"] = normalize_phone(phone)
+    session["loyalty_phone"] = phone_key
     return redirect(url_for("cart"))
 
 @app.get("/cart/remove/<int:pid>")   
