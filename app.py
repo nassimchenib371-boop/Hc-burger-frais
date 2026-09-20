@@ -304,7 +304,7 @@ def home():
     ).fetchall()}
     con.close()
     restaurant_open = settings.get("restaurant_open", "1") == "1"
-    return render_template("index.html", products=products, settings=settings, restaurant_open=restaurant_open)
+    return render_template("index.html", products=products, settings=settings, restaurant_open=restaurant_open, public_base_url="https://hc-burger-frais.onrender.com")
 
 @app.post("/api/orders")
 def create_order():
