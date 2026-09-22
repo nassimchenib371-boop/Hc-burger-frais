@@ -400,6 +400,30 @@
     "img": "nuggets_6_hc.png"
   },
   {
+    "cat": "Tenders",
+    "name": "Mozza Sticks",
+    "desc": "6 pièces",
+    "price": 5.9,
+    "menu": null,
+    "img": "mozza_sticks_hc.png"
+  },
+  {
+    "cat": "Tenders",
+    "name": "Onion Rings",
+    "desc": "8 pièces",
+    "price": 3.9,
+    "menu": null,
+    "img": "onion_rings_hc.png"
+  },
+  {
+    "cat": "Tenders",
+    "name": "Bol Mix HC",
+    "desc": "2 Tenders + 3 Mozza Sticks + 5 Onion Rings",
+    "price": 9.9,
+    "menu": null,
+    "img": "bol_mix_hc.png"
+  },
+  {
     "cat": "Menu Enfant",
     "name": "Menu Enfant - Burger simple",
     "desc": "Burger simple + frites + Capri-Sun",
