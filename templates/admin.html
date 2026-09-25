@@ -145,7 +145,7 @@ async function loadOrders() {
 container.innerHTML = activeOrders.map(order => `
     <div>
         <hr>
-        <h3>Commande #${order.id}</h3>
+        <h3>Commande #${order.daily_number || order.id}</h3>
 <p><strong>Nom :</strong> ${order.customer_name}</p>
 <p><strong>Téléphone :</strong> ${order.phone}</p>
 <p><strong>Quantité :</strong> ${(order.items || []).reduce((sum, item) => sum + Number(item.quantity || 0), 0)}</p>
@@ -217,7 +217,7 @@ function printOrder(id) {
 const clean = s => String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     let text = "\x1D\x21\x11HC BURGER FRAIS\x1D\x21\x00\n";
     text += "------------------------------\n";
-    text += `\x1D\x21\x11Commande #${order.id}\n`;
+    text += `\x1D\x21\x11Commande #${order.daily_number || order.id}\n`;
     const orderDate = order.created_at ? new Date(order.created_at) : new Date();
 const dateText = orderDate.toLocaleDateString("fr-FR", { timeZone: "Europe/Paris" });
 const timeText = orderDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });

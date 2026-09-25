@@ -555,10 +555,11 @@ async function checkFidelity(){
 
   banner.href = '/commande/' + orderId;
 
-  function render(status) {
-    if (status === 'accepted') text.textContent = '🟢 Commande #' + orderId + ' acceptée — en préparation';
+  function render(status, orderNumber) {
+    const displayNumber = orderNumber || orderId;
+    if (status === 'accepted') text.textContent = '🟢 Commande #' + displayNumber + ' acceptée — en préparation';
     else if (status === 'done') {
-      text.textContent = '✅ Commande #' + orderId + ' prête !';
+      text.textContent = '✅ Commande #' + displayNumber + ' prête !';
       let doneAt = 0;
       try {
         doneAt = Number(localStorage.getItem('hc_active_order_done_at') || 0);
@@ -575,8 +576,8 @@ async function checkFidelity(){
         banner.style.display = 'none';
       }, remaining);
     }
-    else if (status === 'rejected') text.textContent = '🔴 Commande #' + orderId + ' refusée';
-    else text.textContent = '🟠 Commande #' + orderId + ' en attente';
+    else if (status === 'rejected') text.textContent = '🔴 Commande #' + displayNumber + ' refusée';
+    else text.textContent = '🟠 Commande #' + displayNumber + ' en attente';
     banner.style.display = 'block';
     return status === 'done' || status === 'rejected';
   }
@@ -591,7 +592,7 @@ async function checkFidelity(){
       }
       if (!r.ok) return false;
       const d = await r.json();
-      return d.ok ? render(d.status) : false;
+      return d.ok ? render(d.status, d.order_number) : false;
     } catch (e) { return false; }
   }
 
