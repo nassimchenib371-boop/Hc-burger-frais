@@ -251,11 +251,35 @@ def api_loyalty():
     b = loyalty_balance(phone)
     return jsonify(ok=True, points=b, gift_available=b >= 5)
 
+def daily_order_number(order_id, created_at=None, con=None):
+    """Numéro visible de la commande, remis à 1 chaque jour (heure de Paris).
+
+    L'id SQLite reste inchangé et continue d'être utilisé en interne pour le suivi,
+    les paiements et la fidélité.
+    """
+    own = con is None
+    if own:
+        con = db()
+    if created_at is None:
+        row = con.execute("SELECT created_at FROM orders WHERE id=?", (order_id,)).fetchone()
+        if not row:
+            if own: con.close()
+            return int(order_id)
+        created_at = row["created_at"]
+    day = str(created_at)[:10]
+    row = con.execute(
+        "SELECT COUNT(*) AS n FROM orders WHERE substr(created_at,1,10)=? AND id<=?",
+        (day, int(order_id))
+    ).fetchone()
+    if own:
+        con.close()
+    return int(row["n"] or 1)
+
 def ticket_text(o):
     items=json.loads(o["items_json"])
     s=get_settings()
     lines=[s["restaurant_name"],s["address"],s["phone"],"-"*32,
-           f"COMMANDE #{o['id']}",o["created_at"],"-"*32]
+           f"COMMANDE #{daily_order_number(o['id'], o['created_at'])}",o["created_at"],"-"*32]
     for it in items:
         if it.get("loyalty_gift") is True:
             lines.append("*** CADEAU FIDELITE - MENU OFFERT ***")
@@ -428,11 +452,13 @@ def admin():
 @app.get("/api/admin/orders")
 @admin_required
 def admin_orders():
-    con=db(); rows=con.execute("SELECT * FROM orders ORDER BY id DESC LIMIT 100").fetchall(); con.close()
+    con=db(); rows=con.execute("SELECT * FROM orders ORDER BY id DESC LIMIT 100").fetchall()
     out=[]
     for r in rows:
         d=dict(r); d["items"]=json.loads(d.pop("items_json"))
+        d["daily_number"] = daily_order_number(d["id"], d["created_at"], con)
         out.append(d)
+    con.close()
     return jsonify(out)
 
 @app.get("/api/admin/restaurant-status")
@@ -1034,21 +1060,25 @@ def cart_checkout():
 def order_tracking(oid):
     # Page légère : aucune connexion Neon. Elle ne lit que le statut de la commande locale.
     con = db()
-    order = con.execute("SELECT id, status FROM orders WHERE id=?", (oid,)).fetchone()
-    con.close()
+    order = con.execute("SELECT id, created_at, status FROM orders WHERE id=?", (oid,)).fetchone()
     if not order:
+        con.close()
         return "Commande introuvable", 404
-    return render_template("order_tracking.html", order_id=oid, initial_status=order["status"])
+    order_number = daily_order_number(oid, order["created_at"], con)
+    con.close()
+    return render_template("order_tracking.html", order_id=oid, order_number=order_number, initial_status=order["status"])
 
 @app.get("/api/orders/<int:oid>/status")
 def public_order_status(oid):
     # Ne renvoie aucune donnée personnelle : seulement le numéro et le statut.
     con = db()
-    order = con.execute("SELECT id, status FROM orders WHERE id=?", (oid,)).fetchone()
-    con.close()
+    order = con.execute("SELECT id, created_at, status FROM orders WHERE id=?", (oid,)).fetchone()
     if not order:
+        con.close()
         return jsonify(ok=False), 404
-    return jsonify(ok=True, order_id=order["id"], status=order["status"])
+    order_number = daily_order_number(oid, order["created_at"], con)
+    con.close()
+    return jsonify(ok=True, order_id=order["id"], order_number=order_number, status=order["status"])
 
 @app.get("/google48b9ad064bd54754.html")
 def google_site_verification():
