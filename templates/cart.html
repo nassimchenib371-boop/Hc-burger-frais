@@ -129,7 +129,7 @@
         <select name="promo_gift" id="promo_gift">
             <option value="">— Choisir mon cadeau —</option>
             {% for gift in promo_gifts %}
-            <option value="{{ gift }}">{{ gift }}</option>
+            <option value="{{ gift.name }}" data-category="{{ gift.category }}">{{ gift.name }} — {{ "%.2f"|format(gift.price) }} €</option>
             {% endfor %}
         </select>
 
@@ -150,7 +150,7 @@
         </div>
 
         <div id="promo-sandwich-options" style="display:none; margin-top:14px;">
-            <p><strong>🥪 Options du Sandwich Kebab offert</strong></p>
+            <p><strong>🥪 Options du Sandwich offert</strong></p>
             <label>🥫 Sauce :</label><br>
             <select id="promo_gift_sauce_sandwich">
                 <option value="">— Choisir la sauce —</option>
@@ -259,8 +259,10 @@ function updateGiftOptions() {
     const sandwichSauce = document.getElementById('promo_gift_sauce_sandwich');
     if (!gift) return;
 
-    const isTacos = gift.value === 'Tacos M';
-    const isSandwich = gift.value === 'Sandwich Kebab';
+    const selected = gift.options[gift.selectedIndex];
+    const category = (selected?.dataset.category || '').toLowerCase();
+    const isTacos = category === 'tacos';
+    const isSandwich = category === 'sandwichs';
     tacosBox.style.display = isTacos ? 'block' : 'none';
     sandwichBox.style.display = isSandwich ? 'block' : 'none';
     viande.required = isTacos;
