@@ -592,6 +592,13 @@ def supplements_extra_price(category, supplements):
     if category == "Salades":
         prices = {"Œuf": 1.0, "Poulet mariné": 2.5, "Tender": 2.5, "Steak haché": 2.5}
         return sum(prices.get(x, 0.0) for x in supplements)
+    if category == "Poutines":
+        prices = {
+            "Steak haché": 2.5, "Poulet mariné": 2.5, "Escalope": 2.5,
+            "Cordon-bleu": 2.5, "Kebab": 2.5, "Tenders": 2.5,
+            "Œuf": 1.0, "Bacon": 1.0
+        }
+        return sum(prices.get(x, 0.0) for x in supplements)
     if category in ("Burgers", "Tacos"):
         return 1.0 * len(supplements)
     return 0.0
@@ -732,7 +739,12 @@ def add_to_cart(pid):
         "b_emmental": "Emmental", "b_oignons": "Oignons cuits",
         # Salades
         "s_oeuf": "Œuf", "s_poulet": "Poulet mariné",
-        "s_tender": "Tender", "s_steak": "Steak haché"
+        "s_tender": "Tender", "s_steak": "Steak haché",
+        # Poutines
+        "p_steak": "Steak haché", "p_poulet": "Poulet mariné",
+        "p_escalope": "Escalope", "p_cordon": "Cordon-bleu",
+        "p_kebab": "Kebab", "p_tenders": "Tenders",
+        "p_oeuf": "Œuf", "p_bacon": "Bacon"
     }
     garniture_map = {
         "1": "Salade",
