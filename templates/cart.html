@@ -82,7 +82,7 @@
         </p>
 
       {% set n = item.name|lower %}
-{% if ('burger' in n or 'tacos' in n or 'sandwich' in n or 'poutine' in n or 'hermanos' in n or 'pollo' in n or 'smash' in n or 'philly' in n or 'tender' in n or 'nugget' in n) and 'menu enfant' not in n %}
+{% if item.menu_price is not none and 'menu enfant' not in n %}
         <p>
             <strong>Formule :</strong><br>
             {% if item.quantity == 1 %}
