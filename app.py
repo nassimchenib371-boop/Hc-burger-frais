@@ -621,6 +621,7 @@ def cart():
                 "id": product["id"],
                 "name": product["name"],
                 "price": float(product["price"]) + extra_price,
+                "menu_price": (float(product["menu_price"]) + extra_price) if product["menu_price"] is not None else None,
                 "quantity": quantity,
                 "viande": choice.get("viande", ""),
                 "sauce": choice.get("sauce", ""),
