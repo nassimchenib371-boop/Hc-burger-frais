@@ -41,7 +41,7 @@ PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL","http://localhost:8000")
 PARIS_TZ = ZoneInfo("Europe/Paris")
 
 # Offre découverte : dès 2 menus dans le panier, 1 produit offert au choix.
-PROMO_GIFTS = ["Tacos M", "Simple Smash", "Sandwich Kebab", "Pâtes à la crème"]
+PROMO_MAX_PRICE = 6.90
 # Fidélité : 5 commandes avec exactement 1 menu Burger/Tacos/Sandwich = 6e menu offert.
 LOYALTY_GIFTS = {
     "Menu Simple Smash": "Simple Smash",
@@ -643,7 +643,15 @@ def cart():
             session.pop("loyalty_phone", None)
             pending_loyalty_gift = ""
 
-    return render_template("cart.html", items=items, total=total, promo_gifts=PROMO_GIFTS,
+    # Cadeau promo : proposer automatiquement tous les produits actifs à 6,90 € ou moins.
+    gift_con = db()
+    promo_gifts = gift_con.execute(
+        "SELECT name, price, category FROM products WHERE active=1 AND price<=? ORDER BY category, name",
+        (PROMO_MAX_PRICE,)
+    ).fetchall()
+    gift_con.close()
+
+    return render_template("cart.html", items=items, total=total, promo_gifts=promo_gifts,
                            loyalty_gifts=list(LOYALTY_GIFTS.keys()),
                            pending_loyalty_gift=pending_loyalty_gift)
 
@@ -977,17 +985,18 @@ def cart_checkout():
     promo_gift = request.form.get("promo_gift", "").strip()
 
     if menu_count >= 2:
-        if promo_gift not in PROMO_GIFTS:
+        if not promo_gift:
             con.close()
             return "Choisissez votre produit offert.", 400
 
+        # Sécurité côté serveur : le cadeau doit être actif ET coûter au maximum 6,90 €.
         gift_product = con.execute(
-            "SELECT * FROM products WHERE name = ? AND active = 1 LIMIT 1",
-            (promo_gift,)
+            "SELECT * FROM products WHERE name = ? AND active = 1 AND price <= ? LIMIT 1",
+            (promo_gift, PROMO_MAX_PRICE)
         ).fetchone()
         if not gift_product:
             con.close()
-            return "Produit offert indisponible.", 400
+            return "Produit offert indisponible ou supérieur à 6,90 €.", 400
 
         # Options du cadeau gratuit (mêmes choix utiles que le produit normal).
         gift_viande = request.form.get("promo_gift_viande", "").strip()
@@ -995,9 +1004,10 @@ def cart_checkout():
         gift_garnitures = [g.strip() for g in request.form.getlist("promo_gift_garnitures") if g.strip()]
 
         # On ne garde que les options qui correspondent au cadeau choisi.
-        if promo_gift == "Tacos M":
+        gift_category = (gift_product["category"] or "").strip().lower()
+        if gift_category == "tacos":
             gift_garnitures = []
-        elif promo_gift == "Sandwich Kebab":
+        elif gift_category == "sandwichs":
             gift_viande = ""
         else:
             gift_viande = ""
