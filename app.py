@@ -160,6 +160,19 @@ def init_db():
             if (p["cat"], p["name"]) not in existing:
                 con.execute("""INSERT INTO products(category,name,description,price,menu_price,image,active)
                                VALUES(?,?,?,?,?,?,1)""",(p["cat"],p["name"],p["desc"],p["price"],p["menu"],p["img"]))
+
+    # Synchronise uniquement les 4 nouveaux sandwichs ajoutés au menu.
+    # Important sur Render : la base products existe déjà, donc un simple ajout dans
+    # products.json ne mettrait pas à jour leur prix menu/image après déploiement.
+    sandwich_updates = {
+        "Escalope Boursin", "Escalope Chèvre Miel", "Poulet Curry", "Escalope Kiri"
+    }
+    for p in DEFAULT_PRODUCTS:
+        if p["name"] in sandwich_updates:
+            con.execute("""UPDATE products
+                           SET category=?, description=?, price=?, menu_price=?, image=?, active=1
+                           WHERE name=?""",
+                        (p["cat"], p["desc"], p["price"], p["menu"], p["img"], p["name"]))
     defaults={
         "restaurant_name":"HC BURGER FRAIS",
         "address":"24 Boulevard Banon, 13004 Marseille",
