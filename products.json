@@ -112,6 +112,38 @@
     "img": "sandwich_chef_new.jpeg"
   },
   {
+    "cat": "Sandwichs",
+    "name": "Escalope Boursin",
+    "desc": "Escalope, Boursin, salade, tomate, oignons",
+    "price": 6.9,
+    "menu": 9.4,
+    "img": "sandwich_boursin_hc.png"
+  },
+  {
+    "cat": "Sandwichs",
+    "name": "Escalope Chèvre Miel",
+    "desc": "Escalope, chèvre, miel, salade, tomate, oignons",
+    "price": 6.9,
+    "menu": 9.4,
+    "img": "sandwich_chevre_miel_hc.png"
+  },
+  {
+    "cat": "Sandwichs",
+    "name": "Poulet Curry",
+    "desc": "Poulet curry, salade, tomate, oignons",
+    "price": 6.9,
+    "menu": 9.4,
+    "img": "sandwich_poulet_curry_hc.png"
+  },
+  {
+    "cat": "Sandwichs",
+    "name": "Escalope Kiri",
+    "desc": "Escalope, Kiri, salade, tomate, oignons",
+    "price": 6.9,
+    "menu": 9.4,
+    "img": "sandwich_kiri_hc.png"
+  },
+  {
     "cat": "Tacos",
     "name": "Tacos M",
     "desc": "",
