@@ -365,6 +365,24 @@ if (category === "Burgers") {
     return;
 }
 
+if (category === "Poutines") {
+    const supplements = await chooseSupplements([
+        ["p_steak", "Steak haché (+2,50€)"],
+        ["p_poulet", "Poulet mariné (+2,50€)"],
+        ["p_escalope", "Escalope (+2,50€)"],
+        ["p_cordon", "Cordon-bleu (+2,50€)"],
+        ["p_kebab", "Kebab (+2,50€)"],
+        ["p_tenders", "Tenders (+2,50€)"],
+        ["p_oeuf", "Œuf (+1€)"],
+        ["p_bacon", "Bacon (+1€)"]
+    ], "Suppléments Poutine", null, "Plusieurs choix possibles");
+    const url = new URL(link.href, window.location.origin);
+    url.searchParams.set("supplements", supplements);
+    link.href = url.toString();
+    addToCart(event, link);
+    return;
+}
+
 if (category === "Salades") {
     const supplements = await chooseSupplements([
         ["s_oeuf", "Œuf (+1€)"],
