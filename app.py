@@ -599,7 +599,13 @@ def supplements_extra_price(category, supplements):
             "Œuf": 1.0, "Bacon": 1.0
         }
         return sum(prices.get(x, 0.0) for x in supplements)
-    if category in ("Burgers", "Tacos"):
+    if category == "Burgers":
+        prices = {
+            "Steak haché": 2.5, "Tenders": 2.5,
+            "Cheddar": 1.0, "Chèvre": 1.0, "Raclette": 1.0, "Œuf": 1.0
+        }
+        return sum(prices.get(x, 0.0) for x in supplements)
+    if category == "Tacos":
         return 1.0 * len(supplements)
     return 0.0
 
@@ -734,9 +740,9 @@ def add_to_cart(pid):
         "1": "Œuf", "2": "Emmental", "3": "Cheddar", "4": "Chèvre",
         "5": "Raclette", "6": "Vache Kiri", "7": "Bacon",
         # Burgers
-        "b_oeuf": "Œuf", "b_bacon": "Bacon", "b_raclette": "Raclette",
-        "b_chevre": "Chèvre", "b_vache": "La Vache qui rit", "b_kiri": "Kiri",
-        "b_emmental": "Emmental", "b_oignons": "Oignons cuits",
+        "b_steak": "Steak haché", "b_tenders": "Tenders",
+        "b_cheddar": "Cheddar", "b_chevre": "Chèvre",
+        "b_raclette": "Raclette", "b_oeuf": "Œuf",
         # Salades
         "s_oeuf": "Œuf", "s_poulet": "Poulet mariné",
         "s_tender": "Tender", "s_steak": "Steak haché",
