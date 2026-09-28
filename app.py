@@ -643,10 +643,10 @@ def cart():
             session.pop("loyalty_phone", None)
             pending_loyalty_gift = ""
 
-    # Cadeau promo : proposer automatiquement tous les produits actifs à 6,90 € ou moins.
+    # Cadeau promo : proposer automatiquement tous les produits alimentaires actifs à 6,90 € ou moins (hors boissons).
     gift_con = db()
     promo_gifts = gift_con.execute(
-        "SELECT name, price, category FROM products WHERE active=1 AND price<=? ORDER BY category, name",
+        "SELECT name, price, category FROM products WHERE active=1 AND price<=? AND LOWER(TRIM(category)) NOT IN ('boissons', 'boisson') ORDER BY category, name",
         (PROMO_MAX_PRICE,)
     ).fetchall()
     gift_con.close()
@@ -989,9 +989,9 @@ def cart_checkout():
             con.close()
             return "Choisissez votre produit offert.", 400
 
-        # Sécurité côté serveur : le cadeau doit être actif ET coûter au maximum 6,90 €.
+        # Sécurité côté serveur : le cadeau doit être actif, alimentaire (hors boissons) ET coûter au maximum 6,90 €.
         gift_product = con.execute(
-            "SELECT * FROM products WHERE name = ? AND active = 1 AND price <= ? LIMIT 1",
+            "SELECT * FROM products WHERE name = ? AND active = 1 AND price <= ? AND LOWER(TRIM(category)) NOT IN ('boissons', 'boisson') LIMIT 1",
             (promo_gift, PROMO_MAX_PRICE)
         ).fetchone()
         if not gift_product:
