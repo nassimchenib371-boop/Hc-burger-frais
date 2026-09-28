@@ -349,14 +349,12 @@ if (productName.includes("double l")) {
 
 if (category === "Burgers") {
     const supplements = await chooseSupplements([
-        ["b_oeuf", "Œuf (+1€)"],
-        ["b_bacon", "Bacon (+1€)"],
-        ["b_raclette", "Raclette (+1€)"],
+        ["b_steak", "Steak haché (+2,50€)"],
+        ["b_tenders", "Tenders (+2,50€)"],
+        ["b_cheddar", "Cheddar (+1€)"],
         ["b_chevre", "Chèvre (+1€)"],
-        ["b_vache", "La Vache qui rit (+1€)"],
-        ["b_kiri", "Kiri (+1€)"],
-        ["b_emmental", "Emmental (+1€)"],
-        ["b_oignons", "Oignons cuits (+1€)"]
+        ["b_raclette", "Raclette (+1€)"],
+        ["b_oeuf", "Œuf (+1€)"]
     ], "Suppléments Burger", null, "Plusieurs choix possibles");
     const url = new URL(link.href, window.location.origin);
     url.searchParams.set("supplements", supplements);
