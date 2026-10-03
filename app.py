@@ -165,7 +165,8 @@ def init_db():
     # Important sur Render : la base products existe déjà, donc un simple ajout dans
     # products.json ne mettrait pas à jour leur prix menu/image après déploiement.
     sandwich_updates = {
-        "Escalope Boursin", "Escalope Chèvre Miel", "Poulet Curry", "Escalope Kiri"
+        "Escalope Boursin", "Escalope Chèvre Miel", "Poulet Curry", "Escalope Kiri",
+        "Sandwich Kebab", "Sandwich Poulet Mariné"
     }
     for p in DEFAULT_PRODUCTS:
         if p["name"] in sandwich_updates:

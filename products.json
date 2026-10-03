@@ -67,16 +67,16 @@
     "cat": "Sandwichs",
     "name": "Sandwich Kebab",
     "desc": "",
-    "price": 5.9,
-    "menu": 8.4,
+    "price": 4.9,
+    "menu": 7.4,
     "img": "8DB23C02-D372-417D-9DBE-4F99E533A450.png"
   },
   {
     "cat": "Sandwichs",
     "name": "Sandwich Poulet Mariné",
     "desc": "",
-    "price": 5.9,
-    "menu": 8.4,
+    "price": 5.5,
+    "menu": 7.9,
     "img": "33A72874-C992-458F-88C7-401197FEA1EA.png"
   },
   {
