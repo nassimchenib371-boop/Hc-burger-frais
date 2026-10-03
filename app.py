@@ -764,7 +764,7 @@ def add_to_cart(pid):
     garniture_codes = request.args.get("garnitures", "")
     garnitures = [garniture_map[g.strip()] for g in garniture_codes.split(",") if g.strip() in garniture_map]
     viande = ", ".join(viande_map[c.strip()] for c in viande_code.split(",") if c.strip() in viande_map)
-    sauce = sauce_map.get(sauce_code, "")
+    sauce = ", ".join(sauce_map[c.strip()] for c in sauce_code.split(",")[:2] if c.strip() in sauce_map)
     supplements = [
         supplement_map[c.strip()]
         for c in supp_codes
