@@ -328,6 +328,55 @@ function chooseSupplements(options, title = "Choisis tes suppléments", maxChoic
 }
 
 
+function chooseSauces() {
+    return new Promise((resolve) => {
+        const options = ["Algérienne", "Harissa", "Mayonnaise", "Biggy", "Barbecue", "Andalouse", "Samouraï", "Brésil", "Ketchup"];
+        const overlay = document.createElement("div");
+        overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:99999;padding:20px";
+        const box = document.createElement("div");
+        box.style.cssText = "background:white;width:100%;max-width:400px;border-radius:20px;padding:20px;max-height:85vh;overflow:auto";
+        const title = document.createElement("h2");
+        title.textContent = "Choisis tes sauces (maximum 2)";
+        title.style.textAlign = "center";
+        box.appendChild(title);
+        const selected = [];
+        options.forEach((name, i) => {
+            const code = String(i + 1);
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.textContent = name;
+            btn.style.cssText = "display:block;width:100%;padding:15px;margin:8px 0;border:2px solid #ddd;border-radius:12px;font-size:18px;font-weight:bold;color:#0787ef;cursor:pointer";
+            btn.onclick = () => {
+                const index = selected.indexOf(code);
+                if (index >= 0) {
+                    selected.splice(index, 1);
+                    btn.textContent = name;
+                    btn.style.borderColor = "#ddd";
+                } else if (selected.length < 2) {
+                    selected.push(code);
+                    btn.textContent = "✅ " + name;
+                    btn.style.borderColor = "green";
+                } else {
+                    alert("Maximum 2 sauces.");
+                }
+            };
+            box.appendChild(btn);
+        });
+        function action(label, color, value) {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.textContent = label;
+            btn.style.cssText = `display:block;width:100%;padding:16px;margin-top:12px;border:0;border-radius:12px;font-size:19px;font-weight:bold;background:${color};color:white;cursor:pointer`;
+            btn.onclick = () => { overlay.remove(); resolve(value()); };
+            box.appendChild(btn);
+        }
+        action("Valider", "#28a745", () => selected.join(","));
+        action("Sans sauce / Passer", "#666", () => "");
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+    });
+}
+
 async function customizeOrAdd(event, link) {
     event.preventDefault();
 
@@ -396,17 +445,7 @@ if (category === "Salades") {
 }
 
 if (category.toLowerCase().includes("sandwich")) {
-    const sauce = await chooseOne("Choisis ta sauce", [
-        ["1", "Algérienne"],
-        ["2", "Harissa"],
-        ["3", "Mayonnaise"],
-        ["4", "Biggy"],
-        ["5", "Barbecue"],
-        ["6", "Andalouse"],
-        ["7", "Samouraï"],
-        ["8", "Brésil"],
-        ["9", "Ketchup"]
-    ]);
+    const sauce = await chooseSauces();
 
     const garnitures = await chooseSupplements([
         ["1", "Salade"],
@@ -434,17 +473,7 @@ if (category.toLowerCase().includes("sandwich")) {
     ["7", "Nuggets"]
 ], "Choisis tes viandes", maxViandes);
 
-        const sauce = await chooseOne("Choisis ta sauce", [
-            ["1", "Algérienne"],
-            ["2", "Harissa"],
-            ["3", "Mayonnaise"],
-            ["4", "Biggy"],
-            ["5", "Barbecue"],
-            ["6", "Andalouse"],
-            ["7", "Samouraï"],
-            ["8", "Brésil"],
-            ["9", "Ketchup"]
-        ]);
+        const sauce = await chooseSauces();
 
         const supplements = await chooseSupplements([
             ["1", "Œuf"],
