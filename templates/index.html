@@ -517,50 +517,78 @@ cartCount.textContent = count + 1;
 }
 </script>   
 <script>
-const cartBtn = document.querySelector('.cart-btn');
+// Panier flottant : un simple tap doit TOUJOURS ouvrir /cart.
+// Le déplacement reste possible, mais seulement après un vrai mouvement.
+(function () {
+    const cartBtn = document.querySelector('.cart-btn');
+    if (!cartBtn) return;
 
-if (cartBtn) {
     let dragging = false;
-    let moved = false;
+    let pointerId = null;
+    let startX = 0;
+    let startY = 0;
+    let startLeft = 0;
+    let startTop = 0;
+    let suppressClick = false;
+    const threshold = 10;
 
-    cartBtn.addEventListener('pointerdown', function(e) {
-        dragging = true;
-        moved = false;
-        cartBtn.setPointerCapture(e.pointerId);
-    });
+    cartBtn.addEventListener('pointerdown', function (e) {
+        if (e.button !== undefined && e.button !== 0) return;
+        pointerId = e.pointerId;
+        startX = e.clientX;
+        startY = e.clientY;
+        const rect = cartBtn.getBoundingClientRect();
+        startLeft = rect.left;
+        startTop = rect.top;
+        dragging = false;
+        suppressClick = false;
+    }, { passive: true });
 
-    cartBtn.addEventListener('pointermove', function(e) {
-        if (!dragging) return;
+    cartBtn.addEventListener('pointermove', function (e) {
+        if (pointerId !== e.pointerId) return;
 
-        moved = true;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
 
-        const x = Math.max(
-            10,
-            Math.min(window.innerWidth - cartBtn.offsetWidth - 10, e.clientX - cartBtn.offsetWidth / 2)
-        );
+        if (!dragging && Math.hypot(dx, dy) < threshold) return;
 
-        const y = Math.max(
-            10,
-            Math.min(window.innerHeight - cartBtn.offsetHeight - 10, e.clientY - cartBtn.offsetHeight / 2)
-        );
+        if (!dragging) {
+            dragging = true;
+            suppressClick = true;
+            try { cartBtn.setPointerCapture(e.pointerId); } catch (_) {}
+            cartBtn.style.right = 'auto';
+            cartBtn.style.transform = 'none';
+        }
 
+        e.preventDefault();
+
+        const x = Math.max(10, Math.min(window.innerWidth - cartBtn.offsetWidth - 10, startLeft + dx));
+        const y = Math.max(10, Math.min(window.innerHeight - cartBtn.offsetHeight - 10, startTop + dy));
         cartBtn.style.left = x + 'px';
         cartBtn.style.top = y + 'px';
-        cartBtn.style.right = 'auto';
-        cartBtn.style.transform = 'none';
-    });
+    }, { passive: false });
 
-    cartBtn.addEventListener('pointerup', function() {
-        dragging = false;
-    });
-
-    cartBtn.addEventListener('click', function(e) {
-        if (moved) {
-            e.preventDefault();
-            moved = false;
+    function endPointer(e) {
+        if (pointerId !== null && e.pointerId !== pointerId) return;
+        if (dragging) {
+            try { cartBtn.releasePointerCapture(pointerId); } catch (_) {}
         }
+        dragging = false;
+        pointerId = null;
+    }
+
+    cartBtn.addEventListener('pointerup', endPointer);
+    cartBtn.addEventListener('pointercancel', endPointer);
+
+    cartBtn.addEventListener('click', function (e) {
+        if (suppressClick) {
+            e.preventDefault();
+            e.stopPropagation();
+            suppressClick = false;
+        }
+        // Sinon, on laisse le comportement natif du lien ouvrir /cart.
     });
-}
+})();
 </script>
 
 <script>
