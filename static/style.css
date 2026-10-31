@@ -26,14 +26,15 @@
     font-weight: bold;
 
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    cursor: grab;
+    cursor: pointer;
     user-select: none;
-    touch-action: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .cart-btn:active {
-    cursor: grabbing;
-    transform: translateY(-50%) scale(0.95);
+    transform: translateY(-50%) scale(0.97);
 }
 /* رقم المنتجات فوق السلة */
 .cart-count {
